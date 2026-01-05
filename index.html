@@ -1,200 +1,184 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Documentos RH Digital</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-  <style>
-    body {
-      margin:0;
-      font-family:'Segoe UI', sans-serif;
-      background: linear-gradient(135deg,#2980b9,#8e44ad);
-      display:flex;
-      justify-content:center;
-      padding: 30px 0;
-      color:#fff;
-    }
-    .container {
-      background:#fff;
-      color:#2c3e50;
-      border-radius:16px;
-      padding:25px;
-      width:90%;
-      max-width:650px;
-      box-shadow:0 10px 25px rgba(0,0,0,0.2);
-      animation:fadeIn 0.7s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from {opacity:0; transform:translateY(20px);}
-      to {opacity:1; transform:translateY(0);}
-    }
-    h1 {
-      text-align:center;
-      margin-bottom:20px;
-      color:#2980b9;
-    }
-    .doc-item {
-      display:flex;
-      flex-direction:column;
-      margin-bottom:18px;
-    }
-    .doc-item label {
-      font-weight:bold;
-      margin-bottom:5px;
-    }
-    .doc-buttons {
-      display:flex;
-      gap:8px;
-    }
-    .btn-camera, .btn-upload {
-      border:none;
-      background:#2980b9;
-      color:#fff;
-      border-radius:8px;
-      padding:8px 12px;
-      cursor:pointer;
-      font-size:14px;
-      display:flex;
-      align-items:center;
-    }
-    .btn-camera:hover, .btn-upload:hover { background:#3498db; }
-    input[type=file] { display:none; }
-    .status {
-      text-align:center;
-      font-weight:bold;
-      margin-top:10px;
-      min-height:20px;
-    }
-    video {
-      width:100%;
-      border-radius:12px;
-      margin-top:10px;
-      border:2px solid #2980b9;
-      display:none;
-    }
-    canvas { display:none; }
-    input[type=text] {
-      width:100%;
-      padding:8px;
-      border-radius:6px;
-      border:1px solid #ccc;
-      margin-top:5px;
-      margin-bottom:5px;
-    }
-    button.send-btn {
-      width:100%;
-      background:#27ae60;
-      color:#fff;
-      padding:14px;
-      border:none;
-      border-radius:10px;
-      font-size:16px;
-      cursor:pointer;
-      margin-top:15px;
-    }
-    button.send-btn:hover { background:#2ecc71; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RH Digital - Effico</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<style>
+body {
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background: linear-gradient(135deg,#2980b9,#8e44ad);
+  display:flex;
+  justify-content:center;
+  padding: 30px 0;
+  color:#fff;
+}
+.container {
+  background:#fff;
+  color:#2c3e50;
+  border-radius:16px;
+  padding:25px;
+  width:90%;
+  max-width:650px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  animation:fadeIn 0.7s ease-in-out;
+}
+@keyframes fadeIn {
+  from {opacity:0; transform:translateY(20px);}
+  to {opacity:1; transform:translateY(0);}
+}
+h1 {
+  text-align:center;
+  margin-bottom:20px;
+  color:#2980b9;
+}
+.doc-item {
+  display:flex;
+  flex-direction:column;
+  margin-bottom:18px;
+}
+.doc-item label {
+  font-weight:bold;
+  margin-bottom:5px;
+}
+.doc-buttons {
+  display:flex;
+  gap:8px;
+  margin-bottom:5px;
+}
+.btn-camera, .btn-upload {
+  border:none;
+  background:#2980b9;
+  color:#fff;
+  border-radius:8px;
+  padding:8px 12px;
+  cursor:pointer;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+}
+.btn-camera:hover, .btn-upload:hover { background:#3498db; }
+input[type=file] { display:none; }
+.status { text-align:center; font-weight:bold; margin-top:10px; min-height:20px; }
+video { width:100%; border-radius:12px; margin-top:10px; border:2px solid #2980b9; display:none; }
+canvas { display:none; }
+input[type=text] { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; margin-top:5px; margin-bottom:5px; }
+button.send-btn { width:100%; background:#27ae60; color:#fff; padding:14px; border:none; border-radius:10px; font-size:16px; cursor:pointer; margin-top:15px; }
+button.send-btn:hover { background:#2ecc71; }
+</style>
 </head>
 <body>
 <div class="container">
-  <h1><i class="fas fa-folder-open"></i> Documentos RH</h1>
+<h1><i class="fas fa-folder-open"></i> RH Digital</h1>
 
-  <form id="formDocumentos">
-    <!-- Nome e CPF extraídos do OCR -->
-    <div class="doc-item">
-      <label>Nome</label>
-      <input type="text" id="nome" placeholder="Nome completo">
+<form id="formDocumentos">
+  <!-- Campos OCR -->
+  <div class="doc-item">
+    <label>Nome</label>
+    <input type="text" id="nome" placeholder="Nome completo">
+  </div>
+  <div class="doc-item">
+    <label>CPF</label>
+    <input type="text" id="cpf" placeholder="000.000.000-00">
+  </div>
+  <div class="doc-item">
+    <label>RG</label>
+    <input type="text" id="rg" placeholder="Número do RG">
+  </div>
+
+  <!-- Exemplo Selfie -->
+  <div class="doc-item">
+    <label>Foto Selfie (Crachá)</label>
+    <div class="doc-buttons">
+      <button type="button" class="btn-camera" onclick="abrirCamera('selfie',true)"><i class="fas fa-camera"></i> Câmera</button>
+      <label class="btn-upload"><i class="fas fa-upload"></i> Upload
+        <input type="file" accept="image/*" onchange="uploadArquivo(event,'selfie',true)">
+      </label>
     </div>
-    <div class="doc-item">
-      <label>CPF</label>
-      <input type="text" id="cpf" placeholder="000.000.000-00">
+  </div>
+
+  <!-- Exemplo documento -->
+  <div class="doc-item">
+    <label>CTPS (Se não possuir digital)</label>
+    <div class="doc-buttons">
+      <button type="button" class="btn-camera" onclick="abrirCamera('ctps',false)"><i class="fas fa-camera"></i> Câmera</button>
+      <label class="btn-upload"><i class="fas fa-upload"></i> Upload
+        <input type="file" accept="image/*,application/pdf" onchange="uploadArquivo(event,'ctps',false)">
+      </label>
     </div>
-    <div class="doc-item">
-      <label>RG</label>
-      <input type="text" id="rg" placeholder="Número do RG">
-    </div>
+  </div>
 
-    <!-- Foto Selfie -->
-    <div class="doc-item">
-      <label>Foto Selfie (Para crachá)</label>
-      <div class="doc-buttons">
-        <button type="button" class="btn-camera" onclick="abrirCamera('selfie')"><i class="fas fa-camera"></i> Câmera</button>
-        <label class="btn-upload"><i class="fas fa-upload"></i> Upload
-          <input type="file" accept="image/*" onchange="uploadArquivo(event,'selfie')">
-        </label>
-      </div>
-    </div>
+  <!-- Repetir para todos os documentos -->
 
-    <!-- Documento exemplo (CTPS) -->
-    <div class="doc-item">
-      <label>CTPS (Se não possuir digital)</label>
-      <div class="doc-buttons">
-        <button type="button" class="btn-camera" onclick="abrirCamera('ctps')"><i class="fas fa-camera"></i> Câmera</button>
-        <label class="btn-upload"><i class="fas fa-upload"></i> Upload
-          <input type="file" accept="image/*,application/pdf" onchange="uploadArquivo(event,'ctps')">
-        </label>
-      </div>
-    </div>
+  <button type="button" class="send-btn" onclick="enviarDocumentos()">Enviar Tudo</button>
+  <div class="status" id="status"></div>
+</form>
 
-    <!-- Outros campos podem ser repetidos da mesma forma -->
-
-    <button type="button" class="send-btn" onclick="enviarDocumentos()">Enviar Tudo</button>
-    <div class="status" id="status"></div>
-  </form>
-
-  <video id="videoCamera"></video>
-  <canvas id="canvasCamera"></canvas>
+<video id="videoCamera"></video>
+<canvas id="canvasCamera"></canvas>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 <script>
-const arquivos = {}; // Armazena base64
-const camposOCR = ['nome','cpf','rg']; // Campos extraídos
+// Objeto para armazenar base64 dos arquivos
+const arquivos = {};
+const camposOCR = ['nome','cpf','rg'];
 
-function abrirCamera(tipo){
+async function abrirCamera(tipo,isSelfie){
   const video = document.getElementById('videoCamera');
   const canvas = document.getElementById('canvasCamera');
-  video.style.display = 'block';
-  navigator.mediaDevices.getUserMedia({video:true})
-    .then(stream=>{
-      video.srcObject = stream;
-      video.play();
-      setTimeout(async ()=>{
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video,0,0);
-        arquivos[tipo] = canvas.toDataURL('image/jpeg');
-        video.style.display = 'none';
-        stream.getTracks().forEach(track=>track.stop());
-        document.getElementById('status').innerText = tipo+" capturado!";
+  video.style.display='block';
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:isSelfie?'user':'environment'}});
+    video.srcObject = stream;
+    video.play();
+    setTimeout(async()=>{
+      // Se selfie, valida rosto
+      if(isSelfie){
+        await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+        const detection = await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
+        if(!detection){ alert("Nenhum rosto detectado! Centralize o rosto e tente novamente."); return; }
+      }
+      // captura imagem
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video,0,0);
+      arquivos[tipo] = canvas.toDataURL('image/jpeg');
 
-        // Se for documento, tenta OCR
-        if(tipo !== 'selfie'){
-          const result = await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
-          const text = result.data.text;
-          extrairCamposOCR(text);
-        }
-      },2000);
-    })
-    .catch(err=>alert("Erro ao acessar câmera: "+err));
+      // valida nitidez e tamanho
+      if(!validarNitidez(canvas)){ alert("Documento borrado! Refaça a foto."); return; }
+
+      video.style.display='none';
+      stream.getTracks().forEach(track=>track.stop());
+      document.getElementById('status').innerText=tipo+" capturado!";
+      
+      // OCR para documentos
+      if(!isSelfie){
+        const result = await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
+        extrairCamposOCR(result.data.text);
+      }
+    },2000);
+  }catch(e){alert("Erro ao acessar câmera: "+e);}
 }
 
-function uploadArquivo(event,tipo){
+function uploadArquivo(event,tipo,isSelfie){
   const file = event.target.files[0];
+  if(file.size>5*1024*1024){ alert("Arquivo muito grande (máx 5MB)!"); return; }
   const reader = new FileReader();
   reader.onload = async ()=>{
-    arquivos[tipo] = reader.result;
-    document.getElementById('status').innerText = tipo+" carregado!";
-    if(tipo !== 'selfie'){
-      // cria img temporária para OCR
+    arquivos[tipo]=reader.result;
+    document.getElementById('status').innerText=tipo+" carregado!";
+    if(!isSelfie){
       const img = new Image();
       img.src = reader.result;
       img.onload = async ()=>{
         const canvas = document.getElementById('canvasCamera');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = img.width; canvas.height = img.height;
         canvas.getContext('2d').drawImage(img,0,0);
+        if(!validarNitidez(canvas)){ alert("Documento borrado! Refazer upload."); return; }
         const result = await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
         extrairCamposOCR(result.data.text);
       }
@@ -203,46 +187,47 @@ function uploadArquivo(event,tipo){
   reader.readAsDataURL(file);
 }
 
+// Função de nitidez simples (variance of Laplacian)
+function validarNitidez(canvas){
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+  let gray = new Array(imgData.width*imgData.height);
+  for(let i=0;i<imgData.data.length;i+=4){
+    gray[i/4]=(0.299*imgData.data[i]+0.587*imgData.data[i+1]+0.114*imgData.data[i+2]);
+  }
+  let mean=gray.reduce((a,b)=>a+b)/gray.length;
+  let variance=gray.reduce((a,b)=>a+(b-mean)*(b-mean),0)/gray.length;
+  return variance>500; // threshold simples, ajustar conforme testes
+}
+
 function extrairCamposOCR(text){
-  // Regex simples para CPF
-  const cpfRegex = /\d{3}\.\d{3}\.\d{3}-\d{2}/;
-  const cpfMatch = text.match(cpfRegex);
+  const cpfMatch = text.match(/\d{3}\.\d{3}\.\d{3}-\d{2}/);
   if(cpfMatch) document.getElementById('cpf').value = cpfMatch[0];
-
-  // Regex para RG simples (apenas números e letras)
-  const rgRegex = /(\d{1,2}\.\d{3}\.\d{3}-\d{1})|(\d{7,9})/;
-  const rgMatch = text.match(rgRegex);
+  const rgMatch = text.match(/(\d{1,2}\.\d{3}\.\d{3}-\d{1})|(\d{7,9})/);
   if(rgMatch) document.getElementById('rg').value = rgMatch[0];
-
-  // Nome: pega as primeiras linhas como exemplo
   const linhas = text.split('\n').filter(l=>l.trim().length>3);
   if(linhas.length>0) document.getElementById('nome').value = linhas[0];
 }
 
 async function enviarDocumentos(){
-  // adiciona campos OCR no objeto arquivos
-  arquivos['nome'] = document.getElementById('nome').value;
-  arquivos['cpf'] = document.getElementById('cpf').value;
-  arquivos['rg'] = document.getElementById('rg').value;
-
-  if(Object.keys(arquivos).length===0){
-    alert("Nenhum documento foi carregado!");
-    return;
-  }
-
-  document.getElementById('status').innerText = "Enviando documentos...";
+  camposOCR.forEach(campo=>{
+    arquivos[campo]=document.getElementById(campo).value;
+  });
+  if(Object.keys(arquivos).length===0){ alert("Nenhum documento carregado!"); return; }
+  document.getElementById('status').innerText="Enviando documentos...";
   try{
     await fetch("URL_DO_WEBHOOK_DO_POWER_AUTOMATE",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(arquivos)
     });
-    document.getElementById('status').innerText = "Todos os documentos enviados!";
+    document.getElementById('status').innerText="Todos os documentos enviados!";
   }catch(e){
     console.error(e);
-    document.getElementById('status').innerText = "Erro ao enviar!";
+    document.getElementById('status').innerText="Erro ao enviar!";
   }
 }
 </script>
 </body>
 </html>
+
