@@ -3,75 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RH Digital - Effico</title>
+<title>RH Digital - Banco</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <style>
-body {
-  margin:0;
-  font-family:'Segoe UI',sans-serif;
-  background: linear-gradient(135deg,#2980b9,#8e44ad);
-  display:flex;
-  justify-content:center;
-  padding: 30px 0;
-  color:#fff;
-}
-.container {
-  background:#fff;
-  color:#2c3e50;
-  border-radius:16px;
-  padding:25px;
-  width:90%;
-  max-width:650px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
-  animation:fadeIn 0.7s ease-in-out;
-}
-@keyframes fadeIn {
-  from {opacity:0; transform:translateY(20px);}
-  to {opacity:1; transform:translateY(0);}
-}
-h1 {
-  text-align:center;
-  margin-bottom:20px;
-  color:#2980b9;
-}
-.doc-item {
-  display:flex;
-  flex-direction:column;
-  margin-bottom:18px;
-}
-.doc-item label {
-  font-weight:bold;
-  margin-bottom:5px;
-}
-.doc-buttons {
-  display:flex;
-  gap:8px;
-  margin-bottom:5px;
-}
-.btn-camera, .btn-upload {
-  border:none;
-  background:#2980b9;
-  color:#fff;
-  border-radius:8px;
-  padding:8px 12px;
-  cursor:pointer;
-  font-size:14px;
-  display:flex;
-  align-items:center;
-}
-.btn-camera:hover, .btn-upload:hover { background:#3498db; }
-input[type=file] { display:none; }
-.status { text-align:center; font-weight:bold; margin-top:10px; min-height:20px; }
-video { width:100%; border-radius:12px; margin-top:10px; border:2px solid #2980b9; display:none; }
-canvas { display:none; }
-input[type=text] { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; margin-top:5px; margin-bottom:5px; }
-button.send-btn { width:100%; background:#27ae60; color:#fff; padding:14px; border:none; border-radius:10px; font-size:16px; cursor:pointer; margin-top:15px; }
-button.send-btn:hover { background:#2ecc71; }
+body{margin:0;font-family:'Segoe UI',sans-serif;background:#f0f2f5;display:flex;justify-content:center;align-items:flex-start;padding-top:20px;}
+.container{background:#fff;padding:20px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.2);width:95%;max-width:500px;text-align:center;}
+h1{color:#2980b9;margin-bottom:20px;}
+video{width:100%;border-radius:12px;border:2px solid #ccc;}
+canvas{display:none;}
+#overlay{position:absolute;top:0;left:50%;transform:translateX(-50%);border:4px solid red;width:320px;height:240px;border-radius:12px;pointer-events:none;}
+.status{margin-top:10px;font-weight:bold;min-height:20px;}
+button{background:#2980b9;color:#fff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;margin-top:10px;}
+button:hover{background:#3498db;}
+.doc-item{margin-bottom:18px;text-align:left;}
+.doc-buttons{display:flex;gap:8px;margin-top:5px;}
+.btn-camera,.btn-upload{border:none;background:#2980b9;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;}
+.btn-camera:hover,.btn-upload:hover{background:#3498db;}
+input[type=file]{display:none;}
+input[type=text]{width:100%;padding:6px;border-radius:6px;border:1px solid #ccc;margin-top:3px;margin-bottom:3px;}
+.send-btn{width:100%;background:#27ae60;color:#fff;padding:14px;border:none;border-radius:10px;font-size:16px;cursor:pointer;margin-top:15px;}
+.send-btn:hover{background:#2ecc71;}
 </style>
 </head>
 <body>
 <div class="container">
-<h1><i class="fas fa-folder-open"></i> RH Digital</h1>
+<h1><i class="fas fa-folder-open"></i> RH Digital - Banco</h1>
 
 <form id="formDocumentos">
   <!-- Campos OCR -->
@@ -88,144 +44,169 @@ button.send-btn:hover { background:#2ecc71; }
     <input type="text" id="rg" placeholder="Número do RG">
   </div>
 
-  <!-- Exemplo Selfie -->
-  <div class="doc-item">
-    <label>Foto Selfie (Crachá)</label>
-    <div class="doc-buttons">
-      <button type="button" class="btn-camera" onclick="abrirCamera('selfie',true)"><i class="fas fa-camera"></i> Câmera</button>
-      <label class="btn-upload"><i class="fas fa-upload"></i> Upload
-        <input type="file" accept="image/*" onchange="uploadArquivo(event,'selfie',true)">
-      </label>
-    </div>
-  </div>
-
-  <!-- Exemplo documento -->
-  <div class="doc-item">
-    <label>CTPS (Se não possuir digital)</label>
-    <div class="doc-buttons">
-      <button type="button" class="btn-camera" onclick="abrirCamera('ctps',false)"><i class="fas fa-camera"></i> Câmera</button>
-      <label class="btn-upload"><i class="fas fa-upload"></i> Upload
-        <input type="file" accept="image/*,application/pdf" onchange="uploadArquivo(event,'ctps',false)">
-      </label>
-    </div>
-  </div>
-
-  <!-- Repetir para todos os documentos -->
+  <!-- Checklist de documentos -->
+  <div id="docsContainer"></div>
 
   <button type="button" class="send-btn" onclick="enviarDocumentos()">Enviar Tudo</button>
-  <div class="status" id="status"></div>
+  <div class="status" id="status">Ajuste seu rosto/documento dentro do quadro.</div>
 </form>
 
-<video id="videoCamera"></video>
-<canvas id="canvasCamera"></canvas>
-</div>
+<video id="video" autoplay></video>
+<canvas id="canvas"></canvas>
+<div id="overlay"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 <script>
-// Objeto para armazenar base64 dos arquivos
-const arquivos = {};
-const camposOCR = ['nome','cpf','rg'];
+// --- Checklist de documentos ---
+const documentos = [
+  {label:"Foto Selfie (Crachá)",key:"selfie",ocr:false,selfie:true},
+  {label:"CTPS (Se não possuir digital)",key:"ctps",ocr:true,selfie:false},
+  {label:"Cópia do CPF",key:"cpfDoc",ocr:true,selfie:false},
+  {label:"Cópia do RG",key:"rgDoc",ocr:true,selfie:false},
+  {label:"Cópia do PIS/Cartão Cidadão",key:"pis",ocr:false,selfie:false},
+  {label:"Cópia da CNH",key:"cnh",ocr:true,selfie:false},
+  {label:"Cópia do Certificado de Reservista",key:"reservista",ocr:true,selfie:false},
+  {label:"Comprovante de endereço",key:"endereco",ocr:true,selfie:false},
+  {label:"Cartão Vale Transporte",key:"valeTransporte",ocr:true,selfie:false},
+  {label:"Certidão Casamento/Nascimento",key:"certidao",ocr:true,selfie:false},
+  {label:"CPF do cônjuge",key:"cpfConjuge",ocr:true,selfie:false},
+  {label:"Certidão/RG dos filhos",key:"filhos",ocr:true,selfie:false},
+  {label:"Carteirinha vacinação filhos",key:"vacinaFilhos",ocr:true,selfie:false},
+  {label:"CPF dos filhos",key:"cpfFilhos",ocr:true,selfie:false},
+  {label:"Carteirinha vacinação (Hepatite B/Tétano)",key:"vacinaAdulto",ocr:true,selfie:false},
+  {label:"Carteirinha vacinação Covid",key:"vacinaCovid",ocr:true,selfie:false},
+  {label:"Conta Bancária Itaú",key:"contaItau",ocr:true,selfie:false},
+  {label:"Comprovante escolaridade",key:"escolaridade",ocr:true,selfie:false}
+];
 
-async function abrirCamera(tipo,isSelfie){
-  const video = document.getElementById('videoCamera');
-  const canvas = document.getElementById('canvasCamera');
-  video.style.display='block';
-  try{
-    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:isSelfie?'user':'environment'}});
-    video.srcObject = stream;
-    video.play();
-    setTimeout(async()=>{
-      // Se selfie, valida rosto
-      if(isSelfie){
-        await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-        const detection = await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
-        if(!detection){ alert("Nenhum rosto detectado! Centralize o rosto e tente novamente."); return; }
+const docsContainer=document.getElementById('docsContainer');
+documentos.forEach(doc=>{
+  const div=document.createElement('div');
+  div.className="doc-item";
+  div.innerHTML=`<label>${doc.label}</label>
+  <div class="doc-buttons">
+    <button type="button" class="btn-camera" onclick="abrirCameraDoc('${doc.key}',${doc.selfie})"><i class="fas fa-camera"></i> Câmera</button>
+    <label class="btn-upload"><i class="fas fa-upload"></i> Upload
+      <input type="file" accept="image/*,application/pdf" onchange="uploadDoc(event,'${doc.key}',${doc.selfie})">
+    </label>
+  </div>`;
+  docsContainer.appendChild(div);
+});
+
+// --- Captura ---
+const video=document.getElementById('video');
+const canvas=document.getElementById('canvas');
+const overlay=document.getElementById('overlay');
+const status=document.getElementById('status');
+const arquivos={};
+let captureInterval=null;
+
+async function abrirCameraDoc(key,isSelfie){
+  status.innerText="Ajuste dentro do quadro.";
+  const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:isSelfie?'user':'environment'}});
+  video.srcObject=stream;
+  video.style.display="block";
+
+  if(isSelfie) await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+
+  captureInterval=setInterval(async()=>{
+    canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+    const ctx=canvas.getContext('2d');
+    ctx.drawImage(video,0,0);
+    let ok=false;
+
+    if(isSelfie){
+      const detection=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
+      if(detection){
+        const box=detection.box;
+        const cx=box.x+box.width/2;
+        const cy=box.y+box.height/2;
+        const centerX=video.videoWidth/2;
+        const centerY=video.videoHeight/2;
+        const dist=Math.sqrt((cx-centerX)**2+(cy-centerY)**2);
+        if(dist<50 && box.width>video.videoWidth*0.3){ok=true;}
       }
-      // captura imagem
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d').drawImage(video,0,0);
-      arquivos[tipo] = canvas.toDataURL('image/jpeg');
+    }else{
+      const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+      const variance=calcVariance(imgData);
+      if(variance>500) ok=true;
+    }
 
-      // valida nitidez e tamanho
-      if(!validarNitidez(canvas)){ alert("Documento borrado! Refaça a foto."); return; }
+    overlay.style.borderColor=ok?"green":"red";
+    status.innerText=ok?"Ajuste ok! Tirando foto...":"Ajuste dentro do quadro.";
 
-      video.style.display='none';
-      stream.getTracks().forEach(track=>track.stop());
-      document.getElementById('status').innerText=tipo+" capturado!";
-      
-      // OCR para documentos
+    if(ok && !arquivos[key]){
+      arquivos[key]=canvas.toDataURL('image/jpeg');
       if(!isSelfie){
-        const result = await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
-        extrairCamposOCR(result.data.text);
+        const docConfig=documentos.find(d=>d.key===key);
+        if(docConfig.ocr) await processOCR(canvas,key);
       }
-    },2000);
-  }catch(e){alert("Erro ao acessar câmera: "+e);}
+      clearInterval(captureInterval);
+      video.srcObject.getTracks().forEach(track=>track.stop());
+      video.style.display="none";
+      status.innerText=key+" capturado com sucesso!";
+    }
+  },500);
 }
 
-function uploadArquivo(event,tipo,isSelfie){
-  const file = event.target.files[0];
-  if(file.size>5*1024*1024){ alert("Arquivo muito grande (máx 5MB)!"); return; }
-  const reader = new FileReader();
-  reader.onload = async ()=>{
-    arquivos[tipo]=reader.result;
-    document.getElementById('status').innerText=tipo+" carregado!";
+function uploadDoc(event,key,isSelfie){
+  const file=event.target.files[0];
+  if(file.size>5*1024*1024){alert("Arquivo >5MB"); return;}
+  const reader=new FileReader();
+  reader.onload=async ()=>{
+    arquivos[key]=reader.result;
+    status.innerText=key+" carregado!";
     if(!isSelfie){
-      const img = new Image();
-      img.src = reader.result;
-      img.onload = async ()=>{
-        const canvas = document.getElementById('canvasCamera');
-        canvas.width = img.width; canvas.height = img.height;
+      const img=new Image();
+      img.src=reader.result;
+      img.onload=async ()=>{
+        canvas.width=img.width; canvas.height=img.height;
         canvas.getContext('2d').drawImage(img,0,0);
-        if(!validarNitidez(canvas)){ alert("Documento borrado! Refazer upload."); return; }
-        const result = await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
-        extrairCamposOCR(result.data.text);
+        if(calcVariance(canvas.getContext('2d').getImageData(0,0,img.width,img.height))<500) alert("Documento borrado!");
+        const docConfig=documentos.find(d=>d.key===key);
+        if(docConfig.ocr) await processOCR(canvas,key);
       }
     }
   };
   reader.readAsDataURL(file);
 }
 
-// Função de nitidez simples (variance of Laplacian)
-function validarNitidez(canvas){
-  const ctx = canvas.getContext('2d');
-  const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
-  let gray = new Array(imgData.width*imgData.height);
+// --- Funções OCR ---
+async function processOCR(canvas,key){
+  const result=await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
+  const text=result.data.text;
+  if(text){
+    if(/nome/i.test(key) || key==='selfie') return;
+    if(/cpf/i.test(key) || key.includes("cpf")){ const m=text.match(/\d{3}\.\d{3}\.\d{3}-\d{2}/); if(m) document.getElementById('cpf').value=m[0]; }
+    if(/rg/i.test(key)){ const m=text.match(/(\d{1,2}\.\d{3}\.\d{3}-\d{1})|(\d{7,9})/); if(m) document.getElementById('rg').value=m[0]; }
+    const linhas=text.split('\n').filter(l=>l.trim().length>3);
+    if(linhas.length>0) document.getElementById('nome').value=linhas[0];
+  }
+}
+
+// --- Nitidez ---
+function calcVariance(imgData){
+  let gray=[];
   for(let i=0;i<imgData.data.length;i+=4){
-    gray[i/4]=(0.299*imgData.data[i]+0.587*imgData.data[i+1]+0.114*imgData.data[i+2]);
+    gray.push(0.299*imgData.data[i]+0.587*imgData.data[i+1]+0.114*imgData.data[i+2]);
   }
   let mean=gray.reduce((a,b)=>a+b)/gray.length;
   let variance=gray.reduce((a,b)=>a+(b-mean)*(b-mean),0)/gray.length;
-  return variance>500; // threshold simples, ajustar conforme testes
+  return variance;
 }
 
-function extrairCamposOCR(text){
-  const cpfMatch = text.match(/\d{3}\.\d{3}\.\d{3}-\d{2}/);
-  if(cpfMatch) document.getElementById('cpf').value = cpfMatch[0];
-  const rgMatch = text.match(/(\d{1,2}\.\d{3}\.\d{3}-\d{1})|(\d{7,9})/);
-  if(rgMatch) document.getElementById('rg').value = rgMatch[0];
-  const linhas = text.split('\n').filter(l=>l.trim().length>3);
-  if(linhas.length>0) document.getElementById('nome').value = linhas[0];
-}
-
+// --- Enviar ---
 async function enviarDocumentos(){
-  camposOCR.forEach(campo=>{
-    arquivos[campo]=document.getElementById(campo).value;
-  });
-  if(Object.keys(arquivos).length===0){ alert("Nenhum documento carregado!"); return; }
-  document.getElementById('status').innerText="Enviando documentos...";
+  documentos.forEach(d=>{arquivos[d.key]=arquivos[d.key]||null;});
+  arquivos['nome']=document.getElementById('nome').value;
+  arquivos['cpf']=document.getElementById('cpf').value;
+  arquivos['rg']=document.getElementById('rg').value;
+  status.innerText="Enviando...";
   try{
-    await fetch("URL_DO_WEBHOOK_DO_POWER_AUTOMATE",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(arquivos)
-    });
-    document.getElementById('status').innerText="Todos os documentos enviados!";
-  }catch(e){
-    console.error(e);
-    document.getElementById('status').innerText="Erro ao enviar!";
-  }
+    await fetch("URL_DO_WEBHOOK_DO_POWER_AUTOMATE",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(arquivos)});
+    status.innerText="Todos os documentos enviados!";
+  }catch(e){console.error(e);status.innerText="Erro ao enviar!";}
 }
 </script>
 </body>
