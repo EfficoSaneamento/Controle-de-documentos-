@@ -30,21 +30,12 @@ input[type=text]{width:100%;padding:6px;border-radius:6px;border:1px solid #ccc;
 <h1><i class="fas fa-folder-open"></i> RH Digital - Banco</h1>
 
 <form id="formDocumentos">
-  <!-- Campos OCR -->
-  <div class="doc-item">
-    <label>Nome</label>
-    <input type="text" id="nome" placeholder="Nome completo">
-  </div>
-  <div class="doc-item">
-    <label>CPF</label>
-    <input type="text" id="cpf" placeholder="000.000.000-00">
-  </div>
-  <div class="doc-item">
-    <label>RG</label>
-    <input type="text" id="rg" placeholder="Número do RG">
-  </div>
+  <!-- Campos preenchidos via RG -->
+  <div class="doc-item"><label>Nome</label><input type="text" id="nome" placeholder="Nome completo"></div>
+  <div class="doc-item"><label>CPF</label><input type="text" id="cpf" placeholder="000.000.000-00"></div>
+  <div class="doc-item"><label>RG</label><input type="text" id="rg" placeholder="Número do RG"></div>
+  <div class="doc-item"><label>Data de Nascimento</label><input type="text" id="nascimento" placeholder="DD/MM/AAAA"></div>
 
-  <!-- Checklist de documentos -->
   <div id="docsContainer"></div>
 
   <button type="button" class="send-btn" onclick="enviarDocumentos()">Enviar Tudo</button>
@@ -61,23 +52,13 @@ input[type=text]{width:100%;padding:6px;border-radius:6px;border:1px solid #ccc;
 // --- Checklist de documentos ---
 const documentos = [
   {label:"Foto Selfie (Crachá)",key:"selfie",ocr:false,selfie:true},
-  {label:"CTPS (Se não possuir digital)",key:"ctps",ocr:true,selfie:false},
+  {label:"RG",key:"rgDoc",ocr:true,selfie:false}, // RG é especial
+  {label:"CTPS",key:"ctps",ocr:true,selfie:false},
   {label:"Cópia do CPF",key:"cpfDoc",ocr:true,selfie:false},
-  {label:"Cópia do RG",key:"rgDoc",ocr:true,selfie:false},
-  {label:"Cópia do PIS/Cartão Cidadão",key:"pis",ocr:false,selfie:false},
   {label:"Cópia da CNH",key:"cnh",ocr:true,selfie:false},
-  {label:"Cópia do Certificado de Reservista",key:"reservista",ocr:true,selfie:false},
   {label:"Comprovante de endereço",key:"endereco",ocr:true,selfie:false},
-  {label:"Cartão Vale Transporte",key:"valeTransporte",ocr:true,selfie:false},
   {label:"Certidão Casamento/Nascimento",key:"certidao",ocr:true,selfie:false},
-  {label:"CPF do cônjuge",key:"cpfConjuge",ocr:true,selfie:false},
-  {label:"Certidão/RG dos filhos",key:"filhos",ocr:true,selfie:false},
-  {label:"Carteirinha vacinação filhos",key:"vacinaFilhos",ocr:true,selfie:false},
-  {label:"CPF dos filhos",key:"cpfFilhos",ocr:true,selfie:false},
-  {label:"Carteirinha vacinação (Hepatite B/Tétano)",key:"vacinaAdulto",ocr:true,selfie:false},
-  {label:"Carteirinha vacinação Covid",key:"vacinaCovid",ocr:true,selfie:false},
-  {label:"Conta Bancária Itaú",key:"contaItau",ocr:true,selfie:false},
-  {label:"Comprovante escolaridade",key:"escolaridade",ocr:true,selfie:false}
+  {label:"Carteirinha vacinação Covid",key:"vacinaCovid",ocr:true,selfie:false}
 ];
 
 const docsContainer=document.getElementById('docsContainer');
@@ -138,10 +119,8 @@ async function abrirCameraDoc(key,isSelfie){
 
     if(ok && !arquivos[key]){
       arquivos[key]=canvas.toDataURL('image/jpeg');
-      if(!isSelfie){
-        const docConfig=documentos.find(d=>d.key===key);
-        if(docConfig.ocr) await processOCR(canvas,key);
-      }
+      const docConfig=documentos.find(d=>d.key===key);
+      if(docConfig.ocr) await processOCR(canvas,key);
       clearInterval(captureInterval);
       video.srcObject.getTracks().forEach(track=>track.stop());
       video.style.display="none";
@@ -172,13 +151,26 @@ function uploadDoc(event,key,isSelfie){
   reader.readAsDataURL(file);
 }
 
-// --- Funções OCR ---
+// --- OCR ---
 async function processOCR(canvas,key){
   const result=await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
   const text=result.data.text;
-  if(text){
-    if(/nome/i.test(key) || key==='selfie') return;
-    if(/cpf/i.test(key) || key.includes("cpf")){ const m=text.match(/\d{3}\.\d{3}\.\d{3}-\d{2}/); if(m) document.getElementById('cpf').value=m[0]; }
+  if(!text) return;
+
+  if(key==='rgDoc'){
+    // Preencher campos principais do RG
+    const nomeMatch=text.match(/NOME[:\s]*([A-ZÀ-Ÿ ]+)/i);
+    const nascimentoMatch=text.match(/NASC(?:IMENTO)?[:\s]*(\d{2}\/\d{2}\/\d{4})/i);
+    const rgMatch=text.match(/RG[:\s]*([\d\.]+)/i);
+    const cpfMatch=text.match(/CPF[:\s]*(\d{3}\.\d{3}\.\d{3}-\d{2})/i);
+
+    if(nomeMatch) document.getElementById('nome').value=nomeMatch[1].trim();
+    if(nascimentoMatch) document.getElementById('nascimento').value=nascimentoMatch[1].trim();
+    if(rgMatch) document.getElementById('rg').value=rgMatch[1].trim();
+    if(cpfMatch) document.getElementById('cpf').value=cpfMatch[1].trim();
+  }else{
+    // OCR padrão
+    if(/cpf/i.test(key)){ const m=text.match(/\d{3}\.\d{3}\.\d{3}-\d{2}/); if(m) document.getElementById('cpf').value=m[0]; }
     if(/rg/i.test(key)){ const m=text.match(/(\d{1,2}\.\d{3}\.\d{3}-\d{1})|(\d{7,9})/); if(m) document.getElementById('rg').value=m[0]; }
     const linhas=text.split('\n').filter(l=>l.trim().length>3);
     if(linhas.length>0) document.getElementById('nome').value=linhas[0];
@@ -202,6 +194,7 @@ async function enviarDocumentos(){
   arquivos['nome']=document.getElementById('nome').value;
   arquivos['cpf']=document.getElementById('cpf').value;
   arquivos['rg']=document.getElementById('rg').value;
+  arquivos['nascimento']=document.getElementById('nascimento').value;
   status.innerText="Enviando...";
   try{
     await fetch("URL_DO_WEBHOOK_DO_POWER_AUTOMATE",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(arquivos)});
