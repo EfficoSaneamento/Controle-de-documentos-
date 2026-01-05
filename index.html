@@ -1,168 +1,128 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RH Digital - EFFICO</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    <style>
-        :root {
-            --primary-color: #00c853; /* Verde Effico */
-            --secondary-color: #003399; /* Azul Profissional */
-            --bg-color: #f0f2f5;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            padding: 20px 10px;
-        }
-
-        .container {
-            background: #fff;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-        }
-
-        .logo { width: 120px; margin-bottom: 10px; }
-
-        h1 {
-            color: var(--secondary-color);
-            font-size: 1.4rem;
-            margin-bottom: 25px;
-        }
-
-        .input-group { text-align: left; margin-bottom: 12px; }
-        
-        label {
-            display: block;
-            font-size: 0.8rem;
-            color: #555;
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-
-        input[type=text] {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        /* CAMERA BOX - O segredo do posicionamento */
-        .camera-box {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 4/3;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 20px 0;
-            display: none;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* OVERLAY - Efeito Banco Itaú */
-        #overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 70%;
-            height: 75%;
-            border: 3px solid #fff;
-            border-radius: 20px;
-            z-index: 5;
-            pointer-events: none;
-            /* O segredo da máscara escura em volta */
-            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5); 
-            transition: all 0.3s ease;
-        }
-
-        .status {
-            background: #e3f2fd;
-            color: #0d47a1;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 15px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-primary { background: var(--primary-color); color: white; }
-        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
-
-        canvas { display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RH Digital - EFFICO</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<style>
+:root {
+  --primary-color: #00c853; /* Verde Effico */
+  --secondary-color: #003399; /* Azul Profissional */
+  --bg-color: #f0f2f5;
+}
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  padding: 20px 10px;
+}
+.container {
+  background: #fff;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  position: relative;
+}
+.logo { width: 120px; margin-bottom: 10px; }
+h1 { color: var(--secondary-color); font-size: 1.4rem; margin-bottom: 25px; }
+.input-group { text-align: left; margin-bottom: 12px; }
+label { display: block; font-size: 0.8rem; color: #555; margin-bottom: 4px; font-weight: 600; }
+input[type=text] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; box-sizing: border-box; }
+.camera-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 20px 0;
+  display: none;
+}
+video { width: 100%; height: 100%; object-fit: cover; }
+#overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  height: 75%;
+  border: 3px solid #fff;
+  border-radius: 20px;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: 0 0 0 1000px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+.status {
+  background: #e3f2fd;
+  color: #0d47a1;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+.btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
+.btn-primary { background: var(--primary-color); color: white; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+canvas { display: none; }
+</style>
 </head>
 <body>
 
 <div class="container">
-    <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-    <h1>RH Digital</h1>
+  <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
+  <h1>RH Digital</h1>
 
-    <div id="status" class="status">Carregando módulos...</div>
+  <div id="status" class="status">Carregando módulos...</div>
 
-    <div id="formSection">
-        <div class="input-group">
-            <label>NOME</label>
-            <input type="text" id="nome">
-        </div>
-        <div class="input-group">
-            <label>CPF</label>
-            <input type="text" id="cpf">
-        </div>
-        <div class="input-group">
-            <label>RG</label>
-            <input type="text" id="rg">
-        </div>
-        <div class="input-group">
-            <label>DATA DE NASCIMENTO</label>
-            <input type="text" id="nascimento">
-        </div>
-        <button id="btnIniciar" class="btn btn-primary" onclick="iniciarCaptura()" disabled>Iniciar Processo</button>
-    </div>
+  <div id="formSection">
+    <div class="input-group"><label>NOME</label><input type="text" id="nome"></div>
+    <div class="input-group"><label>CPF</label><input type="text" id="cpf"></div>
+    <div class="input-group"><label>RG</label><input type="text" id="rg"></div>
+    <div class="input-group"><label>DATA DE NASCIMENTO</label><input type="text" id="nascimento"></div>
+    <button id="btnIniciar" class="btn btn-primary" onclick="iniciarCaptura()" disabled>Iniciar Processo</button>
+  </div>
 
-    <div class="camera-box" id="cameraBox">
-        <video id="video" autoplay playsinline></video>
-        <div id="overlay"></div>
-    </div>
+  <div class="camera-box" id="cameraBox">
+    <video id="video" autoplay playsinline></video>
+    <div id="overlay"></div>
+  </div>
 
-    <button id="btnEnviar" class="btn btn-primary" style="display:none;" onclick="enviarTudo()">Enviar Documentos</button>
+  <button id="btnEnviar" class="btn btn-primary" style="display:none;" onclick="enviarTudo()">Enviar Documentos</button>
 </div>
 
 <canvas id="canvas"></canvas>
 
-<script>var exports = {};</script>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 
 <script>
+// ---------- Sequência de Documentos ----------
+const sequencia = [
+  { label: "Sua Foto (Selfie)", key: "selfie", mode: "user", ocr: false },
+  { label: "Frente do RG", key: "rg_frente", mode: "environment", ocr: true },
+  { label: "Verso do RG", key: "rg_verso", mode: "environment", ocr: true },
+  { label: "CTPS", key: "ctps", mode: "environment", ocr: true },
+  { label: "CPF", key: "cpf_doc", mode: "environment", ocr: true },
+  { label: "PIS / Cartão do Cidadão", key: "pis", mode: "environment", ocr: true },
+  { label: "CNH", key: "cnh", mode: "environment", ocr: true },
+  { label: "Certificado de Reservista", key: "reservista", mode: "environment", ocr: true },
+  { label: "Comprovante de Endereço", key: "endereco", mode: "environment", ocr: true },
+  { label: "Cartão Vale Transporte", key: "vale_transporte", mode: "environment", ocr: true },
+  { label: "Certidão de Casamento/Nascimento", key: "certidao", mode: "environment", ocr: true },
+  { label: "CPF do Cônjuge", key: "cpf_conjuge", mode: "environment", ocr: true },
+  { label: "Documentos dos filhos", key: "filhos", mode: "environment", ocr: true },
+  { label: "Carteirinhas de vacinação", key: "vacinas", mode: "environment", ocr: true },
+  { label: "Conta Bancária", key: "conta_banco", mode: "environment", ocr: true }
+];
+
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const overlay = document.getElementById('overlay');
@@ -170,106 +130,152 @@ const status = document.getElementById('status');
 const cameraBox = document.getElementById('cameraBox');
 const formSection = document.getElementById('formSection');
 
-let currentIndex = 0;
-const sequencia = [
-    { label: "Sua Foto (Selfie)", key: "selfie", mode: "user" },
-    { label: "Frente do RG", key: "rg_frente", mode: "environment" }
-];
 let fotos = {};
+let currentIndex = 0;
 
-// 1. CARREGAR MODELOS AO INICIAR
+// ---------- Carregar modelos FaceAPI ----------
 async function loadModels() {
-    try {
-        const URL = 'https://justadudewhohacks.github.io/face-api.js/models';
-        await faceapi.nets.tinyFaceDetector.loadFromUri(URL);
-        status.innerText = "Sistema Pronto";
-        document.getElementById('btnIniciar').disabled = false;
-    } catch (e) {
-        status.innerText = "Erro ao carregar IA. Verifique sua conexão.";
-    }
+  try {
+    const URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+    await faceapi.nets.tinyFaceDetector.loadFromUri(URL);
+    status.innerText = "Sistema pronto!";
+    document.getElementById('btnIniciar').disabled = false;
+  } catch (e) {
+    status.innerText = "Erro ao carregar IA.";
+  }
 }
 
-// 2. INICIAR FLUXO
+// ---------- Iniciar fluxo ----------
 async function iniciarCaptura() {
-    formSection.style.display = 'none';
-    cameraBox.style.display = 'block';
-    proximoPasso();
+  formSection.style.display = 'none';
+  cameraBox.style.display = 'block';
+  proximoPasso();
 }
 
+// ---------- Próximo documento ----------
 async function proximoPasso() {
-    if (currentIndex >= sequencia.length) {
-        finalizar();
-        return;
-    }
+  if(currentIndex >= sequencia.length){
+    finalizar();
+    return;
+  }
 
-    const etapa = sequencia[currentIndex];
-    status.innerText = `Capture agora: ${etapa.label}`;
-    overlay.style.borderColor = "#fff";
+  const etapa = sequencia[currentIndex];
+  status.innerText = `Capture: ${etapa.label}`;
+  overlay.style.borderColor = "#fff";
 
-    try {
-        if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
-        
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: etapa.mode } 
-        });
-        video.srcObject = stream;
-        
-        iniciarDeteccao(etapa);
-    } catch (err) {
-        status.innerText = "Erro ao abrir câmera.";
-    }
+  if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+  const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: etapa.mode } });
+  video.srcObject = stream;
+
+  iniciarDeteccao(etapa);
 }
 
-// 3. LÓGICA DE DETECÇÃO (IGUAL BANCO)
+// ---------- Detecção + Nitidez + Overlay ----------
 async function iniciarDeteccao(etapa) {
-    const loop = setInterval(async () => {
-        if (video.paused || video.ended) return;
+  const loop = setInterval(async () => {
+    if(video.paused || video.ended) return;
 
-        let detectado = false;
-        
-        if (etapa.key === 'selfie') {
-            const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
-            if (result) detectado = true;
-        } else {
-            detectado = true; // Para documentos, apenas aguarda 2s centralizado
-        }
+    let ok = false;
 
-        if (detectado) {
-            overlay.style.borderColor = "#00c853";
-            overlay.style.boxShadow = "0 0 0 1000px rgba(0, 200, 83, 0.2)";
-            
-            clearInterval(loop);
-            setTimeout(() => tirarFoto(etapa), 1500);
-        }
-    }, 600);
+    if(etapa.key === 'selfie'){
+      const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
+      if(result) ok = true;
+    } else {
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video,0,0);
+      const variance = calcVariance(ctx.getImageData(0,0,canvas.width,canvas.height));
+      if(variance>500) ok = true;
+    }
+
+    overlay.style.borderColor = ok ? "#00c853" : "#fff";
+    overlay.style.boxShadow = ok ? "0 0 0 1000px rgba(0,200,83,0.2)" : "0 0 0 1000px rgba(0,0,0,0.5)";
+
+    if(ok){
+      clearInterval(loop);
+      await contagemRegressiva(etapa);
+    }
+
+  },500);
 }
 
-function tirarFoto(etapa) {
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    
-    fotos[etapa.key] = canvas.toDataURL('image/jpeg');
-    currentIndex++;
-    
-    // Efeito visual de clique
-    overlay.style.backgroundColor = "white";
-    setTimeout(() => {
-        overlay.style.backgroundColor = "transparent";
-        proximoPasso();
-    }, 150);
+// ---------- Contagem regressiva ----------
+async function contagemRegressiva(etapa){
+  let count=3;
+  return new Promise(resolve => {
+    const interval = setInterval(()=>{
+      status.innerText = `Captura ${etapa.label} em ${count}...`;
+      count--;
+      if(count<0){
+        clearInterval(interval);
+        tirarFoto(etapa);
+        resolve();
+      }
+    },1000);
+  });
 }
 
-function finalizar() {
-    cameraBox.style.display = 'none';
-    status.innerText = "Tudo pronto para o envio!";
-    document.getElementById('btnEnviar').style.display = 'block';
+// ---------- Tirar foto ----------
+async function tirarFoto(etapa){
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  fotos[etapa.key] = canvas.toDataURL('image/jpeg');
+
+  // OCR se necessário
+  if(etapa.ocr) await processOCR(canvas, etapa.key);
+
+  // Flash visual
+  overlay.style.backgroundColor = "rgba(0,255,0,0.2)";
+  setTimeout(()=> overlay.style.backgroundColor = "transparent",200);
+
+  currentIndex++;
+  proximoPasso();
 }
 
-function enviarTudo() {
-    status.innerText = "Enviando para o RH...";
-    console.log("Dados capturados:", fotos);
-    // Aqui entra seu fetch para o Power Automate
+// ---------- Função de Nitidez ----------
+function calcVariance(imgData){
+  let gray=[];
+  for(let i=0;i<imgData.data.length;i+=4){
+    gray.push(0.299*imgData.data[i]+0.587*imgData.data[i+1]+0.114*imgData.data[i+2]);
+  }
+  let mean = gray.reduce((a,b)=>a+b)/gray.length;
+  return gray.reduce((a,b)=>a+(b-mean)**2,0)/gray.length;
+}
+
+// ---------- OCR ----------
+async function processOCR(canvas,key){
+  try{
+    const result = await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
+    const text = result.data.text;
+
+    if(!text) return;
+    if(key.includes('rg')){
+      const nomeMatch = text.match(/NOME[:\s]*([A-ZÀ-Ÿ ]+)/i);
+      const nascimentoMatch = text.match(/NASC(?:IMENTO)?[:\s]*(\d{2}\/\d{2}\/\d{4})/i);
+      const rgMatch = text.match(/RG[:\s]*([\d\.]+)/i);
+      const cpfMatch = text.match(/CPF[:\s]*(\d{3}\.\d{3}\.\d{3}-\d{2})/i);
+      if(nomeMatch) document.getElementById('nome').value = nomeMatch[1].trim();
+      if(nascimentoMatch) document.getElementById('nascimento').value = nascimentoMatch[1].trim();
+      if(rgMatch) document.getElementById('rg').value = rgMatch[1].trim();
+      if(cpfMatch) document.getElementById('cpf').value = cpfMatch[1].trim();
+    }
+  } catch(e){ console.log("Erro OCR",e); }
+}
+
+// ---------- Finalização ----------
+function finalizar(){
+  cameraBox.style.display = 'none';
+  status.innerText = "Tudo pronto! Envie os documentos.";
+  document.getElementById('btnEnviar').style.display = 'block';
+}
+
+// ---------- Enviar ----------
+function enviarTudo(){
+  status.innerText = "Enviando para o RH...";
+  console.log("Dados capturados:", fotos);
+  // Aqui você faz fetch para Power Automate / SharePoint
 }
 
 window.onload = loadModels;
