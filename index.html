@@ -6,7 +6,6 @@
 <title>RH Digital - EFFICO</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <style>
-/* ---------- Reset & Body ---------- */
 body {
   margin:0;
   font-family:'Segoe UI',sans-serif;
@@ -16,8 +15,6 @@ body {
   align-items:flex-start;
   padding-top:20px;
 }
-
-/* ---------- Container ---------- */
 .container {
   background:#fff;
   padding:20px;
@@ -28,50 +25,38 @@ body {
   text-align:center;
   position:relative;
 }
-
-/* ---------- Logo ---------- */
 .logo {
   position:absolute;
   top:15px;
   left:15px;
   width:100px;
 }
-
-/* ---------- Título ---------- */
 h1{
   color:#0072ff;
   margin-bottom:20px;
   font-size:1.8rem;
   font-weight:bold;
 }
-
-/* ---------- Video ---------- */
 video {
   width:100%;
   border-radius:16px;
   border:2px solid #ccc;
 }
-
-/* ---------- Canvas ---------- */
 canvas{display:none;}
-
-/* ---------- Overlay ---------- */
 #overlay {
   position:absolute;
-  top:80px;
+  top:calc(80px);
   left:50%;
   transform:translateX(-50%);
-  border:4px solid red;
   width:320px;
   height:240px;
+  border:4px solid red;
   border-radius:16px;
   pointer-events:none;
   display:none;
   box-shadow:0 0 20px rgba(255,0,0,0.5);
-  transition: border 0.2s, box-shadow 0.2s;
+  transition:border 0.2s, box-shadow 0.2s;
 }
-
-/* ---------- Status ---------- */
 .status{
   margin-top:15px;
   font-weight:bold;
@@ -80,8 +65,6 @@ canvas{display:none;}
   font-size:1rem;
   transition: all 0.3s;
 }
-
-/* ---------- Inputs ---------- */
 input[type=text]{
   width:100%;
   padding:8px;
@@ -91,8 +74,6 @@ input[type=text]{
   margin-bottom:5px;
   font-size:1rem;
 }
-
-/* ---------- Botão Enviar ---------- */
 .send-btn{
   width:100%;
   background:#00c853;
@@ -113,8 +94,7 @@ input[type=text]{
 <body>
 
 <div class="container">
-  <img src="https://i.imgur.com/4QfKuz1.png" class="logo" alt="EFFICO Logo">
-
+  <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo" alt="EFFICO Logo">
   <h1><i class="fas fa-folder-open"></i> RH Digital</h1>
 
   <form id="formDocumentos">
@@ -134,7 +114,6 @@ input[type=text]{
 <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 <script>
-// ---------- Sequência de Documentos ----------
 const sequenciaDocs = [
   {label:"Foto Selfie (Crachá)",key:"selfie",selfie:true,ocr:false},
   {label:"RG",key:"rgDoc",selfie:false,ocr:true},
@@ -150,7 +129,7 @@ const arquivos = {};
 let currentIndex = 0;
 let captureInterval = null;
 
-// ---------- Função para iniciar sequência ----------
+// ---------- Função Sequencial ----------
 async function startSequencia(){
   if(currentIndex >= sequenciaDocs.length){
     status.innerText="Todos os documentos capturados!";
@@ -160,6 +139,7 @@ async function startSequencia(){
   status.innerText=`Capture: ${doc.label}`;
   overlay.style.display="block";
   overlay.style.borderColor="red";
+  overlay.style.boxShadow="0 0 20px rgba(255,0,0,0.5)";
   video.style.display="block";
 
   const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:doc.selfie?'user':'environment'}});
@@ -193,7 +173,7 @@ async function startSequencia(){
     status.innerText = ok ? `Ajuste ok! Tirando foto de ${doc.label}...` : `Ajuste ${doc.label} dentro do quadro`;
 
     if(ok && !arquivos[doc.key]){
-      // ---------- Contagem regressiva ----------
+      // Contagem regressiva
       let count=3;
       const countdown = setInterval(()=>{
         status.innerText = `Foto de ${doc.label} em ${count}...`;
@@ -208,11 +188,11 @@ async function startSequencia(){
           overlay.style.display="none";
           status.innerText = `${doc.label} capturado com sucesso!`;
           currentIndex++;
-          setTimeout(()=>startSequencia(), 1000); // Próximo documento
+          setTimeout(()=>startSequencia(),1000);
         }
       },1000);
     }
-  }, 500);
+  },500);
 }
 
 // ---------- OCR ----------
@@ -257,7 +237,7 @@ async function enviarDocumentos(){
   }catch(e){console.error(e);status.innerText="Erro ao enviar!";}
 }
 
-// ---------- Iniciar sequencia ----------
+// ---------- Iniciar ----------
 startSequencia();
 </script>
 
