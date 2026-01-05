@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload de Documentos</title>
+  <style>
+    /* Reset básico */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    
+    body {
+      background: #f5f6fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 30px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    video, canvas {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #2980b9;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #3498db;
+    }
+
+    .btn-secondary {
+      background-color: #95a5a6;
+    }
+
+    .btn-secondary:hover {
+      background-color: #7f8c8d;
+    }
+
+    #status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upload de Documentos</h1>
+
+    <p>1️⃣ Capture o documento (frente)</p>
+    <video id="cameraDoc" autoplay></video>
+    <canvas id="canvasDoc" style="display:none;"></canvas>
+    <button onclick="capturarDocumento()">Capturar Documento</button>
+
+    <p>2️⃣ Capture sua selfie</p>
+    <video id="cameraFace" autoplay></video>
+    <canvas id="canvasFace" style="display:none;"></canvas>
+    <button onclick="capturarSelfie()">Capturar Selfie</button>
+
+    <p>3️⃣ Enviar</p>
+    <button class="btn-secondary" onclick="enviar()">Enviar para o SharePoint</button>
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // Abrir câmera para documento
+    const videoDoc = document.getElementById('cameraDoc');
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => videoDoc.srcObject = stream)
+      .catch(err => console.error("Erro ao acessar câmera: ", err));
+
+    const videoFace = document.getElementById('cameraFace');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+      .then(stream => videoFace.srcObject = stream)
+      .catch(err => console.error("Erro ao acessar câmera frontal: ", err));
+
+    let base64Doc = '';
+    let base64Face = '';
+
+    function capturarDocumento() {
+      const canvas = document.getElementById('canvasDoc');
+      canvas.width = videoDoc.videoWidth;
+      canvas.height = videoDoc.videoHeight;
+      canvas.getContext('2d').drawImage(videoDoc, 0, 0);
+      base64Doc = canvas.toDataURL("image/jpeg");
+      document.getElementById('status').innerText = "Documento capturado!";
+    }
+
+    function capturarSelfie() {
+      const canvas = document.getElementById('canvasFace');
+      canvas.width = videoFace.videoWidth;
+      canvas.height = videoFace.videoHeight;
+      canvas.getContext('2d').drawImage(videoFace, 0, 0);
+      base64Face = canvas.toDataURL("image/jpeg");
+      document.getElementById('status').innerText = "Selfie capturada!";
+    }
+
+    function enviar() {
+      if (!base64Doc || !base64Face) {
+        alert("Por favor, capture o documento e a selfie antes de enviar.");
+        return;
+      }
+
+      document.getElementById('status').innerText = "Enviando...";
+
+      fetch("URL_DO_WEBHOOK_DO_POWER_AUTOMATE", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: "Filipe Santos", // aqui pode ser dinamizado com input
+          documento: base64Doc,
+          selfie: base64Face
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('status').innerText = "Enviado com sucesso!";
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('status').innerText = "Erro ao enviar!";
+      });
+    }
+  </script>
+</body>
+</html>
