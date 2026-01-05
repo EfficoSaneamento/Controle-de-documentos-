@@ -3,150 +3,207 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload de Documentos</title>
+  <title>Documentos RH Digital</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <style>
-    /* Reset básico */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-    
     body {
-      background: #f5f6fa;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      margin:0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg,#2980b9,#8e44ad);
+      display:flex;
+      justify-content:center;
+      padding: 30px 0;
+      color:#fff;
     }
-
     .container {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px 30px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
+      background:#fff;
+      color:#2c3e50;
+      border-radius:16px;
+      padding:25px;
+      width:90%;
+      max-width:600px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.2);
+      animation:fadeIn 0.7s ease-in-out;
     }
-
+    @keyframes fadeIn {
+      from {opacity:0; transform:translateY(20px);}
+      to {opacity:1; transform:translateY(0);}
+    }
     h1 {
-      margin-bottom: 20px;
-      color: #2c3e50;
+      text-align:center;
+      margin-bottom:20px;
+      color:#2980b9;
     }
-
-    video, canvas {
-      width: 100%;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
+    .doc-item {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:15px;
     }
-
-    button {
-      background-color: #2980b9;
-      color: #fff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-bottom: 10px;
-      width: 100%;
+    .doc-item label {
+      flex:1;
+      cursor:pointer;
     }
-
-    button:hover {
-      background-color: #3498db;
+    .doc-item input[type=file] {
+      display:none;
     }
-
-    .btn-secondary {
-      background-color: #95a5a6;
+    .btn-camera, .btn-upload {
+      border:none;
+      background:#2980b9;
+      color:#fff;
+      border-radius:8px;
+      padding:8px 10px;
+      cursor:pointer;
+      margin-left:5px;
+      font-size:14px;
+      display:flex;
+      align-items:center;
     }
-
-    .btn-secondary:hover {
-      background-color: #7f8c8d;
+    .btn-camera:hover, .btn-upload:hover {
+      background:#3498db;
     }
-
-    #status {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #27ae60;
+    .status {
+      text-align:center;
+      font-weight:bold;
+      margin-top:10px;
+      min-height:20px;
+    }
+    video {
+      width:100%;
+      border-radius:12px;
+      margin-top:10px;
+      border:2px solid #2980b9;
+      display:none;
+    }
+    canvas {
+      display:none;
+    }
+    button.send-btn {
+      width:100%;
+      background:#27ae60;
+      color:#fff;
+      padding:14px;
+      border:none;
+      border-radius:10px;
+      font-size:16px;
+      cursor:pointer;
+      margin-top:15px;
+    }
+    button.send-btn:hover {
+      background:#2ecc71;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Upload de Documentos</h1>
+    <h1><i class="fas fa-folder-open"></i> Documentos RH</h1>
 
-    <p>1️⃣ Capture o documento (frente)</p>
-    <video id="cameraDoc" autoplay></video>
-    <canvas id="canvasDoc" style="display:none;"></canvas>
-    <button onclick="capturarDocumento()">Capturar Documento</button>
+    <form id="formDocumentos">
+      <!-- Exemplo de item -->
+      <div class="doc-item">
+        <label>Foto Selfie (Para criação do crachá)</label>
+        <div>
+          <button type="button" class="btn-camera" onclick="abrirCamera('selfie')"><i class="fas fa-camera"></i></button>
+          <label class="btn-upload"><i class="fas fa-upload"></i>
+            <input type="file" accept="image/*" onchange="uploadArquivo(event,'selfie')">
+          </label>
+        </div>
+      </div>
 
-    <p>2️⃣ Capture sua selfie</p>
-    <video id="cameraFace" autoplay></video>
-    <canvas id="canvasFace" style="display:none;"></canvas>
-    <button onclick="capturarSelfie()">Capturar Selfie</button>
+      <div class="doc-item">
+        <label>CTPS (Em caso de não possuir a digital)</label>
+        <div>
+          <button type="button" class="btn-camera" onclick="abrirCamera('ctps')"><i class="fas fa-camera"></i></button>
+          <label class="btn-upload"><i class="fas fa-upload"></i>
+            <input type="file" accept="image/*,application/pdf" onchange="uploadArquivo(event,'ctps')">
+          </label>
+        </div>
+      </div>
 
-    <p>3️⃣ Enviar</p>
-    <button class="btn-secondary" onclick="enviar()">Enviar para o SharePoint</button>
+      <!-- Repetir para os demais campos -->
+      <div class="doc-item">
+        <label>Cópia do CPF</label>
+        <div>
+          <button type="button" class="btn-camera" onclick="abrirCamera('cpf')"><i class="fas fa-camera"></i></button>
+          <label class="btn-upload"><i class="fas fa-upload"></i>
+            <input type="file" accept="image/*,application/pdf" onchange="uploadArquivo(event,'cpf')">
+          </label>
+        </div>
+      </div>
 
-    <div id="status"></div>
+      <div class="doc-item">
+        <label>Cópia do RG</label>
+        <div>
+          <button type="button" class="btn-camera" onclick="abrirCamera('rg')"><i class="fas fa-camera"></i></button>
+          <label class="btn-upload"><i class="fas fa-upload"></i>
+            <input type="file" accept="image/*,application/pdf" onchange="uploadArquivo(event,'rg')">
+          </label>
+        </div>
+      </div>
+
+      <!-- Adicionar todos os demais itens da sua lista aqui da mesma forma -->
+
+      <button type="button" class="send-btn" onclick="enviarDocumentos()">Enviar Tudo</button>
+      <div class="status" id="status"></div>
+    </form>
+
+    <video id="videoCamera"></video>
+    <canvas id="canvasCamera"></canvas>
+
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
   <script>
-    // Abrir câmera para documento
-    const videoDoc = document.getElementById('cameraDoc');
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => videoDoc.srcObject = stream)
-      .catch(err => console.error("Erro ao acessar câmera: ", err));
+    const arquivos = {}; // Vai armazenar base64 ou arquivos
 
-    const videoFace = document.getElementById('cameraFace');
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-      .then(stream => videoFace.srcObject = stream)
-      .catch(err => console.error("Erro ao acessar câmera frontal: ", err));
-
-    let base64Doc = '';
-    let base64Face = '';
-
-    function capturarDocumento() {
-      const canvas = document.getElementById('canvasDoc');
-      canvas.width = videoDoc.videoWidth;
-      canvas.height = videoDoc.videoHeight;
-      canvas.getContext('2d').drawImage(videoDoc, 0, 0);
-      base64Doc = canvas.toDataURL("image/jpeg");
-      document.getElementById('status').innerText = "Documento capturado!";
+    function abrirCamera(tipo){
+      const video = document.getElementById('videoCamera');
+      const canvas = document.getElementById('canvasCamera');
+      video.style.display = 'block';
+      navigator.mediaDevices.getUserMedia({video:true})
+        .then(stream => {
+          video.srcObject = stream;
+          video.play();
+          // captura após 2 segundos (exemplo)
+          setTimeout(()=>{
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video,0,0);
+            arquivos[tipo] = canvas.toDataURL('image/jpeg');
+            document.getElementById('status').innerText = tipo + " capturado via câmera!";
+            video.style.display = 'none';
+            stream.getTracks().forEach(track=>track.stop());
+          },2000);
+        });
     }
 
-    function capturarSelfie() {
-      const canvas = document.getElementById('canvasFace');
-      canvas.width = videoFace.videoWidth;
-      canvas.height = videoFace.videoHeight;
-      canvas.getContext('2d').drawImage(videoFace, 0, 0);
-      base64Face = canvas.toDataURL("image/jpeg");
-      document.getElementById('status').innerText = "Selfie capturada!";
+    function uploadArquivo(event,tipo){
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = ()=> {
+        arquivos[tipo] = reader.result;
+        document.getElementById('status').innerText = tipo + " carregado via upload!";
+      };
+      reader.readAsDataURL(file);
     }
 
-    function enviar() {
-      if (!base64Doc || !base64Face) {
-        alert("Por favor, capture o documento e a selfie antes de enviar.");
+    async function enviarDocumentos(){
+      if(Object.keys(arquivos).length === 0){
+        alert("Nenhum documento foi carregado!");
         return;
       }
-
-      document.getElementById('status').innerText = "Enviando...";
-
-      fetch("URL_DO_WEBHOOK_DO_POWER_AUTOMATE", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome: "Filipe Santos", // aqui pode ser dinamizado com input
-          documento: base64Doc,
-          selfie: base64Face
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('status').innerText = "Enviado com sucesso!";
-      })
-      .catch(err => {
-        console.error(err);
+      document.getElementById('status').innerText = "Enviando documentos...";
+      try{
+        await fetch("URL_DO_WEBHOOK_DO_POWER_AUTOMATE",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(arquivos)
+        });
+        document.getElementById('status').innerText = "Todos os documentos enviados!";
+      }catch(e){
+        console.error(e);
         document.getElementById('status').innerText = "Erro ao enviar!";
-      });
+      }
     }
   </script>
 </body>
