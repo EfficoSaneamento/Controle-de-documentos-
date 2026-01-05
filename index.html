@@ -7,17 +7,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <style>
         :root {
-            --primary-color: #ec7000; /* Laranja Itau */
-            --secondary-color: #003399; /* Azul Itau */
-            --bg-color: #f4f7f9;
-            --text-color: #333;
+            --primary-color: #00c853; /* Verde Effico */
+            --secondary-color: #003399; /* Azul Profissional */
+            --bg-color: #f0f2f5;
         }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
             display: flex;
             justify-content: center;
             padding: 20px 10px;
@@ -25,95 +23,84 @@
 
         .container {
             background: #fff;
-            padding: 30px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 450px;
             text-align: center;
         }
 
-        .logo {
-            width: 120px;
-            margin-bottom: 20px;
-        }
+        .logo { width: 120px; margin-bottom: 10px; }
 
         h1 {
             color: var(--secondary-color);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             margin-bottom: 25px;
-            font-weight: 600;
         }
 
-        /* Estilização dos Inputs Estilo Moderno */
-        .input-group {
-            text-align: left;
-            margin-bottom: 15px;
-        }
-
+        .input-group { text-align: left; margin-bottom: 12px; }
+        
         label {
             display: block;
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 5px;
-            margin-left: 5px;
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 4px;
+            font-weight: 600;
         }
 
         input[type=text] {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px;
             border-radius: 8px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             font-size: 1rem;
             box-sizing: border-box;
-            transition: border-color 0.3s;
         }
 
-        input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        /* Container da Câmera Corrigido */
+        /* CAMERA BOX - O segredo do posicionamento */
         .camera-box {
             position: relative;
             width: 100%;
-            border-radius: 16px;
-            overflow: hidden;
+            aspect-ratio: 4/3;
             background: #000;
-            margin-top: 20px;
-            display: none; /* Escondido até o usuário clicar em iniciar */
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
         }
 
         video {
             width: 100%;
-            display: block;
+            height: 100%;
+            object-fit: cover;
         }
 
-        /* O Quadrado de Foco (Overlay) corrigido */
+        /* OVERLAY - Efeito Banco Itaú */
         #overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 260px; /* Tamanho otimizado para rosto/documento */
-            height: 320px;
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            border-radius: 24px;
+            width: 70%;
+            height: 75%;
+            border: 3px solid #fff;
+            border-radius: 20px;
+            z-index: 5;
             pointer-events: none;
-            z-index: 10;
-            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.4); /* Escurece as bordas estilo banco */
+            /* O segredo da máscara escura em volta */
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5); 
             transition: all 0.3s ease;
         }
 
         .status {
-            margin-top: 20px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--secondary-color);
-            background: #eef2ff;
-            padding: 10px;
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 12px;
             border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 15px;
         }
 
         .btn {
@@ -125,17 +112,10 @@
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 10px;
         }
 
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #d66500;
-        }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
 
         canvas { display: none; }
     </style>
@@ -143,48 +123,46 @@
 <body>
 
 <div class="container">
-    <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo" alt="EFFICO Logo">
+    <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
     <h1>RH Digital</h1>
+
+    <div id="status" class="status">Carregando módulos...</div>
 
     <div id="formSection">
         <div class="input-group">
-            <label>Nome Completo</label>
-            <input type="text" id="nome" placeholder="Digite seu nome">
+            <label>NOME</label>
+            <input type="text" id="nome">
         </div>
         <div class="input-group">
             <label>CPF</label>
-            <input type="text" id="cpf" placeholder="000.000.000-00">
+            <input type="text" id="cpf">
         </div>
         <div class="input-group">
             <label>RG</label>
-            <input type="text" id="rg" placeholder="00.000.000-0">
+            <input type="text" id="rg">
         </div>
         <div class="input-group">
-            <label>Data de Nascimento</label>
-            <input type="text" id="nascimento" placeholder="DD/MM/AAAA">
+            <label>DATA DE NASCIMENTO</label>
+            <input type="text" id="nascimento">
         </div>
-        <button type="button" class="btn btn-primary" onclick="iniciarFluxo()">Iniciar Captura de Documentos</button>
+        <button id="btnIniciar" class="btn btn-primary" onclick="iniciarCaptura()" disabled>Iniciar Processo</button>
     </div>
 
     <div class="camera-box" id="cameraBox">
         <video id="video" autoplay playsinline></video>
         <div id="overlay"></div>
     </div>
-    
-    <div class="status" id="status" style="display:none;">Aguardando câmera...</div>
-    <canvas id="canvas"></canvas>
-    
-    <button id="btnEnviar" class="btn btn-primary" style="display:none;" onclick="enviarDocumentos()">Finalizar e Enviar Tudo</button>
+
+    <button id="btnEnviar" class="btn btn-primary" style="display:none;" onclick="enviarTudo()">Enviar Documentos</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
-<script>
-const sequenciaDocs = [
-    {label:"Foto Selfie (Rosto)", key:"selfie", selfie:true, ocr:false},
-    {label:"Frente do RG", key:"rgDoc", selfie:false, ocr:true}
-];
+<canvas id="canvas"></canvas>
 
+<script>var exports = {};</script>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+
+<script>
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const overlay = document.getElementById('overlay');
@@ -193,83 +171,108 @@ const cameraBox = document.getElementById('cameraBox');
 const formSection = document.getElementById('formSection');
 
 let currentIndex = 0;
-let arquivos = {};
+const sequencia = [
+    { label: "Sua Foto (Selfie)", key: "selfie", mode: "user" },
+    { label: "Frente do RG", key: "rg_frente", mode: "environment" }
+];
+let fotos = {};
 
-async function iniciarFluxo() {
-    formSection.style.display = 'none';
-    cameraBox.style.display = 'block';
-    status.style.display = 'block';
-    startSequencia();
+// 1. CARREGAR MODELOS AO INICIAR
+async function loadModels() {
+    try {
+        const URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+        await faceapi.nets.tinyFaceDetector.loadFromUri(URL);
+        status.innerText = "Sistema Pronto";
+        document.getElementById('btnIniciar').disabled = false;
+    } catch (e) {
+        status.innerText = "Erro ao carregar IA. Verifique sua conexão.";
+    }
 }
 
-async function startSequencia() {
-    if(currentIndex >= sequenciaDocs.length) {
-        status.innerText = "Captura concluída!";
-        cameraBox.style.display = 'none';
-        document.getElementById('btnEnviar').style.display = 'block';
+// 2. INICIAR FLUXO
+async function iniciarCaptura() {
+    formSection.style.display = 'none';
+    cameraBox.style.display = 'block';
+    proximoPasso();
+}
+
+async function proximoPasso() {
+    if (currentIndex >= sequencia.length) {
+        finalizar();
         return;
     }
 
-    const doc = sequenciaDocs[currentIndex];
-    status.innerText = `Posicione: ${doc.label}`;
-    
-    // Configuração visual do overlay para "Aguardando"
-    overlay.style.borderColor = "white";
-    
+    const etapa = sequencia[currentIndex];
+    status.innerText = `Capture agora: ${etapa.label}`;
+    overlay.style.borderColor = "#fff";
+
     try {
+        if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+        
         const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: doc.selfie ? 'user' : 'environment' } 
+            video: { facingMode: etapa.mode } 
         });
         video.srcObject = stream;
         
-        if(doc.selfie) await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
-
-        const captureInterval = setInterval(async () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-
-            let ok = false;
-
-            if(doc.selfie) {
-                const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
-                if(detection) ok = true;
-            } else {
-                ok = true; // No caso de documentos, apenas centralizar
-            }
-
-            if(ok) {
-                overlay.style.borderColor = "#00c853"; // Verde
-                overlay.style.borderWidth = "5px";
-                
-                // Simula captura automática após 2 segundos de foco
-                clearInterval(captureInterval);
-                setTimeout(() => tirarFoto(doc), 1000);
-            }
-        }, 1000);
-
+        iniciarDeteccao(etapa);
     } catch (err) {
-        status.innerText = "Erro ao acessar câmera.";
+        status.innerText = "Erro ao abrir câmera.";
     }
 }
 
-function tirarFoto(doc) {
-    arquivos[doc.key] = canvas.toDataURL('image/jpeg');
-    status.innerText = `${doc.label} capturado!`;
+// 3. LÓGICA DE DETECÇÃO (IGUAL BANCO)
+async function iniciarDeteccao(etapa) {
+    const loop = setInterval(async () => {
+        if (video.paused || video.ended) return;
+
+        let detectado = false;
+        
+        if (etapa.key === 'selfie') {
+            const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
+            if (result) detectado = true;
+        } else {
+            detectado = true; // Para documentos, apenas aguarda 2s centralizado
+        }
+
+        if (detectado) {
+            overlay.style.borderColor = "#00c853";
+            overlay.style.boxShadow = "0 0 0 1000px rgba(0, 200, 83, 0.2)";
+            
+            clearInterval(loop);
+            setTimeout(() => tirarFoto(etapa), 1500);
+        }
+    }, 600);
+}
+
+function tirarFoto(etapa) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
     
-    // Para o stream atual para trocar de câmera se necessário no próximo passo
-    video.srcObject.getTracks().forEach(track => track.stop());
-    
+    fotos[etapa.key] = canvas.toDataURL('image/jpeg');
     currentIndex++;
-    setTimeout(() => startSequencia(), 1500);
+    
+    // Efeito visual de clique
+    overlay.style.backgroundColor = "white";
+    setTimeout(() => {
+        overlay.style.backgroundColor = "transparent";
+        proximoPasso();
+    }, 150);
 }
 
-async function enviarDocumentos() {
-    // Mesma lógica de envio que você já tinha...
-    alert("Enviando dados para a EFFICO...");
+function finalizar() {
+    cameraBox.style.display = 'none';
+    status.innerText = "Tudo pronto para o envio!";
+    document.getElementById('btnEnviar').style.display = 'block';
 }
+
+function enviarTudo() {
+    status.innerText = "Enviando para o RH...";
+    console.log("Dados capturados:", fotos);
+    // Aqui entra seu fetch para o Power Automate
+}
+
+window.onload = loadModels;
 </script>
-
 </body>
 </html>
