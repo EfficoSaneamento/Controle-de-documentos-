@@ -3,205 +3,264 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RH Digital - Banco</title>
+<title>RH Digital - EFFICO</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <style>
-body{margin:0;font-family:'Segoe UI',sans-serif;background:#f0f2f5;display:flex;justify-content:center;align-items:flex-start;padding-top:20px;}
-.container{background:#fff;padding:20px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.2);width:95%;max-width:500px;text-align:center;}
-h1{color:#2980b9;margin-bottom:20px;}
-video{width:100%;border-radius:12px;border:2px solid #ccc;}
+/* ---------- Reset & Body ---------- */
+body {
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background: linear-gradient(135deg,#00c6ff,#0072ff);
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding-top:20px;
+}
+
+/* ---------- Container ---------- */
+.container {
+  background:#fff;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 15px 35px rgba(0,0,0,0.25);
+  width:95%;
+  max-width:500px;
+  text-align:center;
+  position:relative;
+}
+
+/* ---------- Logo ---------- */
+.logo {
+  position:absolute;
+  top:15px;
+  left:15px;
+  width:100px;
+}
+
+/* ---------- Título ---------- */
+h1{
+  color:#0072ff;
+  margin-bottom:20px;
+  font-size:1.8rem;
+  font-weight:bold;
+}
+
+/* ---------- Video ---------- */
+video {
+  width:100%;
+  border-radius:16px;
+  border:2px solid #ccc;
+}
+
+/* ---------- Canvas ---------- */
 canvas{display:none;}
-#overlay{position:absolute;top:0;left:50%;transform:translateX(-50%);border:4px solid red;width:320px;height:240px;border-radius:12px;pointer-events:none;}
-.status{margin-top:10px;font-weight:bold;min-height:20px;}
-button{background:#2980b9;color:#fff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;margin-top:10px;}
-button:hover{background:#3498db;}
-.doc-item{margin-bottom:18px;text-align:left;}
-.doc-buttons{display:flex;gap:8px;margin-top:5px;}
-.btn-camera,.btn-upload{border:none;background:#2980b9;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;}
-.btn-camera:hover,.btn-upload:hover{background:#3498db;}
-input[type=file]{display:none;}
-input[type=text]{width:100%;padding:6px;border-radius:6px;border:1px solid #ccc;margin-top:3px;margin-bottom:3px;}
-.send-btn{width:100%;background:#27ae60;color:#fff;padding:14px;border:none;border-radius:10px;font-size:16px;cursor:pointer;margin-top:15px;}
-.send-btn:hover{background:#2ecc71;}
+
+/* ---------- Overlay ---------- */
+#overlay {
+  position:absolute;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%);
+  border:4px solid red;
+  width:320px;
+  height:240px;
+  border-radius:16px;
+  pointer-events:none;
+  display:none;
+  box-shadow:0 0 20px rgba(255,0,0,0.5);
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+/* ---------- Status ---------- */
+.status{
+  margin-top:15px;
+  font-weight:bold;
+  min-height:24px;
+  color:#333;
+  font-size:1rem;
+  transition: all 0.3s;
+}
+
+/* ---------- Inputs ---------- */
+input[type=text]{
+  width:100%;
+  padding:8px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  margin-top:5px;
+  margin-bottom:5px;
+  font-size:1rem;
+}
+
+/* ---------- Botão Enviar ---------- */
+.send-btn{
+  width:100%;
+  background:#00c853;
+  color:#fff;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+  margin-top:15px;
+  transition: all 0.3s;
+}
+.send-btn:hover{
+  background:#00e676;
+}
 </style>
 </head>
 <body>
+
 <div class="container">
-<h1><i class="fas fa-folder-open"></i> RH Digital - Banco</h1>
+  <img src="https://i.imgur.com/4QfKuz1.png" class="logo" alt="EFFICO Logo">
 
-<form id="formDocumentos">
-  <!-- Campos preenchidos via RG -->
-  <div class="doc-item"><label>Nome</label><input type="text" id="nome" placeholder="Nome completo"></div>
-  <div class="doc-item"><label>CPF</label><input type="text" id="cpf" placeholder="000.000.000-00"></div>
-  <div class="doc-item"><label>RG</label><input type="text" id="rg" placeholder="Número do RG"></div>
-  <div class="doc-item"><label>Data de Nascimento</label><input type="text" id="nascimento" placeholder="DD/MM/AAAA"></div>
+  <h1><i class="fas fa-folder-open"></i> RH Digital</h1>
 
-  <div id="docsContainer"></div>
+  <form id="formDocumentos">
+    <div><label>Nome</label><input type="text" id="nome"></div>
+    <div><label>CPF</label><input type="text" id="cpf"></div>
+    <div><label>RG</label><input type="text" id="rg"></div>
+    <div><label>Data de Nascimento</label><input type="text" id="nascimento"></div>
+    <button type="button" class="send-btn" onclick="enviarDocumentos()">Enviar Tudo</button>
+    <div class="status" id="status">Aguardando início...</div>
+  </form>
 
-  <button type="button" class="send-btn" onclick="enviarDocumentos()">Enviar Tudo</button>
-  <div class="status" id="status">Ajuste seu rosto/documento dentro do quadro.</div>
-</form>
-
-<video id="video" autoplay></video>
-<canvas id="canvas"></canvas>
-<div id="overlay"></div>
+  <video id="video" autoplay></video>
+  <canvas id="canvas"></canvas>
+  <div id="overlay"></div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 <script>
-// --- Checklist de documentos ---
-const documentos = [
-  {label:"Foto Selfie (Crachá)",key:"selfie",ocr:false,selfie:true},
-  {label:"RG",key:"rgDoc",ocr:true,selfie:false}, // RG é especial
-  {label:"CTPS",key:"ctps",ocr:true,selfie:false},
-  {label:"Cópia do CPF",key:"cpfDoc",ocr:true,selfie:false},
-  {label:"Cópia da CNH",key:"cnh",ocr:true,selfie:false},
-  {label:"Comprovante de endereço",key:"endereco",ocr:true,selfie:false},
-  {label:"Certidão Casamento/Nascimento",key:"certidao",ocr:true,selfie:false},
-  {label:"Carteirinha vacinação Covid",key:"vacinaCovid",ocr:true,selfie:false}
+// ---------- Sequência de Documentos ----------
+const sequenciaDocs = [
+  {label:"Foto Selfie (Crachá)",key:"selfie",selfie:true,ocr:false},
+  {label:"RG",key:"rgDoc",selfie:false,ocr:true},
+  {label:"CTPS",key:"ctps",selfie:false,ocr:true},
+  {label:"Comprovante de Endereço",key:"endereco",selfie:false,ocr:true}
 ];
 
-const docsContainer=document.getElementById('docsContainer');
-documentos.forEach(doc=>{
-  const div=document.createElement('div');
-  div.className="doc-item";
-  div.innerHTML=`<label>${doc.label}</label>
-  <div class="doc-buttons">
-    <button type="button" class="btn-camera" onclick="abrirCameraDoc('${doc.key}',${doc.selfie})"><i class="fas fa-camera"></i> Câmera</button>
-    <label class="btn-upload"><i class="fas fa-upload"></i> Upload
-      <input type="file" accept="image/*,application/pdf" onchange="uploadDoc(event,'${doc.key}',${doc.selfie})">
-    </label>
-  </div>`;
-  docsContainer.appendChild(div);
-});
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const overlay = document.getElementById('overlay');
+const status = document.getElementById('status');
+const arquivos = {};
+let currentIndex = 0;
+let captureInterval = null;
 
-// --- Captura ---
-const video=document.getElementById('video');
-const canvas=document.getElementById('canvas');
-const overlay=document.getElementById('overlay');
-const status=document.getElementById('status');
-const arquivos={};
-let captureInterval=null;
-
-async function abrirCameraDoc(key,isSelfie){
-  status.innerText="Ajuste dentro do quadro.";
-  const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:isSelfie?'user':'environment'}});
-  video.srcObject=stream;
+// ---------- Função para iniciar sequência ----------
+async function startSequencia(){
+  if(currentIndex >= sequenciaDocs.length){
+    status.innerText="Todos os documentos capturados!";
+    return;
+  }
+  const doc = sequenciaDocs[currentIndex];
+  status.innerText=`Capture: ${doc.label}`;
+  overlay.style.display="block";
+  overlay.style.borderColor="red";
   video.style.display="block";
 
-  if(isSelfie) await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+  const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:doc.selfie?'user':'environment'}});
+  video.srcObject = stream;
 
-  captureInterval=setInterval(async()=>{
-    canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-    const ctx=canvas.getContext('2d');
+  if(doc.selfie) await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+
+  captureInterval = setInterval(async ()=>{
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
     ctx.drawImage(video,0,0);
-    let ok=false;
+    let ok = false;
 
-    if(isSelfie){
-      const detection=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
+    if(doc.selfie){
+      const detection = await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
       if(detection){
         const box=detection.box;
         const cx=box.x+box.width/2;
         const cy=box.y+box.height/2;
-        const centerX=video.videoWidth/2;
-        const centerY=video.videoHeight/2;
-        const dist=Math.sqrt((cx-centerX)**2+(cy-centerY)**2);
-        if(dist<50 && box.width>video.videoWidth*0.3){ok=true;}
+        const dist=Math.sqrt((cx-video.videoWidth/2)**2 + (cy-video.videoHeight/2)**2);
+        if(dist<50 && box.width>video.videoWidth*0.3) ok=true;
       }
     }else{
-      const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-      const variance=calcVariance(imgData);
-      if(variance>500) ok=true;
+      const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+      if(calcVariance(imgData)>500) ok=true;
     }
 
-    overlay.style.borderColor=ok?"green":"red";
-    status.innerText=ok?"Ajuste ok! Tirando foto...":"Ajuste dentro do quadro.";
+    overlay.style.borderColor = ok ? "green" : "red";
+    overlay.style.boxShadow = ok ? "0 0 20px rgba(0,255,0,0.5)" : "0 0 20px rgba(255,0,0,0.5)";
+    status.innerText = ok ? `Ajuste ok! Tirando foto de ${doc.label}...` : `Ajuste ${doc.label} dentro do quadro`;
 
-    if(ok && !arquivos[key]){
-      arquivos[key]=canvas.toDataURL('image/jpeg');
-      const docConfig=documentos.find(d=>d.key===key);
-      if(docConfig.ocr) await processOCR(canvas,key);
-      clearInterval(captureInterval);
-      video.srcObject.getTracks().forEach(track=>track.stop());
-      video.style.display="none";
-      status.innerText=key+" capturado com sucesso!";
+    if(ok && !arquivos[doc.key]){
+      // ---------- Contagem regressiva ----------
+      let count=3;
+      const countdown = setInterval(()=>{
+        status.innerText = `Foto de ${doc.label} em ${count}...`;
+        count--;
+        if(count<0){
+          clearInterval(countdown);
+          arquivos[doc.key] = canvas.toDataURL('image/jpeg');
+          if(doc.ocr) processOCR(canvas, doc.key);
+          clearInterval(captureInterval);
+          video.srcObject.getTracks().forEach(track=>track.stop());
+          video.style.display="none";
+          overlay.style.display="none";
+          status.innerText = `${doc.label} capturado com sucesso!`;
+          currentIndex++;
+          setTimeout(()=>startSequencia(), 1000); // Próximo documento
+        }
+      },1000);
     }
-  },500);
+  }, 500);
 }
 
-function uploadDoc(event,key,isSelfie){
-  const file=event.target.files[0];
-  if(file.size>5*1024*1024){alert("Arquivo >5MB"); return;}
-  const reader=new FileReader();
-  reader.onload=async ()=>{
-    arquivos[key]=reader.result;
-    status.innerText=key+" carregado!";
-    if(!isSelfie){
-      const img=new Image();
-      img.src=reader.result;
-      img.onload=async ()=>{
-        canvas.width=img.width; canvas.height=img.height;
-        canvas.getContext('2d').drawImage(img,0,0);
-        if(calcVariance(canvas.getContext('2d').getImageData(0,0,img.width,img.height))<500) alert("Documento borrado!");
-        const docConfig=documentos.find(d=>d.key===key);
-        if(docConfig.ocr) await processOCR(canvas,key);
-      }
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-// --- OCR ---
+// ---------- OCR ----------
 async function processOCR(canvas,key){
-  const result=await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
-  const text=result.data.text;
+  const result = await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
+  const text = result.data.text;
   if(!text) return;
-
   if(key==='rgDoc'){
-    // Preencher campos principais do RG
-    const nomeMatch=text.match(/NOME[:\s]*([A-ZÀ-Ÿ ]+)/i);
-    const nascimentoMatch=text.match(/NASC(?:IMENTO)?[:\s]*(\d{2}\/\d{2}\/\d{4})/i);
-    const rgMatch=text.match(/RG[:\s]*([\d\.]+)/i);
-    const cpfMatch=text.match(/CPF[:\s]*(\d{3}\.\d{3}\.\d{3}-\d{2})/i);
-
-    if(nomeMatch) document.getElementById('nome').value=nomeMatch[1].trim();
-    if(nascimentoMatch) document.getElementById('nascimento').value=nascimentoMatch[1].trim();
-    if(rgMatch) document.getElementById('rg').value=rgMatch[1].trim();
-    if(cpfMatch) document.getElementById('cpf').value=cpfMatch[1].trim();
-  }else{
-    // OCR padrão
-    if(/cpf/i.test(key)){ const m=text.match(/\d{3}\.\d{3}\.\d{3}-\d{2}/); if(m) document.getElementById('cpf').value=m[0]; }
-    if(/rg/i.test(key)){ const m=text.match(/(\d{1,2}\.\d{3}\.\d{3}-\d{1})|(\d{7,9})/); if(m) document.getElementById('rg').value=m[0]; }
-    const linhas=text.split('\n').filter(l=>l.trim().length>3);
-    if(linhas.length>0) document.getElementById('nome').value=linhas[0];
+    const nomeMatch = text.match(/NOME[:\s]*([A-ZÀ-Ÿ ]+)/i);
+    const nascimentoMatch = text.match(/NASC(?:IMENTO)?[:\s]*(\d{2}\/\d{2}\/\d{4})/i);
+    const rgMatch = text.match(/RG[:\s]*([\d\.]+)/i);
+    const cpfMatch = text.match(/CPF[:\s]*(\d{3}\.\d{3}\.\d{3}-\d{2})/i);
+    if(nomeMatch) document.getElementById('nome').value = nomeMatch[1].trim();
+    if(nascimentoMatch) document.getElementById('nascimento').value = nascimentoMatch[1].trim();
+    if(rgMatch) document.getElementById('rg').value = rgMatch[1].trim();
+    if(cpfMatch) document.getElementById('cpf').value = cpfMatch[1].trim();
   }
 }
 
-// --- Nitidez ---
+// ---------- Nitidez ----------
 function calcVariance(imgData){
   let gray=[];
   for(let i=0;i<imgData.data.length;i+=4){
     gray.push(0.299*imgData.data[i]+0.587*imgData.data[i+1]+0.114*imgData.data[i+2]);
   }
-  let mean=gray.reduce((a,b)=>a+b)/gray.length;
-  let variance=gray.reduce((a,b)=>a+(b-mean)*(b-mean),0)/gray.length;
+  let mean = gray.reduce((a,b)=>a+b)/gray.length;
+  let variance = gray.reduce((a,b)=>a+(b-mean)**2,0)/gray.length;
   return variance;
 }
 
-// --- Enviar ---
+// ---------- Enviar ----------
 async function enviarDocumentos(){
-  documentos.forEach(d=>{arquivos[d.key]=arquivos[d.key]||null;});
-  arquivos['nome']=document.getElementById('nome').value;
-  arquivos['cpf']=document.getElementById('cpf').value;
-  arquivos['rg']=document.getElementById('rg').value;
-  arquivos['nascimento']=document.getElementById('nascimento').value;
+  sequenciaDocs.forEach(d=>{arquivos[d.key]=arquivos[d.key]||null;});
+  arquivos['nome'] = document.getElementById('nome').value;
+  arquivos['cpf'] = document.getElementById('cpf').value;
+  arquivos['rg'] = document.getElementById('rg').value;
+  arquivos['nascimento'] = document.getElementById('nascimento').value;
   status.innerText="Enviando...";
   try{
     await fetch("URL_DO_WEBHOOK_DO_POWER_AUTOMATE",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(arquivos)});
     status.innerText="Todos os documentos enviados!";
   }catch(e){console.error(e);status.innerText="Erro ao enviar!";}
 }
+
+// ---------- Iniciar sequencia ----------
+startSequencia();
 </script>
+
 </body>
 </html>
 
