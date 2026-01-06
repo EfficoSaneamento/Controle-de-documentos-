@@ -37,15 +37,8 @@ body{
   text-align:center;
 }
 
-.logo{
-  width:110px;
-  margin-bottom:12px;
-}
-
-h1{
-  font-size:1.3rem;
-  color:var(--effico-blue);
-}
+.logo{width:110px;margin-bottom:12px}
+h1{font-size:1.3rem;color:var(--effico-blue)}
 
 .status{
   background:#eef4f8;
@@ -79,9 +72,7 @@ button{
   color:#fff;
 }
 
-.secondary{
-  background:#e5e5e5;
-}
+.secondary{background:#e5e5e5}
 
 .camera{
   position:relative;
@@ -93,11 +84,7 @@ button{
   background:#000;
 }
 
-video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
+video{width:100%;height:100%;object-fit:cover}
 
 .overlay-doc,.overlay-face{
   position:absolute;
@@ -105,7 +92,6 @@ video{
   border:3px solid red;
   border-radius:16px;
   pointer-events:none;
-  transition:.3s;
 }
 
 .overlay-face{
@@ -115,9 +101,7 @@ video{
 
 .success{border-color:#00c853}
 .warning{border-color:#ff1744}
-
 .hidden{display:none}
-
 input[type=file]{display:none}
 </style>
 </head>
@@ -127,7 +111,6 @@ input[type=file]{display:none}
 <div class="app">
 
 <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-
 <h1>RH Digital</h1>
 
 <div id="status" class="status">Leia e aceite para continuar</div>
@@ -157,159 +140,105 @@ exclusivamente para fins de admissão, conforme a Lei nº 13.709/2018.
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 
 <script>
-const etapas = [
- { label:"Selfie", key:"selfie", face:true },
- { label:"RG", key:"rg", keywords:["NOME","RG","NASC"] },
- { label:"CPF", key:"cpf", keywords:["CPF"] },
- { label:"CNH", key:"cnh", keywords:["CNH","DETRAN"] },
- { label:"Comprovante de Endereço", key:"endereco", keywords:["RUA","AV","CEP"] }
+const etapas=[
+ {label:"Selfie",key:"selfie",face:true},
+ {label:"RG",key:"rg",keywords:["RG","NOME"]},
+ {label:"CPF",key:"cpf",keywords:["CPF"]},
+ {label:"CNH",key:"cnh",keywords:["CNH","DETRAN"]},
+ {label:"Comprovante de Endereço",key:"endereco",keywords:["RUA","CEP"]}
 ];
 
-let idx = 0;
-let fotos = {};
-let stream = null;
+let idx=0,fotos={},stream;
+const video=document.getElementById("video");
+const overlay=document.getElementById("overlay");
+const status=document.getElementById("status");
 
-const video = document.getElementById("video");
-const overlay = document.getElementById("overlay");
-const status = document.getElementById("status");
-
-document.getElementById("btnAceitar").onclick = async () => {
+document.getElementById("btnAceitar").onclick=async()=>{
  document.getElementById("lgpd").remove();
  document.getElementById("btnAceitar").remove();
- status.innerText = "Carregando câmera...";
  await faceapi.nets.tinyFaceDetector.loadFromUri(
   "https://justadudewhohacks.github.io/face-api.js/models"
  );
- iniciarEtapa();
+ iniciar();
 };
 
-function iniciarEtapa(){
- if(idx >= etapas.length){
-  status.innerText = "Processo concluído";
+function iniciar(){
+ if(idx>=etapas.length){
+  status.innerText="Processo concluído";
   document.getElementById("btnEnviar").classList.remove("hidden");
   return;
  }
-
- status.innerText = "Envie: " + etapas[idx].label;
+ status.innerText="Envie: "+etapas[idx].label;
  document.getElementById("btnFoto").classList.remove("hidden");
  document.getElementById("btnUpload").classList.remove("hidden");
 }
 
-document.getElementById("btnFoto").onclick = async () => {
- document.getElementById("cameraBox").style.display = "block";
- overlay.className = etapas[idx].face ? "overlay-face warning" : "overlay-doc";
-
- stream = await navigator.mediaDevices.getUserMedia({
-  video:{ facingMode: etapas[idx].face ? "user" : "environment" }
+document.getElementById("btnFoto").onclick=async()=>{
+ document.getElementById("cameraBox").style.display="block";
+ overlay.className=etapas[idx].face?"overlay-face warning":"overlay-doc success";
+ stream=await navigator.mediaDevices.getUserMedia({
+  video:{facingMode:etapas[idx].face?"user":"environment"}
  });
-
- video.srcObject = stream;
+ video.srcObject=stream;
 
  if(etapas[idx].face){
-  validarRosto();
- } else {
-  overlay.classList.add("success");
+  const loop=setInterval(async()=>{
+   const face=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
+   overlay.classList.toggle("success",!!face);
+   overlay.classList.toggle("warning",!face);
+  },400);
+
+  document.getElementById("btnFoto").onclick=()=>{
+   if(!overlay.classList.contains("success")){
+    alert("Centralize o rosto");
+    return;
+   }
+   clearInterval(loop);
+   capturar();
+  };
  }
 };
-
-async function validarRosto(){
- const loop = setInterval(async () => {
-  const face = await faceapi.detectSingleFace(
-    video,
-    new faceapi.TinyFaceDetectorOptions()
-  );
-
-  if(face){
-   overlay.classList.add("success");
-   overlay.classList.remove("warning");
-  } else {
-   overlay.classList.add("warning");
-   overlay.classList.remove("success");
-  }
- }, 500);
-
- document.getElementById("btnFoto").onclick = () => {
-  if(!overlay.classList.contains("success")){
-   alert("Centralize o rosto para continuar");
-   return;
-  }
-  clearInterval(loop);
-  capturar();
- };
-}
 
 function capturar(){
- const canvas = document.createElement("canvas");
- canvas.width = video.videoWidth;
- canvas.height = video.videoHeight;
- canvas.getContext("2d").drawImage(video,0,0);
-
- fotos[etapas[idx].key] = canvas.toDataURL("image/jpeg");
-
- stream.getTracks().forEach(t => t.stop());
- document.getElementById("cameraBox").style.display = "none";
-
- if(!etapas[idx].face){
-  rodarOCR(canvas, etapas[idx]);
- }
-
+ const c=document.createElement("canvas");
+ c.width=video.videoWidth;
+ c.height=video.videoHeight;
+ c.getContext("2d").drawImage(video,0,0);
+ fotos[etapas[idx].key]=c.toDataURL("image/jpeg");
+ stream.getTracks().forEach(t=>t.stop());
+ document.getElementById("cameraBox").style.display="none";
  idx++;
- iniciarEtapa();
+ iniciar();
 }
 
-document.getElementById("btnUpload").onclick = () => {
- document.getElementById("fileInput").click();
-};
+document.getElementById("btnUpload").onclick=()=>fileInput.click();
 
-document.getElementById("fileInput").onchange = e => {
- const file = e.target.files[0];
- const reader = new FileReader();
- reader.onload = () => {
-  fotos[etapas[idx].key] = reader.result;
+fileInput.onchange=e=>{
+ const r=new FileReader();
+ r.onload=()=>{
+  fotos[etapas[idx].key]=r.result;
   idx++;
-  iniciarEtapa();
+  iniciar();
  };
- reader.readAsDataURL(file);
+ r.readAsDataURL(e.target.files[0]);
 };
 
-async function rodarOCR(canvas, etapa){
- const res = await Tesseract.recognize(canvas, "por");
- const texto = res.data.text.toUpperCase();
+document.getElementById("btnEnviar").onclick=async()=>{
+ status.innerText="Enviando documentos...";
+ const payload={dados:{},fotos};
 
- const valido = etapa.keywords.some(k => texto.includes(k));
- console.log(etapa.label, valido ? "✔ OCR OK" : "⚠ OCR FRACO");
-}
+ const res=await fetch("🔴COLE_AQUI_A_URL_DO_WEB_APP🔴",{
+  method:"POST",
+  body:JSON.stringify(payload)
+ });
 
-document.getElementById("btnEnviar").onclick = async () => {
-  status.innerText = "Enviando documentos, aguarde...";
-
-  const payload = {
-    dados: {
-      nome: "",
-      cpf: "",
-      rg: "",
-      nascimento: ""
-    },
-    fotos: fotos
-  };
-
-  try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbyS6HWDBc9_OYLCvAucNNWjC1Tw-licjf2ysAtVgWvK5LmDysYo8zcY-_AvnIgeeYIo/exec", {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
-
-    const json = await res.json();
-
-    if (json.status === "ok") {
-      status.innerText = "✅ Documentos enviados com sucesso!";
-      document.getElementById("btnEnviar").disabled = true;
-    } else {
-      status.innerText = "⚠ Erro ao enviar documentos";
-    }
-
-  } catch (e) {
-    status.innerText = "❌ Falha de conexão";
-  }
+ const json=await res.json();
+ status.innerText=json.status==="ok"
+  ?"✅ Documentos enviados com sucesso"
+  :"❌ Erro no envio";
 };
+</script>
+
+</body>
+</html>
 
