@@ -5,53 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RH Digital - EFFICO</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
 <style>
 :root{
-  --green:#00c853;
-  --red:#ff5252;
-  --blue:#003399;
-  --bg:#f0f2f5;
+  --primary:#687b58;
+  --secondary:#003399;
 }
-
 body{
   margin:0;
-  font-family:Segoe UI,sans-serif;
-  background:var(--bg);
+  font-family:'Segoe UI',sans-serif;
+  background:#f0f2f5;
   display:flex;
   justify-content:center;
   padding:20px;
 }
-
 .container{
   background:#fff;
   max-width:480px;
   width:100%;
-  border-radius:18px;
-  padding:24px;
-  box-shadow:0 12px 30px rgba(0,0,0,.15);
+  padding:20px;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.15);
   text-align:center;
 }
-
-.logo{width:120px;margin-bottom:8px;}
-h1{color:var(--blue);font-size:1.4rem;}
+.logo{width:120px;margin-bottom:10px;}
+h1{font-size:1.4rem;color:var(--secondary);}
 
 .status{
   background:#e3f2fd;
   color:#0d47a1;
-  padding:12px;
+  padding:10px;
   border-radius:8px;
   margin:15px 0;
-  font-weight:500;
+  font-size:.9rem;
 }
 
 .camera-box{
-  display:none;
   position:relative;
   width:100%;
   aspect-ratio:4/3;
   background:#000;
-  border-radius:16px;
+  border-radius:14px;
   overflow:hidden;
+  display:none;
 }
 
 video{
@@ -62,44 +59,39 @@ video{
 
 .overlay{
   position:absolute;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:70%;
+  height:80%;
+  border:3px solid red;
+  border-radius:20px;
+  box-shadow:0 0 0 1000px rgba(0,0,0,.6);
+  transition:.3s;
   pointer-events:none;
 }
 
-.mask{
-  width:65%;
-  height:75%;
-  border:3px solid var(--red);
+.overlay.selfie{
   border-radius:50%;
-  box-shadow:0 0 0 999px rgba(0,0,0,.55);
-  transition:.3s;
 }
 
-.mask.doc{
-  width:78%;
-  height:65%;
-  border-radius:14px;
-}
-
-.mask.ok{
-  border-color:var(--green);
-  box-shadow:0 0 0 999px rgba(0,200,83,.25);
-}
-
-button{
-  margin-top:15px;
+.btn{
   width:100%;
   padding:14px;
   border:none;
-  border-radius:10px;
-  background:#687b58;
+  border-radius:8px;
+  background:var(--primary);
   color:#fff;
   font-size:1rem;
   font-weight:bold;
   cursor:pointer;
+  margin-top:10px;
+}
+
+.btn:disabled{background:#ccc;}
+
+input[type=file]{
+  display:none;
 }
 
 canvas{display:none;}
@@ -114,171 +106,136 @@ canvas{display:none;}
 
   <div id="status" class="status">Carregando sistema...</div>
 
-  <button id="btnIniciar">Iniciar Processo</button>
+  <button id="btnStart" class="btn" onclick="start()" disabled>Iniciar</button>
 
   <div class="camera-box" id="cameraBox">
-    <video id="video" autoplay playsinline muted></video>
-    <div class="overlay">
-      <div id="mask" class="mask"></div>
-    </div>
+    <video id="video" autoplay playsinline></video>
+    <div id="overlay" class="overlay"></div>
   </div>
 
-  <button id="btnEnviar" style="display:none">Enviar Documentos</button>
+  <label class="btn" id="btnUpload" style="display:none;">
+    Anexar documento
+    <input type="file" accept="image/*" onchange="uploadManual(this)">
+  </label>
+
+  <button id="btnEnviar" class="btn" style="display:none;" onclick="enviar()">Enviar Documentos</button>
 </div>
 
 <canvas id="canvas"></canvas>
 
-<!-- LIBS -->
-<script async src="https://docs.opencv.org/4.x/opencv.js" onload="cvReady=true"></script>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <script>
-let cvReady=false;
-const esperarCV=()=>new Promise(r=>{
-  const i=setInterval(()=>{ if(cvReady){clearInterval(i);r();} },100);
-});
+const video = document.getElementById("video");
+const overlay = document.getElementById("overlay");
+const cameraBox = document.getElementById("cameraBox");
+const status = document.getElementById("status");
+const canvas = document.getElementById("canvas");
 
-const video=document.getElementById('video');
-const canvas=document.getElementById('canvas');
-const status=document.getElementById('status');
-const cameraBox=document.getElementById('cameraBox');
-const mask=document.getElementById('mask');
-const btnIniciar=document.getElementById('btnIniciar');
-const btnEnviar=document.getElementById('btnEnviar');
-
-const etapas=[
- {label:'Selfie',key:'selfie',mode:'user',tipo:'face'},
- {label:'RG',key:'rg',mode:'environment',tipo:'doc'},
- {label:'Comprovante de Endereço',key:'endereco',mode:'environment',tipo:'doc'}
+const etapas = [
+  {label:"Selfie", key:"selfie", face:true},
+  {label:"RG", key:"rg"},
+  {label:"CPF", key:"cpf"},
+  {label:"Comprovante de Endereço", key:"endereco"}
 ];
 
-let idx=0;
-let fotos={};
-let streamAtual=null;
+let etapaAtual = 0;
+let fotos = {};
+let stream;
 
-// ---------- LOAD ----------
-async function load(){
- const url='https://justadudewhohacks.github.io/face-api.js/models';
- await faceapi.nets.tinyFaceDetector.loadFromUri(url);
- status.innerText='Sistema pronto';
+async function loadModels(){
+  await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
+  status.innerText = "Sistema pronto";
+  document.getElementById("btnStart").disabled = false;
 }
-load();
+loadModels();
 
-// ---------- START (USER GESTURE) ----------
-btnIniciar.onclick = async ()=>{
- btnIniciar.style.display='none';
- cameraBox.style.display='block';
- status.innerText='Abrindo câmera...';
+async function start(){
+  document.getElementById("btnStart").style.display="none";
+  cameraBox.style.display="block";
+  iniciarCamera();
+}
 
- await iniciarCamera('user');
- next();
-};
+async function iniciarCamera(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
 
-// ---------- CAMERA ----------
-async function iniciarCamera(facing){
- try{
-  if(streamAtual) streamAtual.getTracks().forEach(t=>t.stop());
-
-  streamAtual = await navigator.mediaDevices.getUserMedia({
-    video:{ facingMode:facing },
-    audio:false
+  stream = await navigator.mediaDevices.getUserMedia({
+    video:{facingMode: etapaAtual===0 ? "user":"environment"}
   });
 
-  video.srcObject = streamAtual;
-  await video.play();
- }catch(e){
-  status.innerText='Erro ao acessar câmera';
-  console.error(e);
- }
+  video.srcObject = stream;
+
+  overlay.classList.toggle("selfie", etapas[etapaAtual].face);
+  status.innerText = "Enquadre: " + etapas[etapaAtual].label;
+
+  detectar();
 }
 
-// ---------- NEXT ----------
-async function next(){
- if(idx>=etapas.length){
-  finish(); return;
- }
+async function detectar(){
+  const loop = setInterval(async ()=>{
+    let ok = false;
 
- const e=etapas[idx];
- status.innerText=`Posicione: ${e.label}`;
+    if(etapas[etapaAtual].face){
+      const face = await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
+      ok = !!face;
+    } else {
+      ok = video.videoWidth > 0;
+    }
 
- mask.className='mask'+(e.tipo==='doc'?' doc':'');
- mask.classList.remove('ok');
+    overlay.style.borderColor = ok ? "lime" : "red";
 
- await iniciarCamera(e.mode);
- detectar(e);
+    if(ok){
+      clearInterval(loop);
+      capturar();
+    }
+  },700);
 }
 
-// ---------- DETECÇÃO ----------
-async function detectar(e){
- await esperarCV();
+function capturar(){
+  setTimeout(()=>{
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video,0,0);
+    fotos[etapas[etapaAtual].key] = canvas.toDataURL("image/jpeg");
 
- const loop=setInterval(async()=>{
-  if(video.paused) return;
-  let ok=false;
+    etapaAtual++;
 
-  canvas.width=video.videoWidth;
-  canvas.height=video.videoHeight;
-  canvas.getContext('2d').drawImage(video,0,0);
-
-  if(e.tipo==='face'){
-   const face=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
-   if(face){
-    const area=face.box.width*face.box.height;
-    const ref=canvas.width*canvas.height;
-    if(area>ref*0.08 && area<ref*0.25) ok=true;
-    status.innerText = area<ref*0.08 ? 'Aproxime o rosto' : 'Centralize o rosto';
-   }else{
-    status.innerText='Posicione o rosto';
-   }
-  }else{
-   let src=cv.imread(canvas),g=new cv.Mat(),e1=new cv.Mat();
-   cv.cvtColor(src,g,cv.COLOR_RGBA2GRAY);
-   cv.Canny(g,e1,80,200);
-   let c=new cv.MatVector(),h=new cv.Mat();
-   cv.findContours(e1,c,h,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE);
-   for(let i=0;i<c.size();i++){
-    if(cv.contourArea(c.get(i))>canvas.width*canvas.height*0.15){ ok=true; break; }
-   }
-   src.delete();g.delete();e1.delete();c.delete();h.delete();
-   status.innerText = ok ? 'Documento centralizado' : 'Centralize o documento';
-  }
-
-  mask.classList.toggle('ok',ok);
-
-  if(ok){
-   clearInterval(loop);
-   setTimeout(()=>capturar(e),800);
-  }
- },400);
+    if(etapaAtual < etapas.length){
+      iniciarCamera();
+    } else {
+      finalizar();
+    }
+  },1000);
 }
 
-// ---------- CAPTURA ----------
-function capturar(e){
- canvas.getContext('2d').drawImage(video,0,0);
- fotos[e.key]=canvas.toDataURL('image/jpeg');
- idx++;
- next();
+function uploadManual(input){
+  const reader = new FileReader();
+  reader.onload = e => {
+    fotos[etapas[etapaAtual].key] = e.target.result;
+    etapaAtual++;
+    iniciarCamera();
+  };
+  reader.readAsDataURL(input.files[0]);
 }
 
-// ---------- FINAL ----------
-function finish(){
- if(streamAtual) streamAtual.getTracks().forEach(t=>t.stop());
- cameraBox.style.display='none';
- status.innerText='Processo concluído';
- btnEnviar.style.display='block';
+function finalizar(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  cameraBox.style.display="none";
+  document.getElementById("btnUpload").style.display="none";
+  document.getElementById("btnEnviar").style.display="block";
+  status.innerText="Pronto para enviar";
 }
 
-btnEnviar.onclick=async()=>{
- status.innerText='Enviando...';
- await fetch('https://SEU_FLUXO_POWER_AUTOMATE', {
-  method:'POST',
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({fotos})
- });
- status.innerText='Enviado com sucesso';
-};
+async function enviar(){
+  status.innerText="Enviando...";
+  await fetch("https://script.google.com/macros/s/AKfycbyl8ocV342DlaSo1qW8TsvtA5t_FFayn2VUWdw-U-xVLa4Ph5SGchKu3nRsu8v3VLginQ/exec",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({dados:{nome:"",cpf:""},fotos})
+  });
+  status.innerText="✅ Enviado com sucesso";
+}
 </script>
 
 </body>
 </html>
-
