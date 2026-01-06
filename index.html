@@ -16,24 +16,19 @@
 
         .status { background: #f0f4f8; padding: 15px; border-radius: 14px; font-size: 0.9rem; font-weight: 600; color: var(--blue); margin-bottom: 20px; border-left: 5px solid var(--blue); min-height: 50px; display: flex; align-items: center; justify-content: center; }
 
-        /* Inputs Estilizados */
         .input-group { text-align: left; margin-bottom: 15px; }
         input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.3s; }
         input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(15, 42, 68, 0.1); }
 
-        /* Container da Câmera Profissional */
         .camera-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 20px; overflow: hidden; display: none; margin-bottom: 20px; }
         video { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Overlay Estilo Banco */
         .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #fff; z-index: 10; pointer-events: none; box-shadow: 0 0 0 1000px rgba(0,0,0,0.6); transition: all 0.3s ease; }
         .rect { width: 85%; height: 60%; border-radius: 15px; }
         .circle { width: 70%; height: 50%; border-radius: 50%; }
 
-        /* Botão de Anexo Flutuante (Híbrido) */
         #btnAnexarOverlay { position: absolute; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--blue); color: white; border: 2px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 30; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; cursor: pointer; }
 
-        /* Botões */
         button { width: 100%; padding: 18px; border: none; border-radius: 15px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; }
         .btn-primary { background: var(--blue); color: #fff; }
         .btn-primary:active { transform: scale(0.98); }
@@ -105,16 +100,21 @@
     const blurWarning = document.getElementById("blur-warning");
 
     async function iniciarChecklist() {
-        if(!document.getElementById("nome").value || !document.getElementById("cpf").value) return alert("Preencha Nome e Função");
+        // CORREÇÃO AQUI: Validando 'funcao' em vez de 'cpf'
+        if(!document.getElementById("nome").value || !document.getElementById("funcao").value) return alert("Preencha Nome e Função");
+        
         document.getElementById("setupSection").classList.add("hidden");
         status.innerText = "Carregando Inteligência Artificial...";
         
-        await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
-        
-        document.getElementById("cameraBox").style.display = "block";
-        btnAction.classList.remove("hidden");
-        document.getElementById("btnSkip").classList.remove("hidden");
-        carregarEtapa();
+        try {
+            await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
+            document.getElementById("cameraBox").style.display = "block";
+            btnAction.classList.remove("hidden");
+            document.getElementById("btnSkip").classList.remove("hidden");
+            carregarEtapa();
+        } catch(e) {
+            status.innerText = "Erro ao carregar IA. Verifique sua conexão.";
+        }
     }
 
     async function carregarEtapa() {
@@ -125,9 +125,16 @@
         document.getElementById("overlay").className = config.isFace ? "overlay circle" : "overlay rect";
 
         if(stream) stream.getTracks().forEach(t => t.stop());
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: config.isFace ? "user" : "environment" } });
-        video.srcObject = stream;
-        detectarBlur();
+        
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: config.isFace ? "user" : "environment" } 
+            });
+            video.srcObject = stream;
+            detectarBlur();
+        } catch(e) {
+            status.innerText = "Erro ao acessar câmera.";
+        }
     }
 
     function detectarBlur() {
@@ -147,7 +154,8 @@
 
     btnAction.onclick = () => {
         const c = document.createElement("canvas");
-        c.width = video.videoWidth; c.height = video.videoHeight;
+        c.width = video.videoWidth; 
+        c.height = video.videoHeight;
         c.getContext("2d").drawImage(video, 0, 0);
         fotos[etapas[currentIdx].key] = c.toDataURL("image/jpeg", 0.7);
         proximo();
@@ -177,12 +185,19 @@
     async function enviarTudo() {
         status.innerText = "🚀 Enviando arquivos ao RH... Aguarde.";
         const payload = {
-            dados: { nome: document.getElementById("nome").value, funcao: document.getElementById("funcao").value },
+            dados: { 
+                nome: document.getElementById("nome").value, 
+                funcao: document.getElementById("funcao").value 
+            },
             fotos: fotos
         };
         
         try {
-            await fetch("https://script.google.com/macros/s/AKfycbxVWJxuHTK3YUt4yY0G0exxyWCiZ5DqOxrNMC9H39NkW571rFEdJIBIv71Ee39p65yK/exec", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            await fetch("https://script.google.com/macros/s/AKfycbxVWJxuHTK3YUt4yY0G0exxyWCiZ5DqOxrNMC9H39NkW571rFEdJIBIv71Ee39p65yK/exec", { 
+                method: "POST", 
+                mode: "no-cors", 
+                body: JSON.stringify(payload) 
+            });
             status.innerText = "✅ SUCESSO! Documentos enviados.";
             alert("Obrigado! Seus documentos foram enviados para a EFFICO.");
         } catch (e) {
