@@ -31,7 +31,6 @@ body{
 }
 .logo{width:120px;margin-bottom:10px;}
 h1{font-size:1.4rem;color:var(--secondary);}
-
 .status{
   background:#e3f2fd;
   color:#0d47a1;
@@ -40,7 +39,6 @@ h1{font-size:1.4rem;color:var(--secondary);}
   margin:15px 0;
   font-size:.9rem;
 }
-
 .camera-box{
   position:relative;
   width:100%;
@@ -50,13 +48,7 @@ h1{font-size:1.4rem;color:var(--secondary);}
   overflow:hidden;
   display:none;
 }
-
-video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
+video{width:100%;height:100%;object-fit:cover;}
 .overlay{
   position:absolute;
   top:50%;
@@ -70,11 +62,7 @@ video{
   transition:.3s;
   pointer-events:none;
 }
-
-.overlay.selfie{
-  border-radius:50%;
-}
-
+.overlay.selfie{border-radius:50%;}
 .btn{
   width:100%;
   padding:14px;
@@ -87,13 +75,15 @@ video{
   cursor:pointer;
   margin-top:10px;
 }
-
 .btn:disabled{background:#ccc;}
-
-input[type=file]{
-  display:none;
+.lgpd{
+  text-align:left;
+  font-size:.85rem;
+  background:#f8f9fa;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:10px;
 }
-
 canvas{display:none;}
 </style>
 </head>
@@ -101,37 +91,40 @@ canvas{display:none;}
 <body>
 
 <div class="container">
-  <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-  <h1>RH Digital</h1>
 
-  <div id="status" class="status">Carregando sistema...</div>
+<img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
+<h1>RH Digital</h1>
 
-  <button id="btnStart" class="btn" onclick="start()" disabled>Iniciar</button>
+<!-- LGPD -->
+<div id="lgpd" class="lgpd">
+<b>Proteção de Dados (LGPD)</b><br><br>
+Ao prosseguir, você autoriza a coleta e o tratamento dos seus dados pessoais e documentos,
+exclusivamente para fins de admissão, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
+</div>
 
-  <div class="camera-box" id="cameraBox">
-    <video id="video" autoplay playsinline></video>
-    <div id="overlay" class="overlay"></div>
-  </div>
+<label>
+<input type="checkbox" id="aceiteLGPD"> Li e concordo com o uso dos meus dados.
+</label>
 
-  <label class="btn" id="btnUpload" style="display:none;">
-    Anexar documento
-    <input type="file" accept="image/*" onchange="uploadManual(this)">
-  </label>
+<button id="btnStart" class="btn" disabled>Iniciar</button>
 
-  <button id="btnEnviar" class="btn" style="display:none;" onclick="enviar()">Enviar Documentos</button>
+<div id="status" class="status">Aguardando consentimento</div>
+
+<div class="camera-box" id="cameraBox">
+  <video id="video" autoplay playsinline></video>
+  <div id="overlay" class="overlay"></div>
+</div>
+
+<button id="btnEnviar" class="btn" style="display:none;">Enviar Documentos</button>
+
 </div>
 
 <canvas id="canvas"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 
 <script>
-const video = document.getElementById("video");
-const overlay = document.getElementById("overlay");
-const cameraBox = document.getElementById("cameraBox");
-const status = document.getElementById("status");
-const canvas = document.getElementById("canvas");
-
 const etapas = [
   {label:"Selfie", key:"selfie", face:true},
   {label:"RG", key:"rg"},
@@ -143,46 +136,80 @@ let etapaAtual = 0;
 let fotos = {};
 let stream;
 
-async function loadModels(){
-  await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
-  status.innerText = "Sistema pronto";
-  document.getElementById("btnStart").disabled = false;
-}
-loadModels();
+const video = document.getElementById("video");
+const overlay = document.getElementById("overlay");
+const cameraBox = document.getElementById("cameraBox");
+const status = document.getElementById("status");
+const canvas = document.getElementById("canvas");
 
-async function start(){
+document.getElementById("aceiteLGPD").onchange = e=>{
+  document.getElementById("btnStart").disabled = !e.target.checked;
+};
+
+document.getElementById("btnStart").onclick = iniciarFluxo;
+
+async function iniciarFluxo(){
+  document.getElementById("lgpd").style.display="none";
   document.getElementById("btnStart").style.display="none";
   cameraBox.style.display="block";
+  await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
   iniciarCamera();
 }
 
 async function iniciarCamera(){
+  if(etapaAtual >= etapas.length){ finalizar(); return; }
+
   if(stream) stream.getTracks().forEach(t=>t.stop());
 
+  const etapa = etapas[etapaAtual];
+
   stream = await navigator.mediaDevices.getUserMedia({
-    video:{facingMode: etapaAtual===0 ? "user":"environment"}
+    video:{ facingMode: etapa.face ? "user":"environment" }
   });
 
   video.srcObject = stream;
+  overlay.classList.toggle("selfie", !!etapa.face);
+  status.innerText = "Enquadre: " + etapa.label;
 
-  overlay.classList.toggle("selfie", etapas[etapaAtual].face);
-  status.innerText = "Enquadre: " + etapas[etapaAtual].label;
-
-  detectar();
+  detectar(etapa);
 }
 
-async function detectar(){
+async function detectar(etapa){
   const loop = setInterval(async ()=>{
-    let ok = false;
+    let ok=false;
+    let msg="";
 
-    if(etapas[etapaAtual].face){
+    if(etapa.face){
       const face = await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
-      ok = !!face;
+      if(face){
+        const area = face.box.width * face.box.height;
+        if(area < 12000) msg="Aproxime o rosto";
+        else if(area > 50000) msg="Afaste o rosto";
+        else ok=true;
+      }
     } else {
-      ok = video.videoWidth > 0;
+      canvas.width=video.videoWidth;
+      canvas.height=video.videoHeight;
+      const ctx=canvas.getContext("2d");
+      ctx.drawImage(video,0,0);
+      const img = ctx.getImageData(0,0,canvas.width,canvas.height);
+      let variance=0,mean=0;
+      for(let i=0;i<img.data.length;i+=4){
+        const v=(img.data[i]+img.data[i+1]+img.data[i+2])/3;
+        mean+=v;
+      }
+      mean/=img.data.length/4;
+      for(let i=0;i<img.data.length;i+=4){
+        const v=(img.data[i]+img.data[i+1]+img.data[i+2])/3;
+        variance+=(v-mean)**2;
+      }
+      variance/=img.data.length/4;
+      if(variance<80) msg="Imagem desfocada";
+      else ok=true;
     }
 
-    overlay.style.borderColor = ok ? "lime" : "red";
+    status.innerText = ok ? "Capturando..." : msg || "Ajuste o enquadramento";
+    overlay.style.borderColor = ok ? "lime":"red";
 
     if(ok){
       clearInterval(loop);
@@ -191,51 +218,32 @@ async function detectar(){
   },700);
 }
 
-function capturar(){
-  setTimeout(()=>{
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video,0,0);
-    fotos[etapas[etapaAtual].key] = canvas.toDataURL("image/jpeg");
-
-    etapaAtual++;
-
-    if(etapaAtual < etapas.length){
-      iniciarCamera();
-    } else {
-      finalizar();
-    }
-  },1000);
-}
-
-function uploadManual(input){
-  const reader = new FileReader();
-  reader.onload = e => {
-    fotos[etapas[etapaAtual].key] = e.target.result;
-    etapaAtual++;
-    iniciarCamera();
-  };
-  reader.readAsDataURL(input.files[0]);
+async function capturar(){
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+  canvas.getContext("2d").drawImage(video,0,0);
+  fotos[etapas[etapaAtual].key] = canvas.toDataURL("image/jpeg");
+  etapaAtual++;
+  iniciarCamera();
 }
 
 function finalizar(){
   if(stream) stream.getTracks().forEach(t=>t.stop());
   cameraBox.style.display="none";
-  document.getElementById("btnUpload").style.display="none";
   document.getElementById("btnEnviar").style.display="block";
-  status.innerText="Pronto para enviar";
+  status.innerText="Pronto para envio";
 }
 
-async function enviar(){
-  status.innerText="Enviando...";
-  await fetch("https://script.google.com/macros/s/AKfycbyl8ocV342DlaSo1qW8TsvtA5t_FFayn2VUWdw-U-xVLa4Ph5SGchKu3nRsu8v3VLginQ/exec",{
+document.getElementById("btnEnviar").onclick = async ()=>{
+  await fetch("https://script.google.com/macros/s/AKfycbym5sK0oqUJYqbAPCmg_qpB89w0Il9w5dc-fjWx0LLpcud7ikBs4VjmBetl0vEI43Wklg/exec",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({dados:{nome:"",cpf:""},fotos})
+    body:JSON.stringify({fotos})
   });
-  status.innerText="✅ Enviado com sucesso";
-}
+  status.innerText="✅ Documentos enviados com sucesso";
+};
 </script>
 
 </body>
 </html>
+
