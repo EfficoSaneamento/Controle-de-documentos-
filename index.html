@@ -17,13 +17,15 @@
         .status { background: #f0f4f8; padding: 15px; border-radius: 14px; font-size: 0.9rem; font-weight: 600; color: var(--blue); margin-bottom: 20px; border-left: 5px solid var(--blue); min-height: 50px; display: flex; align-items: center; justify-content: center; }
 
         .input-group { text-align: left; margin-bottom: 15px; }
-        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(15, 42, 68, 0.1); }
+        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; box-sizing: border-box; outline: none; }
+        
+        /* Box LGPD */
+        .lgpd-box { background: #fffbe6; border: 1px solid #ffe58f; padding: 15px; border-radius: 12px; font-size: 0.8rem; text-align: left; color: #856404; margin-bottom: 20px; line-height: 1.4; }
 
         .camera-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 20px; overflow: hidden; display: none; margin-bottom: 20px; }
         video { width: 100%; height: 100%; object-fit: cover; }
         
-        .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #fff; z-index: 10; pointer-events: none; box-shadow: 0 0 0 1000px rgba(0,0,0,0.6); transition: all 0.3s ease; }
+        .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #fff; z-index: 10; pointer-events: none; box-shadow: 0 0 0 1000px rgba(0,0,0,0.6); }
         .rect { width: 85%; height: 60%; border-radius: 15px; }
         .circle { width: 70%; height: 50%; border-radius: 50%; }
 
@@ -31,7 +33,6 @@
 
         button { width: 100%; padding: 18px; border: none; border-radius: 15px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; }
         .btn-primary { background: var(--blue); color: #fff; }
-        .btn-primary:active { transform: scale(0.98); }
         .btn-skip { background: #f0f0f0; color: #666; font-size: 0.85rem; }
         .hidden { display: none; }
 
@@ -42,20 +43,28 @@
 
 <div class="app">
     <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-    <h1>RH Digital</h1>
+    <h1>RH Digital • Admissão</h1>
 
-    <div id="status" class="status">Identifique-se para começar</div>
+    <div id="status" class="status">Termos de Privacidade</div>
 
-    <div id="setupSection">
+    <div id="lgpdSection">
+        <div class="lgpd-box">
+            <strong>Consentimento LGPD:</strong><br>
+            Ao prosseguir, você autoriza a <strong>EFFICO</strong> a coletar e tratar suas fotos e documentos exclusivamente para fins de admissão e registro funcional, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/18).
+        </div>
+        <button class="btn-primary" onclick="aceitarLGPD()">Li e Aceito os Termos</button>
+    </div>
+
+    <div id="setupSection" class="hidden">
         <div class="input-group"><input type="text" id="nome" placeholder="Nome Completo"></div>
         <div class="input-group"><input type="text" id="funcao" placeholder="Função"></div>
-        <button class="btn-primary" onclick="iniciarChecklist()">Iniciar Admissão</button>
+        <button class="btn-primary" onclick="iniciarChecklist()">Iniciar Captura</button>
     </div>
 
     <div id="cameraBox" class="camera-container">
         <video id="video" autoplay playsinline></video>
         <div id="overlay" class="overlay rect"></div>
-        <div id="blur-warning">⚠️ IMAGEM EMBAÇADA - FOQUE O DOCUMENTO</div>
+        <div id="blur-warning">⚠️ IMAGEM EMBAÇADA</div>
         <button id="btnAnexarOverlay" title="Anexar da Galeria" onclick="document.getElementById('fileInput').click()">
             <i class="fas fa-paperclip"></i>
         </button>
@@ -64,7 +73,7 @@
     <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="processarArquivo(event)">
 
     <button id="btnAction" class="btn-primary hidden">Tirar Foto</button>
-    <button id="btnSkip" class="btn-skip hidden" onclick="proximo()">Pular (Não possuo este item)</button>
+    <button id="btnSkip" class="btn-skip hidden" onclick="pularDocumento()">Não possuo este documento</button>
     <button id="btnEnviar" class="btn-primary hidden" onclick="enviarTudo()">Enviar para o RH</button>
 </div>
 
@@ -74,88 +83,65 @@
 <script>
     const etapas = [
         { label: "Foto Selfie (Crachá)", key: "Selfie", isFace: true },
-        { label: "CTPS (Física ou Digital)", key: "CTPS", isFace: false },
+        { label: "CTPS", key: "CTPS", isFace: false },
         { label: "Cópia do CPF", key: "CPF_Doc", isFace: false },
         { label: "Cópia do RG", key: "RG_Doc", isFace: false },
-        { label: "PIS ou Cartão Cidadão", key: "PIS", isFace: false },
+        { label: "PIS / Cartão Cidadão", key: "PIS", isFace: false },
         { label: "Cópia da CNH", key: "CNH", isFace: false },
-        { label: "Certificado de Reservista", key: "Reservista", isFace: false },
-        { label: "Comprovante de Endereço", key: "Endereco", isFace: false },
-        { label: "Cartão Vale Transporte", key: "Vale_Transporte", isFace: false },
-        { label: "Certidão de Casamento/Nascimento", key: "Certidao_Civil", isFace: false },
+        { label: "Reservista", key: "Reservista", isFace: false },
+        { label: "Comprovante Endereço", key: "Endereco", isFace: false },
+        { label: "Vale Transporte", key: "Vale_Transporte", isFace: false },
+        { label: "Certidão Casamento/Nasc.", key: "Certidao_Civil", isFace: false },
         { label: "CPF do Cônjuge", key: "CPF_Conjuge", isFace: false },
-        { label: "Doc. dos Filhos (RG/Nascimento)", key: "Doc_Filhos", isFace: false },
-        { label: "Vacinação dos Filhos", key: "Vacina_Filhos", isFace: false },
+        { label: "RG/Nasc. dos Filhos", key: "Doc_Filhos", isFace: false },
+        { label: "Vacina dos Filhos", key: "Vacina_Filhos", isFace: false },
         { label: "CPF dos Filhos", key: "CPF_Filhos", isFace: false },
-        { label: "Vacina Hepatite B e Tétano", key: "Vacina_Saude", isFace: false },
-        { label: "Vacina Covid Atualizada", key: "Vacina_Covid", isFace: false },
-        { label: "Conta Bancária Itaú", key: "Conta_Itau", isFace: false },
-        { label: "Comprovante de Escolaridade", key: "Escolaridade", isFace: false }
+        { label: "Vacina Hepatite B/Tétano", key: "Vacina_Saude", isFace: false },
+        { label: "Vacina Covid", key: "Vacina_Covid", isFace: false },
+        { label: "Conta Itaú", key: "Conta_Itau", isFace: false },
+        { label: "Escolaridade", key: "Escolaridade", isFace: false }
     ];
 
     let currentIdx = 0, fotos = {}, stream = null;
     const video = document.getElementById("video");
     const status = document.getElementById("status");
-    const btnAction = document.getElementById("btnAction");
-    const blurWarning = document.getElementById("blur-warning");
+
+    function aceitarLGPD() {
+        document.getElementById("lgpdSection").classList.add("hidden");
+        document.getElementById("setupSection").classList.remove("hidden");
+        status.innerText = "Identifique-se";
+    }
 
     async function iniciarChecklist() {
-        // CORREÇÃO AQUI: Validando 'funcao' em vez de 'cpf'
         if(!document.getElementById("nome").value || !document.getElementById("funcao").value) return alert("Preencha Nome e Função");
-        
         document.getElementById("setupSection").classList.add("hidden");
-        status.innerText = "Carregando Inteligência Artificial...";
-        
-        try {
-            await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
-            document.getElementById("cameraBox").style.display = "block";
-            btnAction.classList.remove("hidden");
-            document.getElementById("btnSkip").classList.remove("hidden");
-            carregarEtapa();
-        } catch(e) {
-            status.innerText = "Erro ao carregar IA. Verifique sua conexão.";
-        }
+        status.innerText = "Carregando Câmera...";
+        await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
+        document.getElementById("cameraBox").style.display = "block";
+        document.getElementById("btnAction").classList.remove("hidden");
+        document.getElementById("btnSkip").classList.remove("hidden");
+        carregarEtapa();
     }
 
     async function carregarEtapa() {
-        if (currentIdx >= etapas.length) return concluirCaptura();
-        
+        if (currentIdx >= etapas.length) return concluir();
         const config = etapas[currentIdx];
         status.innerText = `(${currentIdx+1}/${etapas.length}) ${config.label}`;
         document.getElementById("overlay").className = config.isFace ? "overlay circle" : "overlay rect";
-
         if(stream) stream.getTracks().forEach(t => t.stop());
-        
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: config.isFace ? "user" : "environment" } 
-            });
-            video.srcObject = stream;
-            detectarBlur();
-        } catch(e) {
-            status.innerText = "Erro ao acessar câmera.";
-        }
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: config.isFace ? "user" : "environment" } });
+        video.srcObject = stream;
     }
 
-    function detectarBlur() {
-        if (!stream || video.paused) return;
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = 100; canvas.height = 75;
-        ctx.drawImage(video, 0, 0, 100, 75);
-        const data = ctx.getImageData(0, 0, 100, 75).data;
-        let v = 0, a = 0;
-        for (let i = 0; i < data.length; i += 4) a += data[i];
-        a /= (data.length / 4);
-        for (let i = 0; i < data.length; i += 4) v += Math.abs(data[i] - a);
-        blurWarning.style.display = (v / (data.length / 4)) < 15 ? "block" : "none";
-        requestAnimationFrame(detectarBlur);
+    function pularDocumento() {
+        // Registra que o colaborador clicou em "Não Possuo"
+        fotos[etapas[currentIdx].key] = "NÃO POSSUI";
+        proximo();
     }
 
-    btnAction.onclick = () => {
+    document.getElementById("btnAction").onclick = () => {
         const c = document.createElement("canvas");
-        c.width = video.videoWidth; 
-        c.height = video.videoHeight;
+        c.width = video.videoWidth; c.height = video.videoHeight;
         c.getContext("2d").drawImage(video, 0, 0);
         fotos[etapas[currentIdx].key] = c.toDataURL("image/jpeg", 0.7);
         proximo();
@@ -165,44 +151,31 @@
         const reader = new FileReader();
         reader.onload = (f) => {
             fotos[etapas[currentIdx].key] = f.target.result;
-            status.innerText = "✅ Documento Anexado!";
-            setTimeout(proximo, 600);
+            proximo();
         };
         reader.readAsDataURL(e.target.files[0]);
     }
 
     function proximo() { currentIdx++; carregarEtapa(); }
 
-    function concluirCaptura() {
+    function concluir() {
         if(stream) stream.getTracks().forEach(t => t.stop());
         document.getElementById("cameraBox").style.display = "none";
-        btnAction.classList.add("hidden");
+        document.getElementById("btnAction").classList.add("hidden");
         document.getElementById("btnSkip").classList.add("hidden");
         document.getElementById("btnEnviar").classList.remove("hidden");
-        status.innerText = "Checklist concluído!";
+        status.innerText = "Tudo pronto para enviar!";
     }
 
     async function enviarTudo() {
-        status.innerText = "🚀 Enviando arquivos ao RH... Aguarde.";
+        status.innerText = "🚀 Enviando ao RH...";
         const payload = {
-            dados: { 
-                nome: document.getElementById("nome").value, 
-                funcao: document.getElementById("funcao").value 
-            },
+            dados: { nome: document.getElementById("nome").value, funcao: document.getElementById("funcao").value },
             fotos: fotos
         };
-        
-        try {
-            await fetch("https://script.google.com/macros/s/AKfycbxVWJxuHTK3YUt4yY0G0exxyWCiZ5DqOxrNMC9H39NkW571rFEdJIBIv71Ee39p65yK/exec", { 
-                method: "POST", 
-                mode: "no-cors", 
-                body: JSON.stringify(payload) 
-            });
-            status.innerText = "✅ SUCESSO! Documentos enviados.";
-            alert("Obrigado! Seus documentos foram enviados para a EFFICO.");
-        } catch (e) {
-            status.innerText = "❌ Erro no envio. Tente novamente.";
-        }
+        await fetch("https://script.google.com/macros/s/AKfycbwucFDNUR_j4LishZJJTfpWuZMxXvoOSZSoomQSNgZm-44qBzzs3oBXgy1FIbIsNQV88g/exec", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        status.innerText = "✅ ENVIADO COM SUCESSO!";
+        alert("Recebemos seus documentos. Bem-vindo à EFFICO!");
     }
 </script>
 </body>
