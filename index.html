@@ -15,7 +15,7 @@
 
 body{
   margin:0;
-  font-family:Segoe UI, sans-serif;
+  font-family:Segoe UI,sans-serif;
   background:var(--bg);
   display:flex;
   justify-content:center;
@@ -32,7 +32,7 @@ body{
   text-align:center;
 }
 
-.logo{width:120px;margin-bottom:10px;}
+.logo{width:120px;margin-bottom:8px;}
 h1{color:var(--blue);font-size:1.4rem;}
 
 .status{
@@ -40,8 +40,8 @@ h1{color:var(--blue);font-size:1.4rem;}
   color:#0d47a1;
   padding:12px;
   border-radius:8px;
-  font-weight:500;
   margin:15px 0;
+  font-weight:500;
 }
 
 .camera-box{
@@ -60,7 +60,6 @@ video{
   object-fit:cover;
 }
 
-/* MÁSCARA */
 .overlay{
   position:absolute;
   inset:0;
@@ -80,14 +79,14 @@ video{
 }
 
 .mask.doc{
-  border-radius:14px;
   width:78%;
   height:65%;
+  border-radius:14px;
 }
 
 .mask.ok{
   border-color:var(--green);
-  box-shadow:0 0 0 999px rgba(0,200,83,.2);
+  box-shadow:0 0 0 999px rgba(0,200,83,.25);
 }
 
 button{
@@ -110,21 +109,21 @@ canvas{display:none;}
 <body>
 
 <div class="container">
-<img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-<h1>RH Digital</h1>
+  <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
+  <h1>RH Digital</h1>
 
-<div id="status" class="status">Carregando sistema...</div>
+  <div id="status" class="status">Carregando sistema...</div>
 
-<button id="btnIniciar" onclick="start()" disabled>Iniciar Processo</button>
+  <button id="btnIniciar">Iniciar Processo</button>
 
-<div class="camera-box" id="cameraBox">
-  <video id="video" autoplay playsinline></video>
-  <div class="overlay">
-    <div id="mask" class="mask"></div>
+  <div class="camera-box" id="cameraBox">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="overlay">
+      <div id="mask" class="mask"></div>
+    </div>
   </div>
-</div>
 
-<button id="btnEnviar" style="display:none" onclick="enviar()">Enviar Documentos</button>
+  <button id="btnEnviar" style="display:none">Enviar Documentos</button>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -136,7 +135,7 @@ canvas{display:none;}
 <script>
 let cvReady=false;
 const esperarCV=()=>new Promise(r=>{
-  const i=setInterval(()=>{if(cvReady){clearInterval(i);r();}},100);
+  const i=setInterval(()=>{ if(cvReady){clearInterval(i);r();} },100);
 });
 
 const video=document.getElementById('video');
@@ -144,50 +143,77 @@ const canvas=document.getElementById('canvas');
 const status=document.getElementById('status');
 const cameraBox=document.getElementById('cameraBox');
 const mask=document.getElementById('mask');
+const btnIniciar=document.getElementById('btnIniciar');
+const btnEnviar=document.getElementById('btnEnviar');
 
 const etapas=[
  {label:'Selfie',key:'selfie',mode:'user',tipo:'face'},
  {label:'RG',key:'rg',mode:'environment',tipo:'doc'},
- {label:'Comprovante',key:'endereco',mode:'environment',tipo:'doc'}
+ {label:'Comprovante de Endereço',key:'endereco',mode:'environment',tipo:'doc'}
 ];
 
 let idx=0;
 let fotos={};
+let streamAtual=null;
 
+// ---------- LOAD ----------
 async function load(){
  const url='https://justadudewhohacks.github.io/face-api.js/models';
  await faceapi.nets.tinyFaceDetector.loadFromUri(url);
  status.innerText='Sistema pronto';
- document.getElementById('btnIniciar').disabled=false;
 }
 load();
 
-async function start(){
- document.getElementById('btnIniciar').style.display='none';
+// ---------- START (USER GESTURE) ----------
+btnIniciar.onclick = async ()=>{
+ btnIniciar.style.display='none';
  cameraBox.style.display='block';
+ status.innerText='Abrindo câmera...';
+
+ await iniciarCamera('user');
  next();
+};
+
+// ---------- CAMERA ----------
+async function iniciarCamera(facing){
+ try{
+  if(streamAtual) streamAtual.getTracks().forEach(t=>t.stop());
+
+  streamAtual = await navigator.mediaDevices.getUserMedia({
+    video:{ facingMode:facing },
+    audio:false
+  });
+
+  video.srcObject = streamAtual;
+  await video.play();
+ }catch(e){
+  status.innerText='Erro ao acessar câmera';
+  console.error(e);
+ }
 }
 
+// ---------- NEXT ----------
 async function next(){
  if(idx>=etapas.length){
-  finish();return;
+  finish(); return;
  }
+
  const e=etapas[idx];
  status.innerText=`Posicione: ${e.label}`;
+
  mask.className='mask'+(e.tipo==='doc'?' doc':'');
  mask.classList.remove('ok');
 
- if(video.srcObject) video.srcObject.getTracks().forEach(t=>t.stop());
- const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:e.mode}});
- video.srcObject=stream;
-
+ await iniciarCamera(e.mode);
  detectar(e);
 }
 
+// ---------- DETECÇÃO ----------
 async function detectar(e){
  await esperarCV();
+
  const loop=setInterval(async()=>{
-  if(video.paused)return;
+  if(video.paused) return;
   let ok=false;
 
   canvas.width=video.videoWidth;
@@ -197,11 +223,12 @@ async function detectar(e){
   if(e.tipo==='face'){
    const face=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
    if(face){
-    const {width,height}=face.box;
-    const area=width*height;
+    const area=face.box.width*face.box.height;
     const ref=canvas.width*canvas.height;
     if(area>ref*0.08 && area<ref*0.25) ok=true;
-    status.innerText=area<ref*0.08?'Aproxime':'Centralize';
+    status.innerText = area<ref*0.08 ? 'Aproxime o rosto' : 'Centralize o rosto';
+   }else{
+    status.innerText='Posicione o rosto';
    }
   }else{
    let src=cv.imread(canvas),g=new cv.Mat(),e1=new cv.Mat();
@@ -210,10 +237,10 @@ async function detectar(e){
    let c=new cv.MatVector(),h=new cv.Mat();
    cv.findContours(e1,c,h,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE);
    for(let i=0;i<c.size();i++){
-    if(cv.contourArea(c.get(i))>canvas.width*canvas.height*0.15){ok=true;break;}
+    if(cv.contourArea(c.get(i))>canvas.width*canvas.height*0.15){ ok=true; break; }
    }
    src.delete();g.delete();e1.delete();c.delete();h.delete();
-   status.innerText=ok?'Centralizado':'Centralize o documento';
+   status.innerText = ok ? 'Documento centralizado' : 'Centralize o documento';
   }
 
   mask.classList.toggle('ok',ok);
@@ -225,6 +252,7 @@ async function detectar(e){
  },400);
 }
 
+// ---------- CAPTURA ----------
 function capturar(e){
  canvas.getContext('2d').drawImage(video,0,0);
  fotos[e.key]=canvas.toDataURL('image/jpeg');
@@ -232,13 +260,15 @@ function capturar(e){
  next();
 }
 
+// ---------- FINAL ----------
 function finish(){
+ if(streamAtual) streamAtual.getTracks().forEach(t=>t.stop());
  cameraBox.style.display='none';
  status.innerText='Processo concluído';
- document.getElementById('btnEnviar').style.display='block';
+ btnEnviar.style.display='block';
 }
 
-async function enviar(){
+btnEnviar.onclick=async()=>{
  status.innerText='Enviando...';
  await fetch('https://SEU_FLUXO_POWER_AUTOMATE', {
   method:'POST',
@@ -246,8 +276,9 @@ async function enviar(){
   body:JSON.stringify({fotos})
  });
  status.innerText='Enviado com sucesso';
-}
+};
 </script>
+
 </body>
 </html>
 
