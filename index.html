@@ -4,227 +4,277 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RH Digital - EFFICO</title>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
 <style>
-:root {
-  --primary-color: #00c853;
-  --secondary-color: #003399;
-  --bg-color: #f0f2f5;
+:root{
+  --verde:#00c853;
+  --vermelho:#ff3b3b;
+  --primaria:#687b58;
+  --fundo:#f0f2f5;
 }
-body {
+
+body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
-  background-color: var(--bg-color);
+  background:var(--fundo);
   display:flex;
   justify-content:center;
-  padding:20px 10px;
+  padding:20px;
 }
-.container {
+
+.container{
   background:#fff;
-  padding:25px;
-  border-radius:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.15);
   width:100%;
-  max-width:500px;
+  max-width:460px;
+  padding:20px;
+  border-radius:18px;
+  box-shadow:0 15px 30px rgba(0,0,0,.15);
   text-align:center;
-  position:relative;
 }
-.logo{width:120px;margin-bottom:10px;}
-h1{color:var(--secondary-color);font-size:1.4rem;margin-bottom:25px;}
-.input-group{text-align:left;margin-bottom:12px;}
-label{display:block;font-size:0.8rem;color:#555;margin-bottom:4px;font-weight:600;}
-input[type=text]{width:100%;padding:12px;border-radius:8px;border:1px solid #ddd;font-size:1rem;box-sizing:border-box;}
-.camera-box{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:12px;overflow:hidden;margin:20px 0;display:none;}
-video{width:100%;height:100%;object-fit:cover;}
-#overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70%;height:75%;border:3px solid #fff;border-radius:20px;z-index:5;pointer-events:none;box-shadow:0 0 0 1000px rgba(0,0,0,0.5);transition:all 0.3s ease;}
-.status{background:#e3f2fd;color:#0d47a1;padding:12px;border-radius:8px;font-size:0.9rem;font-weight:500;margin-bottom:15px;}
-.btn{width:100%;padding:15px;border:none;border-radius:8px;font-size:1rem;font-weight:bold;cursor:pointer;transition:0.3s;}
-.btn-primary{background:var(--primary-color);color:white;}
-.btn-primary:disabled{background:#ccc;cursor:not-allowed;}
+
+.logo{
+  width:120px;
+  margin-bottom:10px;
+}
+
+.status{
+  background:#e8f5e9;
+  color:#1b5e20;
+  padding:12px;
+  border-radius:10px;
+  font-weight:600;
+  margin-bottom:15px;
+}
+
+.input-group{
+  text-align:left;
+  margin-bottom:10px;
+}
+label{
+  font-size:.8rem;
+  font-weight:600;
+  color:#555;
+}
+input{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+.camera{
+  position:relative;
+  width:100%;
+  aspect-ratio:3/4;
+  background:#000;
+  border-radius:16px;
+  overflow:hidden;
+  display:none;
+}
+
+video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.overlay{
+  position:absolute;
+  inset:0;
+  box-shadow:0 0 0 2000px rgba(0,0,0,.55);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  pointer-events:none;
+  transition:.3s;
+}
+
+.guia-rosto{
+  width:65%;
+  height:75%;
+  border:3px solid white;
+  border-radius:50%;
+}
+
+.guia-doc{
+  width:75%;
+  height:55%;
+  border:3px solid white;
+  border-radius:12px;
+}
+
+.btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:var(--primaria);
+  color:#fff;
+  font-weight:700;
+  font-size:1rem;
+  cursor:pointer;
+}
+
 canvas{display:none;}
 </style>
 </head>
+
 <body>
 
 <div class="container">
-<img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-<h1>RH Digital</h1>
 
-<div id="status" class="status">Carregando módulos...</div>
+<img class="logo" src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png">
 
-<div id="formSection">
-  <div class="input-group"><label>NOME</label><input type="text" id="nome"></div>
-  <div class="input-group"><label>CPF</label><input type="text" id="cpf"></div>
-  <div class="input-group"><label>RG</label><input type="text" id="rg"></div>
-  <div class="input-group"><label>DATA DE NASCIMENTO</label><input type="text" id="nascimento"></div>
-  <button id="btnIniciar" class="btn btn-primary" onclick="iniciarCaptura()" disabled>Iniciar Processo</button>
+<div id="status" class="status">Inicializando sistema...</div>
+
+<div id="form">
+  <div class="input-group"><label>NOME</label><input id="nome"></div>
+  <div class="input-group"><label>CPF</label><input id="cpf"></div>
+  <div class="input-group"><label>RG</label><input id="rg"></div>
+  <div class="input-group"><label>NASCIMENTO</label><input id="nascimento"></div>
+  <button class="btn" onclick="iniciar()">Iniciar</button>
 </div>
 
-<div class="camera-box" id="cameraBox">
+<div id="camera" class="camera">
   <video id="video" autoplay playsinline></video>
-  <div id="overlay"></div>
+  <div id="overlay" class="overlay"></div>
 </div>
 
-<button id="btnEnviar" class="btn btn-primary" style="display:none;" onclick="enviarTudo()">Enviar Documentos</button>
 </div>
 
 <canvas id="canvas"></canvas>
 
-<script async src="https://docs.opencv.org/4.x/opencv.js" type="text/javascript"></script>
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+<script src="https://docs.opencv.org/4.x/opencv.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>
 
 <script>
-const sequencia = [
-  { label: "Sua Foto (Selfie)", key: "selfie", mode: "user", ocr: false },
-  { label: "Frente do RG", key: "rg_frente", mode: "environment", ocr: true },
-  { label: "Verso do RG", key: "rg_verso", mode: "environment", ocr: true },
-  { label: "CTPS", key: "ctps", mode: "environment", ocr: true },
-  { label: "CPF", key: "cpf_doc", mode: "environment", ocr: true },
-  { label: "PIS / Cartão do Cidadão", key: "pis", mode: "environment", ocr: true },
-  { label: "CNH", key: "cnh", mode: "environment", ocr: true },
-  { label: "Certificado de Reservista", key: "reservista", mode: "environment", ocr: true },
-  { label: "Comprovante de Endereço", key: "endereco", mode: "environment", ocr: true }
+const etapas=[
+ {nome:"Selfie",key:"selfie",face:true,camera:"user"},
+ {nome:"RG Frente",key:"rg_frente",camera:"environment",ocr:true},
+ {nome:"RG Verso",key:"rg_verso",camera:"environment"}
 ];
 
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const overlay = document.getElementById('overlay');
-const status = document.getElementById('status');
-const cameraBox = document.getElementById('cameraBox');
-const formSection = document.getElementById('formSection');
+let etapaAtual=0, estabilidade=0, fotos={};
 
-let fotos = {};
-let currentIndex = 0;
+const video=document.getElementById("video");
+const canvas=document.getElementById("canvas");
+const status=document.getElementById("status");
+const camera=document.getElementById("camera");
+const overlay=document.getElementById("overlay");
 
-// ---------- Carregar FaceAPI ----------
-async function loadModels() {
-  const URL = 'https://justadudewhohacks.github.io/face-api.js/models';
-  await faceapi.nets.tinyFaceDetector.loadFromUri(URL);
-  status.innerText = "Sistema pronto!";
-  document.getElementById('btnIniciar').disabled = false;
-}
-window.onload = loadModels;
-
-// ---------- Iniciar fluxo ----------
-async function iniciarCaptura(){
-  formSection.style.display='none';
-  cameraBox.style.display='block';
-  proximoPasso();
+async function iniciar(){
+ document.getElementById("form").style.display="none";
+ camera.style.display="block";
+ await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
+ proxima();
 }
 
-// ---------- Próximo documento ----------
-async function proximoPasso(){
-  if(currentIndex >= sequencia.length){ finalizar(); return; }
-  const etapa = sequencia[currentIndex];
-  status.innerText=`Capture: ${etapa.label}`;
-  overlay.style.borderColor="#fff";
+async function proxima(){
+ if(etapaAtual>=etapas.length){
+   status.innerText="Processo finalizado!";
+   return;
+ }
 
-  if(video.srcObject) video.srcObject.getTracks().forEach(t=>t.stop());
-  const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode: etapa.mode }});
-  video.srcObject = stream;
-  iniciarDeteccao(etapa);
+ estabilidade=0;
+ const e=etapas[etapaAtual];
+ status.innerText=`Capture: ${e.nome}`;
+
+ overlay.innerHTML=e.face
+  ?'<div class="guia-rosto"></div>'
+  :'<div class="guia-doc"></div>';
+
+ if(video.srcObject) video.srcObject.getTracks().forEach(t=>t.stop());
+ const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:e.camera}});
+ video.srcObject=stream;
+
+ detectar();
 }
 
-// ---------- Detecção ----------
-async function iniciarDeteccao(etapa){
-  const loop = setInterval(async()=>{
-    if(video.paused || video.ended) return;
+function detectar(){
+ const loop=setInterval(async()=>{
+   canvas.width=video.videoWidth;
+   canvas.height=video.videoHeight;
+   canvas.getContext("2d").drawImage(video,0,0);
 
-    let ok = false;
+   let valido=false;
 
-    if(etapa.key==='selfie'){
-      const result = await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
-      if(result) ok=true;
-    } else {
-      // Detecta presença do documento usando OpenCV.js
-      const ctx=canvas.getContext('2d');
-      canvas.width=video.videoWidth;
-      canvas.height=video.videoHeight;
-      ctx.drawImage(video,0,0);
-      let src = cv.imread(canvas);
-      let gray = new cv.Mat();
-      cv.cvtColor(src,gray,cv.COLOR_RGBA2GRAY,0);
-      let edges = new cv.Mat();
-      cv.Canny(gray, edges, 50, 150);
-      let contours = new cv.MatVector();
-      let hierarchy = new cv.Mat();
-      cv.findContours(edges,contours,hierarchy,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE);
-      for(let i=0;i<contours.size();i++){
-        let cnt=contours.get(i);
-        let area=cv.contourArea(cnt);
-        if(area > (canvas.width*canvas.height*0.1)){ ok=true; break; }
-      }
-      src.delete(); gray.delete(); edges.delete(); contours.delete(); hierarchy.delete();
-    }
+   if(etapas[etapaAtual].face){
+     const face=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
+     valido=!!face;
+   }else{
+     let src=cv.imread(canvas);
+     let gray=new cv.Mat();
+     cv.cvtColor(src,gray,cv.COLOR_RGBA2GRAY);
+     let edges=new cv.Mat();
+     cv.Canny(gray,edges,80,200);
+     let cont=new cv.MatVector(), hier=new cv.Mat();
+     cv.findContours(edges,cont,hier,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE);
 
-    overlay.style.borderColor = ok ? "#00c853":"#fff";
-    overlay.style.boxShadow = ok ? "0 0 0 1000px rgba(0,200,83,0.2)":"0 0 0 1000px rgba(0,0,0,0.5)";
+     let maior=0;
+     for(let i=0;i<cont.size();i++){
+       maior=Math.max(maior,cv.contourArea(cont.get(i)));
+     }
 
-    if(ok){
-      clearInterval(loop);
-      await contagemRegressiva(etapa);
-    }
-  },500);
+     let perc=maior/(canvas.width*canvas.height);
+
+     if(perc<0.22) erro("Aproxime o documento");
+     else if(perc>0.55) erro("Afaste um pouco");
+     else valido=true;
+
+     src.delete();gray.delete();edges.delete();cont.delete();hier.delete();
+   }
+
+   if(valido){
+     estabilidade++;
+     ok();
+   }else estabilidade=0;
+
+   if(estabilidade>=3){
+     clearInterval(loop);
+     capturar();
+   }
+ },500);
 }
 
-// ---------- Contagem regressiva ----------
-async function contagemRegressiva(etapa){
-  let count=3;
-  return new Promise(resolve=>{
-    const interval=setInterval(()=>{
-      status.innerText=`Captura ${etapa.label} em ${count}...`;
-      count--;
-      if(count<0){ clearInterval(interval); tirarFoto(etapa); resolve(); }
-    },1000);
-  });
+function erro(msg){
+ status.innerText=msg;
+ overlay.style.boxShadow="0 0 0 2000px rgba(255,59,59,.4)";
 }
 
-// ---------- Tirar foto ----------
-async function tirarFoto(etapa){
-  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-  canvas.getContext('2d').drawImage(video,0,0);
-  fotos[etapa.key]=canvas.toDataURL('image/jpeg');
-
-  if(etapa.ocr) await processOCR(canvas,etapa.key);
-
-  overlay.style.backgroundColor="rgba(0,255,0,0.2)";
-  setTimeout(()=>overlay.style.backgroundColor="transparent",200);
-
-  currentIndex++;
-  proximoPasso();
+function ok(){
+ status.innerText="Perfeito, mantenha";
+ overlay.style.boxShadow="0 0 0 2000px rgba(0,200,83,.25)";
 }
 
-// ---------- OCR ----------
-async function processOCR(canvas,key){
-  const result = await Tesseract.recognize(canvas,'por',{logger:m=>console.log(m)});
-  const text=result.data.text;
-  if(!text) return;
-  if(key.includes('rg')){
-    const nomeMatch=text.match(/NOME[:\s]*([A-ZÀ-Ÿ ]+)/i);
-    const nascimentoMatch=text.match(/NASC(?:IMENTO)?[:\s]*(\d{2}\/\d{2}\/\d{4})/i);
-    const rgMatch=text.match(/RG[:\s]*([\d\.]+)/i);
-    const cpfMatch=text.match(/CPF[:\s]*(\d{3}\.\d{3}\.\d{3}-\d{2})/i);
-    if(nomeMatch) document.getElementById('nome').value=nomeMatch[1].trim();
-    if(nascimentoMatch) document.getElementById('nascimento').value=nascimentoMatch[1].trim();
-    if(rgMatch) document.getElementById('rg').value=rgMatch[1].trim();
-    if(cpfMatch) document.getElementById('cpf').value=cpfMatch[1].trim();
-  }
+async function capturar(){
+ canvas.getContext("2d").drawImage(video,0,0);
+ fotos[etapas[etapaAtual].key]=canvas.toDataURL("image/jpeg");
+
+ if(etapas[etapaAtual].ocr) await ocr();
+
+ etapaAtual++;
+ proxima();
 }
 
-// ---------- Finalização ----------
-function finalizar(){
-  cameraBox.style.display='none';
-  status.innerText="Tudo pronto! Envie os documentos.";
-  document.getElementById('btnEnviar').style.display='block';
-}
+async function ocr(){
+ const r=await Tesseract.recognize(canvas,'por');
+ const t=r.data.text;
+ if(!t) return;
 
-function enviarTudo(){
-  status.innerText="Enviando para o RH...";
-  console.log("Dados capturados:",fotos);
-  // Aqui entra o fetch para Power Automate / SharePoint
+ const nome=t.match(/NOME[:\s]*([A-ZÀ-Ÿ ]+)/i);
+ const cpf=t.match(/CPF[:\s]*(\d{3}\.\d{3}\.\d{3}-\d{2})/);
+ const rg=t.match(/RG[:\s]*([\d\.]+)/);
+ const nasc=t.match(/(\d{2}\/\d{2}\/\d{4})/);
+
+ if(nome) nomeInput.value=nome[1];
+ if(cpf) cpfInput.value=cpf[1];
+ if(rg) rgInput.value=rg[1];
+ if(nasc) nascimentoInput.value=nasc[1];
 }
 </script>
+
 </body>
 </html>
-
