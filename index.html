@@ -4,52 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RH Digital • EFFICO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --blue: #0f2a44; --green: #6b8f71; --white: #ffffff; }
         body { margin: 0; font-family: 'Inter', sans-serif; background: linear-gradient(135deg, var(--blue), var(--green)); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px; }
-        .app { width: 100%; max-width: 450px; background: rgba(255,255,255,0.98); border-radius: 24px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; }
-        .logo { width: 100px; margin-bottom: 10px; }
         
-        .status { background: #f0f4f8; padding: 15px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; color: var(--blue); margin-bottom: 15px; border-left: 5px solid var(--blue); }
-        
-        .camera-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 18px; overflow: hidden; display: none; margin-top: 10px; }
+        .app { width: 100%; max-width: 450px; background: rgba(255,255,255,0.98); border-radius: 28px; padding: 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); text-align: center; position: relative; }
+        .logo { width: 110px; margin-bottom: 10px; }
+        h1 { font-size: 1.3rem; color: var(--blue); margin-bottom: 20px; font-weight: 700; }
+
+        .status { background: #f0f4f8; padding: 15px; border-radius: 14px; font-size: 0.9rem; font-weight: 600; color: var(--blue); margin-bottom: 20px; border-left: 5px solid var(--blue); min-height: 50px; display: flex; align-items: center; justify-content: center; }
+
+        /* Inputs Estilizados */
+        .input-group { text-align: left; margin-bottom: 15px; }
+        input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(15, 42, 68, 0.1); }
+
+        /* Container da Câmera Profissional */
+        .camera-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 20px; overflow: hidden; display: none; margin-bottom: 20px; }
         video { width: 100%; height: 100%; object-fit: cover; }
         
-        .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #fff; z-index: 10; pointer-events: none; box-shadow: 0 0 0 1000px rgba(0,0,0,0.6); }
+        /* Overlay Estilo Banco */
+        .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #fff; z-index: 10; pointer-events: none; box-shadow: 0 0 0 1000px rgba(0,0,0,0.6); transition: all 0.3s ease; }
         .rect { width: 85%; height: 60%; border-radius: 15px; }
         .circle { width: 70%; height: 50%; border-radius: 50%; }
 
-        button { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        /* Botão de Anexo Flutuante (Híbrido) */
+        #btnAnexarOverlay { position: absolute; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: var(--blue); color: white; border: 2px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 30; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; cursor: pointer; }
+
+        /* Botões */
+        button { width: 100%; padding: 18px; border: none; border-radius: 15px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; }
         .btn-primary { background: var(--blue); color: #fff; }
-        .btn-skip { background: #eee; color: #666; font-size: 0.8rem; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-skip { background: #f0f0f0; color: #666; font-size: 0.85rem; }
         .hidden { display: none; }
-        
-        /* Alerta de Foto Embaçada */
-        #blur-warning { position: absolute; bottom: 20px; left: 0; right: 0; color: #ffeb3b; font-size: 0.8rem; font-weight: bold; z-index: 20; display: none; text-shadow: 1px 1px 2px #000; }
+
+        #blur-warning { position: absolute; bottom: 85px; left: 0; right: 0; color: #ffeb3b; font-size: 0.8rem; font-weight: bold; z-index: 25; display: none; text-shadow: 1px 1px 3px #000; }
     </style>
 </head>
 <body>
 
 <div class="app">
     <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-    <div id="status" class="status">Carregando formulário...</div>
+    <h1>RH Digital</h1>
 
-    <div id="setup-fields">
-        <input type="text" id="nome" placeholder="Nome Completo" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
-        <input type="text" id="cpf" placeholder="CPF" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
-        <button class="btn-primary" onclick="iniciarCaptura()">Iniciar Checklist</button>
+    <div id="status" class="status">Identifique-se para começar</div>
+
+    <div id="setupSection">
+        <div class="input-group"><input type="text" id="nome" placeholder="Nome Completo"></div>
+        <div class="input-group"><input type="text" id="cpf" placeholder="CPF"></div>
+        <button class="btn-primary" onclick="iniciarChecklist()">Iniciar Admissão</button>
     </div>
 
     <div id="cameraBox" class="camera-container">
         <video id="video" autoplay playsinline></video>
         <div id="overlay" class="overlay rect"></div>
-        <div id="blur-warning">⚠️ IMAGEM EMBAÇADA - APROXIME OU FOQUE</div>
+        <div id="blur-warning">⚠️ IMAGEM EMBAÇADA - FOQUE O DOCUMENTO</div>
+        <button id="btnAnexarOverlay" title="Anexar da Galeria" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-paperclip"></i>
+        </button>
     </div>
 
+    <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="processarArquivo(event)">
+
     <button id="btnAction" class="btn-primary hidden">Tirar Foto</button>
-    <button id="btnSkip" class="btn-skip hidden" onclick="pularDocumento()">Pular este documento (Não possuo)</button>
-    <button id="btnEnviar" class="btn-primary hidden" onclick="enviarParaRH()">Enviar Tudo para o RH</button>
+    <button id="btnSkip" class="btn-skip hidden" onclick="proximo()">Pular (Não possuo este item)</button>
+    <button id="btnEnviar" class="btn-primary hidden" onclick="enviarTudo()">Enviar para o RH</button>
 </div>
 
 <script>var exports = {};</script>
@@ -57,7 +78,7 @@
 
 <script>
     const etapas = [
-        { label: "Foto Selfie (Para crachá)", key: "Selfie", isFace: true },
+        { label: "Foto Selfie (Crachá)", key: "Selfie", isFace: true },
         { label: "CTPS (Física ou Digital)", key: "CTPS", isFace: false },
         { label: "Cópia do CPF", key: "CPF_Doc", isFace: false },
         { label: "Cópia do RG", key: "RG_Doc", isFace: false },
@@ -66,9 +87,9 @@
         { label: "Certificado de Reservista", key: "Reservista", isFace: false },
         { label: "Comprovante de Endereço", key: "Endereco", isFace: false },
         { label: "Cartão Vale Transporte", key: "Vale_Transporte", isFace: false },
-        { label: "Certidão Casamento/Nascimento", key: "Certidao_Civil", isFace: false },
+        { label: "Certidão de Casamento/Nascimento", key: "Certidao_Civil", isFace: false },
         { label: "CPF do Cônjuge", key: "CPF_Conjuge", isFace: false },
-        { label: "Certidão/RG dos Filhos", key: "Doc_Filhos", isFace: false },
+        { label: "Doc. dos Filhos (RG/Nascimento)", key: "Doc_Filhos", isFace: false },
         { label: "Vacinação dos Filhos", key: "Vacina_Filhos", isFace: false },
         { label: "CPF dos Filhos", key: "CPF_Filhos", isFace: false },
         { label: "Vacina Hepatite B e Tétano", key: "Vacina_Saude", isFace: false },
@@ -77,97 +98,96 @@
         { label: "Comprovante de Escolaridade", key: "Escolaridade", isFace: false }
     ];
 
-    let currentIdx = 0, fotosCapturadas = {}, stream = null;
+    let currentIdx = 0, fotos = {}, stream = null;
     const video = document.getElementById("video");
     const status = document.getElementById("status");
     const btnAction = document.getElementById("btnAction");
     const blurWarning = document.getElementById("blur-warning");
 
-    async function iniciarCaptura() {
-        if(!document.getElementById("nome").value) return alert("Digite seu nome");
-        document.getElementById("setup-fields").style.display = "none";
-        status.innerText = "Preparando Câmera...";
+    async function iniciarChecklist() {
+        if(!document.getElementById("nome").value || !document.getElementById("cpf").value) return alert("Preencha Nome e CPF");
+        document.getElementById("setupSection").classList.add("hidden");
+        status.innerText = "Carregando Inteligência Artificial...";
+        
         await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
         
         document.getElementById("cameraBox").style.display = "block";
         btnAction.classList.remove("hidden");
         document.getElementById("btnSkip").classList.remove("hidden");
-        abrirEtapa();
+        carregarEtapa();
     }
 
-    async function abrirEtapa() {
-        if (currentIdx >= etapas.length) return finalizar();
-        const doc = etapas[currentIdx];
-        status.innerText = `(${currentIdx+1}/${etapas.length}) ${doc.label}`;
-        document.getElementById("overlay").className = doc.isFace ? "overlay circle" : "overlay rect";
+    async function carregarEtapa() {
+        if (currentIdx >= etapas.length) return concluirCaptura();
         
+        const config = etapas[currentIdx];
+        status.innerText = `(${currentIdx+1}/${etapas.length}) ${config.label}`;
+        document.getElementById("overlay").className = config.isFace ? "overlay circle" : "overlay rect";
+
         if(stream) stream.getTracks().forEach(t => t.stop());
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: doc.isFace ? "user" : "environment" } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: config.isFace ? "user" : "environment" } });
         video.srcObject = stream;
-        
-        requestAnimationFrame(verificarNitidez);
+        detectarBlur();
     }
 
-    // DETECTOR DE NITIDEZ (FOTO EMBAÇADA)
-    function verificarNitidez() {
+    function detectarBlur() {
         if (!stream || video.paused) return;
-        
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        canvas.width = 100; canvas.height = 75; // Baixa resolução para performance
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-        let variancia = 0, avg = 0;
-        for (let i = 0; i < data.length; i += 4) avg += data[i];
-        avg /= (data.length / 4);
-        for (let i = 0; i < data.length; i += 4) variancia += Math.abs(data[i] - avg);
-        
-        // Se a variância de brilho for muito baixa, a imagem está lisa/embaçada
-        const score = variancia / (data.length / 4);
-        blurWarning.style.display = score < 15 ? "block" : "none";
-        
-        requestAnimationFrame(verificarNitidez);
+        canvas.width = 100; canvas.height = 75;
+        ctx.drawImage(video, 0, 0, 100, 75);
+        const data = ctx.getImageData(0, 0, 100, 75).data;
+        let v = 0, a = 0;
+        for (let i = 0; i < data.length; i += 4) a += data[i];
+        a /= (data.length / 4);
+        for (let i = 0; i < data.length; i += 4) v += Math.abs(data[i] - a);
+        blurWarning.style.display = (v / (data.length / 4)) < 15 ? "block" : "none";
+        requestAnimationFrame(detectarBlur);
     }
 
     btnAction.onclick = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0);
-        fotosCapturadas[etapas[currentIdx].key] = canvas.toDataURL("image/jpeg", 0.8);
+        const c = document.createElement("canvas");
+        c.width = video.videoWidth; c.height = video.videoHeight;
+        c.getContext("2d").drawImage(video, 0, 0);
+        fotos[etapas[currentIdx].key] = c.toDataURL("image/jpeg", 0.7);
         proximo();
     };
 
-    function pularDocumento() { proximo(); }
-
-    function proximo() {
-        currentIdx++;
-        abrirEtapa();
+    function processarArquivo(e) {
+        const reader = new FileReader();
+        reader.onload = (f) => {
+            fotos[etapas[currentIdx].key] = f.target.result;
+            status.innerText = "✅ Documento Anexado!";
+            setTimeout(proximo, 600);
+        };
+        reader.readAsDataURL(e.target.files[0]);
     }
 
-    function finalizar() {
-        stream.getTracks().forEach(t => t.stop());
+    function proximo() { currentIdx++; carregarEtapa(); }
+
+    function concluirCaptura() {
+        if(stream) stream.getTracks().forEach(t => t.stop());
         document.getElementById("cameraBox").style.display = "none";
         btnAction.classList.add("hidden");
         document.getElementById("btnSkip").classList.add("hidden");
         document.getElementById("btnEnviar").classList.remove("hidden");
-        status.innerText = "Checklist finalizado!";
+        status.innerText = "Checklist concluído!";
     }
 
-    async function enviarParaRH() {
-        status.innerText = "Enviando arquivos... Isso pode levar um minuto.";
+    async function enviarTudo() {
+        status.innerText = "🚀 Enviando arquivos ao RH... Aguarde.";
         const payload = {
             dados: { nome: document.getElementById("nome").value, cpf: document.getElementById("cpf").value },
-            fotos: fotosCapturadas
+            fotos: fotos
         };
         
-        // COLE SUA URL AQUI
-        const URL = "https://script.google.com/macros/s/AKfycbwIodwuI75p1eqmhOYEgCgFnRHlxzrTmxEX0oHzr90nUugd9warabRiiS2gHVz0rSZo/exec";
-
         try {
-            await fetch(URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
-            status.innerText = "✅ TUDO ENVIADO! Obrigado.";
-        } catch (e) { status.innerText = "❌ Erro ao enviar."; }
+            await fetch("SUA_URL_DO_APPS_SCRIPT_AQUI", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            status.innerText = "✅ SUCESSO! Documentos enviados.";
+            alert("Obrigado! Seus documentos foram enviados para a EFFICO.");
+        } catch (e) {
+            status.innerText = "❌ Erro no envio. Tente novamente.";
+        }
     }
 </script>
 </body>
