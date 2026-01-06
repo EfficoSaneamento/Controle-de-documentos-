@@ -280,8 +280,36 @@ async function rodarOCR(canvas, etapa){
  console.log(etapa.label, valido ? "✔ OCR OK" : "⚠ OCR FRACO");
 }
 
-document.getElementById("btnEnviar").onclick = () => {
- console.log("Arquivos:", fotos);
- status.innerText = "Pronto para envio";
+document.getElementById("btnEnviar").onclick = async () => {
+  status.innerText = "Enviando documentos, aguarde...";
+
+  const payload = {
+    dados: {
+      nome: "",
+      cpf: "",
+      rg: "",
+      nascimento: ""
+    },
+    fotos: fotos
+  };
+
+  try {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbyS6HWDBc9_OYLCvAucNNWjC1Tw-licjf2ysAtVgWvK5LmDysYo8zcY-_AvnIgeeYIo/exec", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    const json = await res.json();
+
+    if (json.status === "ok") {
+      status.innerText = "✅ Documentos enviados com sucesso!";
+      document.getElementById("btnEnviar").disabled = true;
+    } else {
+      status.innerText = "⚠ Erro ao enviar documentos";
+    }
+
+  } catch (e) {
+    status.innerText = "❌ Falha de conexão";
+  }
 };
-</script>
+
