@@ -1,244 +1,145 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RH Digital • EFFICO</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RH Digital • EFFICO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --blue: #0f2a44; --green: #6b8f71; --white: #ffffff; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: linear-gradient(135deg, var(--blue), var(--green)); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px; }
+        .app { width: 100%; max-width: 420px; background: rgba(255,255,255,0.96); backdrop-filter: blur(10px); border-radius: 24px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; }
+        .logo { width: 110px; margin-bottom: 10px; }
+        h1 { font-size: 1.3rem; color: var(--blue); margin-bottom: 20px; }
+        
+        .status { background: #f0f4f8; padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: var(--blue); margin-bottom: 15px; min-height: 45px; display: flex; align-items: center; justify-content: center; }
+        
+        .input-group { text-align: left; margin-bottom: 10px; }
+        label { font-size: 0.75rem; font-weight: 700; color: #555; margin-left: 5px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-top: 4px; font-size: 1rem; box-sizing: border-box; }
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+        .camera-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 18px; overflow: hidden; display: none; margin-top: 15px; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* O Quadrado Corrigido */
+        .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #fff; z-index: 10; pointer-events: none; box-shadow: 0 0 0 1000px rgba(0,0,0,0.6); transition: all 0.3s; }
+        .rect { width: 80%; height: 60%; border-radius: 15px; }
+        .circle { width: 70%; height: 50%; border-radius: 50%; }
 
-<style>
-:root{
-  --effico-green:#6b8f71;
-  --effico-blue:#0f2a44;
-  --glass:rgba(255,255,255,.85);
-}
-
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:'Inter',sans-serif;
-  background:linear-gradient(135deg,#0f2a44,#6b8f71);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
-}
-
-.app{
-  width:100%;
-  max-width:420px;
-  background:var(--glass);
-  backdrop-filter:blur(14px);
-  border-radius:22px;
-  box-shadow:0 25px 60px rgba(0,0,0,.35);
-  padding:24px;
-  text-align:center;
-}
-
-.logo{width:110px;margin-bottom:12px}
-h1{font-size:1.3rem;color:var(--effico-blue)}
-
-.status{
-  background:#eef4f8;
-  padding:12px;
-  border-radius:12px;
-  font-size:.85rem;
-  margin:14px 0;
-}
-
-.lgpd{
-  font-size:.75rem;
-  text-align:left;
-  background:#f8f8f8;
-  padding:12px;
-  border-radius:10px;
-}
-
-button{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
-  border:none;
-  border-radius:14px;
-  font-size:.95rem;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.primary{
-  background:linear-gradient(135deg,#0f2a44,#6b8f71);
-  color:#fff;
-}
-
-.secondary{background:#e5e5e5}
-
-.camera{
-  position:relative;
-  width:100%;
-  aspect-ratio:3/4;
-  border-radius:18px;
-  overflow:hidden;
-  display:none;
-  background:#000;
-}
-
-video{width:100%;height:100%;object-fit:cover}
-
-.overlay-doc,.overlay-face{
-  position:absolute;
-  inset:12%;
-  border:3px solid red;
-  border-radius:16px;
-  pointer-events:none;
-}
-
-.overlay-face{
-  inset:18%;
-  border-radius:50%;
-}
-
-.success{border-color:#00c853}
-.warning{border-color:#ff1744}
-.hidden{display:none}
-input[type=file]{display:none}
-</style>
+        button { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:disabled { background: #ccc; }
+        .hidden { display: none; }
+    </style>
 </head>
-
 <body>
 
 <div class="app">
+    <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
+    <h1>RH Digital</h1>
 
-<img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-<h1>RH Digital</h1>
+    <div id="status" class="status">Preencha os dados para iniciar</div>
 
-<div id="status" class="status">Leia e aceite para continuar</div>
+    <div id="formSection">
+        <div class="input-group"><label>NOME COMPLETO</label><input type="text" id="nome"></div>
+        <div class="input-group"><label>CPF</label><input type="text" id="cpf"></div>
+        <div class="input-group"><label>RG</label><input type="text" id="rg"></div>
+        <div class="input-group"><label>DATA NASCIMENTO</label><input type="text" id="nascimento"></div>
+        <button id="btnIniciar" class="btn-primary" onclick="iniciarFluxo()">Iniciar Captura</button>
+    </div>
 
-<div id="lgpd" class="lgpd">
-<b>LGPD – Proteção de Dados</b><br><br>
-Ao continuar, você autoriza a coleta e o tratamento dos seus dados pessoais
-exclusivamente para fins de admissão, conforme a Lei nº 13.709/2018.
+    <div id="cameraBox" class="camera-container">
+        <video id="video" autoplay playsinline></video>
+        <div id="overlay" class="overlay rect"></div>
+    </div>
+
+    <button id="btnAction" class="btn-primary hidden">Tirar Foto</button>
+    <button id="btnEnviar" class="btn-primary hidden" onclick="enviarParaAppsScript()">Enviar Documentação</button>
 </div>
 
-<button id="btnAceitar" class="primary">Aceitar e Iniciar</button>
-
-<div id="cameraBox" class="camera">
-  <video id="video" autoplay playsinline></video>
-  <div id="overlay" class="overlay-doc"></div>
-</div>
-
-<button id="btnFoto" class="primary hidden">Usar Câmera</button>
-<button id="btnUpload" class="secondary hidden">Anexar Arquivo</button>
-<input type="file" id="fileInput" accept="image/*">
-
-<button id="btnEnviar" class="primary hidden">Enviar Documentos</button>
-
-</div>
-
+<script>var exports = {};</script>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 
 <script>
-const etapas=[
- {label:"Selfie",key:"selfie",face:true},
- {label:"RG",key:"rg",keywords:["RG","NOME"]},
- {label:"CPF",key:"cpf",keywords:["CPF"]},
- {label:"CNH",key:"cnh",keywords:["CNH","DETRAN"]},
- {label:"Comprovante de Endereço",key:"endereco",keywords:["RUA","CEP"]}
-];
+    const etapas = [
+        { label: "Sua Selfie", key: "selfie", isFace: true },
+        { label: "Frente do RG", key: "rg_frente", isFace: false },
+        { label: "Comprovante de Residência", key: "endereco", isFace: false }
+    ];
 
-let idx=0,fotos={},stream;
-const video=document.getElementById("video");
-const overlay=document.getElementById("overlay");
-const status=document.getElementById("status");
+    let currentIdx = 0, fotosCapturadas = {}, stream = null;
+    const video = document.getElementById("video");
+    const overlay = document.getElementById("overlay");
+    const status = document.getElementById("status");
+    const btnAction = document.getElementById("btnAction");
 
-document.getElementById("btnAceitar").onclick=async()=>{
- document.getElementById("lgpd").remove();
- document.getElementById("btnAceitar").remove();
- await faceapi.nets.tinyFaceDetector.loadFromUri(
-  "https://justadudewhohacks.github.io/face-api.js/models"
- );
- iniciar();
-};
+    async function iniciarFluxo() {
+        document.getElementById("btnIniciar").disabled = true;
+        status.innerText = "Carregando Inteligência Facial...";
+        await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
+        
+        document.getElementById("formSection").classList.add("hidden");
+        document.getElementById("cameraBox").style.display = "block";
+        btnAction.classList.remove("hidden");
+        proximaEtapa();
+    }
 
-function iniciar(){
- if(idx>=etapas.length){
-  status.innerText="Processo concluído";
-  document.getElementById("btnEnviar").classList.remove("hidden");
-  return;
- }
- status.innerText="Envie: "+etapas[idx].label;
- document.getElementById("btnFoto").classList.remove("hidden");
- document.getElementById("btnUpload").classList.remove("hidden");
-}
+    async function proximaEtapa() {
+        if (currentIdx >= etapas.length) {
+            finalizar(); return;
+        }
+        const config = etapas[currentIdx];
+        status.innerText = "Capture: " + config.label;
+        overlay.className = config.isFace ? "overlay circle" : "overlay rect";
+        
+        if(stream) stream.getTracks().forEach(t => t.stop());
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: config.isFace ? "user" : "environment" } });
+        video.srcObject = stream;
+    }
 
-document.getElementById("btnFoto").onclick=async()=>{
- document.getElementById("cameraBox").style.display="block";
- overlay.className=etapas[idx].face?"overlay-face warning":"overlay-doc success";
- stream=await navigator.mediaDevices.getUserMedia({
-  video:{facingMode:etapas[idx].face?"user":"environment"}
- });
- video.srcObject=stream;
+    btnAction.onclick = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        fotosCapturadas[etapas[currentIdx].key] = canvas.toDataURL("image/jpeg");
+        currentIdx++;
+        proximaEtapa();
+    };
 
- if(etapas[idx].face){
-  const loop=setInterval(async()=>{
-   const face=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
-   overlay.classList.toggle("success",!!face);
-   overlay.classList.toggle("warning",!face);
-  },400);
+    function finalizar() {
+        if(stream) stream.getTracks().forEach(t => t.stop());
+        document.getElementById("cameraBox").style.display = "none";
+        btnAction.classList.add("hidden");
+        document.getElementById("btnEnviar").classList.remove("hidden");
+        status.innerText = "Fotos capturadas com sucesso!";
+    }
 
-  document.getElementById("btnFoto").onclick=()=>{
-   if(!overlay.classList.contains("success")){
-    alert("Centralize o rosto");
-    return;
-   }
-   clearInterval(loop);
-   capturar();
-  };
- }
-};
+    async function enviarParaAppsScript() {
+        status.innerText = "🚀 Enviando para o RH... Aguarde.";
+        const payload = {
+            dados: {
+                nome: document.getElementById("nome").value,
+                cpf: document.getElementById("cpf").value,
+                rg: document.getElementById("rg").value,
+                nascimento: document.getElementById("nascimento").value
+            },
+            fotos: fotosCapturadas
+        };
 
-function capturar(){
- const c=document.createElement("canvas");
- c.width=video.videoWidth;
- c.height=video.videoHeight;
- c.getContext("2d").drawImage(video,0,0);
- fotos[etapas[idx].key]=c.toDataURL("image/jpeg");
- stream.getTracks().forEach(t=>t.stop());
- document.getElementById("cameraBox").style.display="none";
- idx++;
- iniciar();
-}
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxxwbiXFXGZaB_5yY4_Vceve_LMjrYtpUoUlR01t5Euy4t8wZkQV21_KvWzTAp1Q4aD/exec";
 
-document.getElementById("btnUpload").onclick=()=>fileInput.click();
-
-fileInput.onchange=e=>{
- const r=new FileReader();
- r.onload=()=>{
-  fotos[etapas[idx].key]=r.result;
-  idx++;
-  iniciar();
- };
- r.readAsDataURL(e.target.files[0]);
-};
-
-document.getElementById("btnEnviar").onclick=async()=>{
- status.innerText="Enviando documentos...";
- const payload={dados:{},fotos};
-
- const res=await fetch("🔴COLE_AQUI_A_URL_DO_WEB_APP🔴",{
-  method:"POST",
-  body:JSON.stringify(payload)
- });
-
- const json=await res.json();
- status.innerText=json.status==="ok"
-  ?"✅ Documentos enviados com sucesso"
-  :"❌ Erro no envio";
-};
+        try {
+            await fetch(URL_SCRIPT, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify(payload)
+            });
+            status.innerText = "✅ Enviado! Verifique o e-mail do RH.";
+            alert("Documentos enviados!");
+        } catch (e) {
+            status.innerText = "❌ Erro ao enviar.";
+        }
+    }
 </script>
-
 </body>
 </html>
-
