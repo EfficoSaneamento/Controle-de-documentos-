@@ -2,234 +2,236 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<title>EFFICO | Validação de Documentos</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RH Digital - EFFICO</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
-:root{
-  --green:#00c853;
-  --red:#d32f2f;
-  --bg:#f2f4f7;
-}
+*{box-sizing:border-box;font-family:'Inter',sans-serif}
 body{
-  margin:0;
-  font-family:'Segoe UI',sans-serif;
-  background:var(--bg);
-  display:flex;
-  justify-content:center;
-  padding:20px;
+ margin:0;
+ min-height:100vh;
+ background:linear-gradient(135deg,#0b3c49,#0f6e7a);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ color:#fff;
 }
-.container{
-  background:#fff;
-  max-width:420px;
-  width:100%;
-  border-radius:20px;
-  box-shadow:0 12px 30px rgba(0,0,0,.15);
-  padding:24px;
+.card{
+ width:100%;
+ max-width:420px;
+ background:rgba(255,255,255,.08);
+ backdrop-filter:blur(14px);
+ border-radius:20px;
+ padding:24px;
+ box-shadow:0 20px 50px rgba(0,0,0,.35);
 }
-.logo{width:110px;margin-bottom:10px}
-h1{margin:0 0 20px;font-size:1.3rem;color:#003399}
-
-.status{
-  background:#eef3ff;
-  padding:12px;
-  border-radius:10px;
-  font-size:.9rem;
-  margin-bottom:15px;
+.logo{
+ font-weight:700;
+ font-size:20px;
+ margin-bottom:10px;
 }
-
-.btn{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  font-size:1rem;
-  font-weight:bold;
-  cursor:pointer;
+h2{margin:10px 0;font-weight:600}
+button{
+ width:100%;
+ padding:14px;
+ border:none;
+ border-radius:12px;
+ background:#00d2c6;
+ color:#003c3c;
+ font-size:16px;
+ font-weight:600;
+ cursor:pointer;
+ margin-top:10px;
 }
-.btn-primary{background:var(--green);color:#fff}
-.btn-outline{
-  background:#fff;
-  border:2px solid var(--green);
-  color:var(--green);
-  margin-top:10px;
+button.sec{
+ background:#ffffff22;
+ color:#fff;
 }
-
-.camera-box{
-  position:relative;
-  width:100%;
-  aspect-ratio:4/3;
-  background:#000;
-  border-radius:16px;
-  overflow:hidden;
-  margin:15px 0;
-  display:none;
-}
-video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-#overlay{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:70%;
-  height:75%;
-  border:3px solid var(--red);
-  border-radius:18px;
-  box-shadow:0 0 0 9999px rgba(0,0,0,.55);
-  transition:.3s;
-}
-
-.selfie #overlay{
-  border-radius:50%;
-}
-
 .hidden{display:none}
-canvas{display:none}
+
+video{
+ width:100%;
+ border-radius:14px;
+ margin-top:10px;
+}
+.overlay{
+ position:absolute;
+ inset:0;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ pointer-events:none;
+}
+.face{
+ width:200px;
+ height:260px;
+ border:3px solid red;
+ border-radius:50%;
+}
+.doc{
+ width:260px;
+ height:170px;
+ border:3px solid red;
+ border-radius:14px;
+}
+.ok{border-color:#00ffb3}
+.status{
+ text-align:center;
+ margin-top:8px;
+ font-weight:500;
+}
+input[type=file]{
+ margin-top:10px;
+ color:#fff;
+}
 </style>
 </head>
 
 <body>
-<div class="container">
 
-<img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-<h1>RH Digital</h1>
+<div class="card">
+  <div class="logo">EFFICO</div>
 
-<div id="lgpd" class="status">
-Ao continuar, você autoriza o tratamento dos seus dados conforme a
-<b>LGPD (Lei 13.709/2018)</b>.
-<br><br>
-<button class="btn btn-primary" onclick="aceitarLGPD()">Aceitar e iniciar</button>
+  <!-- LGPD -->
+  <div id="lgpd">
+    <h2>Proteção de Dados (LGPD)</h2>
+    <p style="font-size:14px">
+      Ao continuar, você autoriza a coleta e uso de seus dados pessoais
+      exclusivamente para fins de admissão, conforme a LGPD.
+    </p>
+    <button onclick="iniciar()">Aceitar e continuar</button>
+  </div>
+
+  <!-- Sistema -->
+  <div id="sistema" class="hidden">
+    <h2 id="titulo">Selfie</h2>
+
+    <button onclick="abrirCamera()">📷 Tirar foto</button>
+    <input type="file" accept="image/*" onchange="upload(this)">
+
+    <div style="position:relative">
+      <video id="video" autoplay playsinline muted class="hidden"></video>
+      <div class="overlay hidden" id="overlay">
+        <div id="guia" class="face"></div>
+      </div>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <button id="btnFoto" class="hidden" onclick="capturar()">Capturar</button>
+  </div>
 </div>
 
-<div id="status" class="status hidden"></div>
-
-<div id="cameraBox" class="camera-box">
-  <video id="video" autoplay muted playsinline></video>
-  <div id="overlay"></div>
-</div>
-
-<div id="acoes" class="hidden">
-  <button class="btn btn-primary" onclick="abrirCamera()">Tirar foto</button>
-  <button class="btn btn-outline" onclick="anexar()">Anexar imagem</button>
-  <input type="file" id="file" class="hidden" accept="image/*">
-</div>
-
-<button id="enviar" class="btn btn-primary hidden" onclick="enviar()">Enviar documentos</button>
-
-</div>
-
-<canvas id="canvas"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<canvas id="canvas" class="hidden"></canvas>
 
 <script>
-const etapas=[
- {label:"Selfie",key:"selfie",mode:"user",tipo:"selfie"},
- {label:"RG Frente",key:"rg_frente",mode:"environment"},
- {label:"CPF",key:"cpf",mode:"environment"},
- {label:"CNH",key:"cnh",mode:"environment"}
+let etapa = 0;
+const etapas = [
+ { nome:'Selfie', tipo:'face' },
+ { nome:'RG / CPF', tipo:'doc' }
 ];
 
-let idx=0;
-let fotos={};
+const video = document.getElementById('video');
+const overlay = document.getElementById('overlay');
+const guia = document.getElementById('guia');
+const status = document.getElementById('status');
 
-const video=document.getElementById("video");
-const overlay=document.getElementById("overlay");
-const cameraBox=document.getElementById("cameraBox");
-const status=document.getElementById("status");
-
-async function aceitarLGPD(){
- document.getElementById("lgpd").remove();
- status.classList.remove("hidden");
- await faceapi.nets.tinyFaceDetector.loadFromUri(
-  "https://justadudewhohacks.github.io/face-api.js/models"
- );
- proximo();
-}
-
-function proximo(){
- if(idx>=etapas.length){
-   status.innerText="Processo concluído";
-   document.getElementById("enviar").classList.remove("hidden");
-   return;
- }
- status.innerText="Documento: "+etapas[idx].label;
- document.getElementById("acoes").classList.remove("hidden");
+function iniciar(){
+ document.getElementById('lgpd').remove();
+ document.getElementById('sistema').classList.remove('hidden');
 }
 
 async function abrirCamera(){
- const etapa=etapas[idx];
+ video.classList.remove('hidden');
+ overlay.classList.remove('hidden');
+ document.getElementById('btnFoto').classList.remove('hidden');
 
- cameraBox.classList.remove("hidden");
- cameraBox.classList.toggle("selfie",etapa.tipo==="selfie");
+ guia.className = etapas[etapa].tipo;
+ document.getElementById('titulo').innerText = etapas[etapa].nome;
 
- const stream=await navigator.mediaDevices.getUserMedia({
-   video:{facingMode:etapa.mode}
+ const stream = await navigator.mediaDevices.getUserMedia({
+   video:{facingMode: etapa===0?'user':'environment'}
  });
- video.srcObject=stream;
+ video.srcObject = stream;
 
- if(etapa.tipo==="selfie") detectarRosto();
- else capturarDepois(2000);
+ validarLoop();
 }
 
-async function detectarRosto(){
- const interval=setInterval(async()=>{
-  const face=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
-  if(face){
-   overlay.style.borderColor="var(--green)";
-   clearInterval(interval);
-   capturar();
-  }else{
-   overlay.style.borderColor="var(--red)";
-  }
- },700);
-}
+function validarLoop(){
+ const w = video.videoWidth;
+ const h = video.videoHeight;
+ if(!w) return requestAnimationFrame(validarLoop);
 
-function capturarDepois(ms){
- setTimeout(capturar,ms);
+ // simulação realista de distância
+ const area = w*h;
+ if(area < 150000){
+   guia.classList.remove('ok');
+   status.innerText = 'Aproxime-se';
+ }else if(area > 600000){
+   guia.classList.remove('ok');
+   status.innerText = 'Afaste-se';
+ }else{
+   guia.classList.add('ok');
+   status.innerText = 'Posição correta';
+ }
+ requestAnimationFrame(validarLoop);
 }
 
 function capturar(){
- const canvas=document.getElementById("canvas");
- canvas.width=video.videoWidth;
- canvas.height=video.videoHeight;
- canvas.getContext("2d").drawImage(video,0,0);
- fotos[etapas[idx].key]=canvas.toDataURL("image/jpeg");
- if(video.srcObject) video.srcObject.getTracks().forEach(t=>t.stop());
- idx++;
- cameraBox.classList.add("hidden");
- proximo();
+ if(!guia.classList.contains('ok')) return;
+
+ const canvas = document.getElementById('canvas');
+ canvas.width = video.videoWidth;
+ canvas.height = video.videoHeight;
+ canvas.getContext('2d').drawImage(video,0,0);
+
+ if(etapas[etapa].tipo==='doc'){
+   ocr(canvas);
+ }
+
+ avancar();
 }
 
-function anexar(){
- document.getElementById("file").click();
+function upload(input){
+ if(!input.files[0]) return;
+ if(etapas[etapa].tipo==='doc'){
+   const img = new Image();
+   img.onload = ()=>ocrImagem(img);
+   img.src = URL.createObjectURL(input.files[0]);
+ }
+ avancar();
 }
 
-document.getElementById("file").onchange=e=>{
- const reader=new FileReader();
- reader.onload=()=>{
-  fotos[etapas[idx].key]=reader.result;
-  idx++;
-  proximo();
- };
- reader.readAsDataURL(e.target.files[0]);
-};
+function avancar(){
+ const tracks = video.srcObject?.getTracks();
+ tracks && tracks.forEach(t=>t.stop());
 
-function enviar(){
- status.innerText="Enviando...";
- console.log(fotos);
+ etapa++;
+ if(etapa>=etapas.length){
+   alert('Processo concluído');
+   return;
+ }
+ abrirCamera();
+}
+
+function ocr(canvas){
+ Tesseract.recognize(canvas,'por').then(r=>{
+   console.log('OCR:',r.data.text);
+ });
+}
+function ocrImagem(img){
+ const c=document.getElementById('canvas');
+ c.width=img.width;c.height=img.height;
+ c.getContext('2d').drawImage(img,0,0);
+ ocr(c);
 }
 </script>
+
 </body>
 </html>
-
 
 
 
