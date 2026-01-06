@@ -3,256 +3,255 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RH Digital • EFFICO</title>
+<title>RH Digital - EFFICO</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
 <style>
 :root{
-  --effico-green:#6b8f71;
-  --effico-blue:#0f2a44;
-  --glass:rgba(255,255,255,.85);
+  --primary:#00c853;
+  --danger:#d32f2f;
+  --bg:#f2f4f7;
 }
-
-*{box-sizing:border-box}
 body{
   margin:0;
-  font-family:'Inter',sans-serif;
-  background:linear-gradient(135deg,#000000,#ededed);
-  min-height:100vh;
+  font-family:'Segoe UI',sans-serif;
+  background:var(--bg);
   display:flex;
   justify-content:center;
-  align-items:center;
   padding:20px;
 }
-
-.app{
-  width:100%;
+.container{
+  background:#fff;
   max-width:420px;
-  background:var(--glass);
-  backdrop-filter:blur(14px);
-  border-radius:22px;
-  box-shadow:0 25px 60px rgba(0,0,0,.35);
+  width:100%;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);
   padding:24px;
-  text-align:center;
 }
-
 .logo{
   width:110px;
-  margin-bottom:12px;
+  margin-bottom:10px;
 }
-
 h1{
+  margin:5px 0 20px;
   font-size:1.3rem;
-  color:var(--effico-blue);
+  color:#003399;
 }
-
 .status{
-  background:#eef4f8;
-  padding:12px;
-  border-radius:12px;
-  font-size:.85rem;
-  margin:14px 0;
-}
-
-.lgpd{
-  font-size:.75rem;
-  text-align:left;
-  background:#f8f8f8;
+  background:#eef3ff;
   padding:12px;
   border-radius:10px;
+  font-size:.9rem;
+  margin-bottom:15px;
 }
-
-button{
+.btn{
   width:100%;
   padding:14px;
-  margin-top:12px;
   border:none;
-  border-radius:14px;
-  font-size:.95rem;
-  font-weight:600;
+  border-radius:10px;
+  font-size:1rem;
+  font-weight:bold;
   cursor:pointer;
 }
-
-.primary{
-  background:linear-gradient(135deg,#687b58,#687b58);
-  color:#fff;
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-outline{
+  border:2px solid var(--primary);
+  background:#fff;
+  color:var(--primary);
+  margin-top:10px;
 }
 
-.secondary{
-  background:#e5e5e5;
-}
-
-.camera{
+.camera-box{
   position:relative;
   width:100%;
-  aspect-ratio:3/4;
-  border-radius:18px;
-  overflow:hidden;
-  display:none;
+  aspect-ratio:4/3;
   background:#000;
-}
-
-video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.overlay-doc,.overlay-face{
-  position:absolute;
-  inset:12%;
-  border:3px solid red;
   border-radius:16px;
-  pointer-events:none;
+  overflow:hidden;
+  margin:15px 0;
+  display:none;
+}
+video{width:100%;height:100%;object-fit:cover;}
+
+#overlay{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:70%;
+  height:75%;
+  border:3px solid var(--danger);
+  border-radius:22px;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.55);
   transition:.3s;
 }
-
-.overlay-face{
-  inset:18%;
+.selfie #overlay{
   border-radius:50%;
 }
 
-.success{border-color:#00c853}
-.warning{border-color:#ff1744}
-
-.hidden{display:none}
-
-input[type=file]{display:none}
+.hidden{display:none;}
+canvas{display:none;}
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<div class="app">
-
-<img src="https://effico.com.br/wp-content/uploads/2022/06/Logo-black.png" class="logo">
-
+<img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
 <h1>RH Digital</h1>
 
-<div id="status" class="status">Leia e aceite para continuar</div>
-
-<div id="lgpd" class="lgpd">
-<b>LGPD – Proteção de Dados</b><br><br>
-Ao continuar, você autoriza a coleta e o tratamento dos seus dados pessoais
-exclusivamente para fins de admissão, conforme a Lei nº 13.709/2018.
+<!-- LGPD -->
+<div id="lgpd">
+  <div class="status">
+    Ao continuar, você autoriza o tratamento dos seus dados pessoais
+    conforme a <b>LGPD (Lei 13.709/2018)</b>, exclusivamente para fins
+    de admissão.
+  </div>
+  <button class="btn btn-primary" onclick="aceitarLGPD()">Aceitar e iniciar</button>
 </div>
 
-<button id="btnAceitar" class="primary">Aceitar e Iniciar</button>
+<div id="status" class="status hidden"></div>
 
-<div id="cameraBox" class="camera">
+<div id="cameraBox" class="camera-box">
   <video id="video" autoplay playsinline></video>
-  <div id="overlay" class="overlay-doc"></div>
+  <div id="overlay"></div>
 </div>
 
-<button id="btnFoto" class="primary hidden">Usar Câmera</button>
-<button id="btnUpload" class="secondary hidden">Anexar Arquivo</button>
-<input type="file" id="fileInput" accept="image/*">
+<div id="acoes" class="hidden">
+  <button class="btn btn-primary" onclick="usarCamera()">Tirar foto</button>
+  <button class="btn btn-outline" onclick="anexarArquivo()">Anexar arquivo</button>
+  <input type="file" id="fileInput" class="hidden" accept="image/*">
+</div>
 
-<button id="btnEnviar" class="primary hidden">Enviar Documentos</button>
+<button id="btnEnviar" class="btn btn-primary hidden" onclick="enviar()">Enviar documentos</button>
 
 </div>
+
+<canvas id="canvas"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 
 <script>
-const etapas=[
- {label:"Selfie",key:"selfie",face:true},
- {label:"RG",key:"rg"},
- {label:"CPF",key:"cpf"},
- {label:"CNH",key:"cnh"},
- {label:"Comprovante de Endereço",key:"endereco"}
+const etapas = [
+ {label:"Selfie",key:"selfie",mode:"user",tipo:"selfie"},
+ {label:"RG Frente",key:"rg_frente",mode:"environment",tipo:"rg"},
+ {label:"RG Verso",key:"rg_verso",mode:"environment",tipo:"rg"},
+ {label:"CPF",key:"cpf",mode:"environment",tipo:"cpf"},
+ {label:"CNH",key:"cnh",mode:"environment",tipo:"cnh"},
+ {label:"CTPS",key:"ctps",mode:"environment",tipo:"ctps"}
 ];
 
-let idx=0,fotos={},stream=null;
+let index=0;
+let fotos={};
+
 const video=document.getElementById("video");
+const canvas=document.getElementById("canvas");
 const overlay=document.getElementById("overlay");
 const status=document.getElementById("status");
+const cameraBox=document.getElementById("cameraBox");
 
-document.getElementById("btnAceitar").onclick=async()=>{
+async function aceitarLGPD(){
  document.getElementById("lgpd").remove();
- document.getElementById("btnAceitar").remove();
- await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
- iniciarEtapa();
-};
-
-function iniciarEtapa(){
- if(idx>=etapas.length){
-  document.getElementById("btnEnviar").classList.remove("hidden");
-  status.innerText="Processo concluído";
-  return;
- }
-
- status.innerText="Envie: "+etapas[idx].label;
- document.getElementById("btnFoto").classList.remove("hidden");
- document.getElementById("btnUpload").classList.remove("hidden");
+ status.classList.remove("hidden");
+ iniciar();
 }
 
-document.getElementById("btnFoto").onclick=async()=>{
- document.getElementById("cameraBox").style.display="block";
- overlay.className=etapas[idx].face?"overlay-face":"overlay-doc";
- stream=await navigator.mediaDevices.getUserMedia({
-  video:{facingMode:etapas[idx].face?"user":"environment"}
+async function iniciar(){
+ await faceapi.nets.tinyFaceDetector.loadFromUri(
+  "https://justadudewhohacks.github.io/face-api.js/models"
+ );
+ proximo();
+}
+
+function proximo(){
+ if(index>=etapas.length){
+   status.innerText="Processo concluído";
+   document.getElementById("btnEnviar").classList.remove("hidden");
+   cameraBox.classList.add("hidden");
+   return;
+ }
+ status.innerText="Documento: "+etapas[index].label;
+ document.getElementById("acoes").classList.remove("hidden");
+}
+
+async function usarCamera(){
+ const etapa=etapas[index];
+ cameraBox.classList.remove("hidden");
+ overlay.className="";
+ if(etapa.tipo==="selfie") cameraBox.classList.add("selfie");
+
+ const stream=await navigator.mediaDevices.getUserMedia({
+  video:{facingMode:etapa.mode}
  });
  video.srcObject=stream;
- detectar();
-};
-
-async function detectar(){
- const interval=setInterval(async()=>{
-  let ok=false;
-  if(etapas[idx].face){
-   const face=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
-   ok=!!face;
-  }else{
-   ok=true;
-  }
-
-  overlay.classList.toggle("success",ok);
-  overlay.classList.toggle("warning",!ok);
-
-  if(ok){
-   clearInterval(interval);
-   capturar();
-  }
- },600);
+ detectar(etapa);
 }
 
-function capturar(){
- const canvas=document.createElement("canvas");
+function detectar(etapa){
+ const loop=setInterval(async()=>{
+  let ok=false;
+
+  if(etapa.tipo==="selfie"){
+   const face=await faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions());
+   if(face){
+    const area=face.box.width*face.box.height;
+    if(area>15000 && area<50000){
+      ok=true;
+    }else{
+      status.innerText=area<15000?"Aproxime o rosto":"Afaste o rosto";
+    }
+   }
+  }else{
+   ok=true; // documentos via OCR + opção anexo
+  }
+
+  overlay.style.borderColor=ok?"#00c853":"#d32f2f";
+
+  if(ok){
+   clearInterval(loop);
+   capturar(etapa);
+  }
+ },700);
+}
+
+function capturar(etapa){
  canvas.width=video.videoWidth;
  canvas.height=video.videoHeight;
  canvas.getContext("2d").drawImage(video,0,0);
- fotos[etapas[idx].key]=canvas.toDataURL("image/jpeg");
- stream.getTracks().forEach(t=>t.stop());
- document.getElementById("cameraBox").style.display="none";
- idx++;
- iniciarEtapa();
+ fotos[etapa.key]=canvas.toDataURL("image/jpeg");
+ if(video.srcObject) video.srcObject.getTracks().forEach(t=>t.stop());
+ index++;
+ proximo();
 }
 
-document.getElementById("btnUpload").onclick=()=>{
+function anexarArquivo(){
  document.getElementById("fileInput").click();
-};
+}
 
 document.getElementById("fileInput").onchange=e=>{
- const file=e.target.files[0];
  const reader=new FileReader();
  reader.onload=()=>{
-  fotos[etapas[idx].key]=reader.result;
-  idx++;
-  iniciarEtapa();
+  fotos[etapas[index].key]=reader.result;
+  index++;
+  proximo();
  };
- reader.readAsDataURL(file);
+ reader.readAsDataURL(e.target.files[0]);
 };
 
-document.getElementById("btnEnviar").onclick=()=>{
- console.log("Enviar:",fotos);
- status.innerText="Arquivos prontos para envio";
-};
+async function enviar(){
+ status.innerText="Enviando...";
+ await fetch("https://script.google.com/macros/s/AKfycbzCWGlR2Dw3m27wfS0P7OtzwTCTgmxbyJR3kwIhVusNt5CkHoZAyJ5sC6GPIDjeC766/exec",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({fotos})
+ });
+ status.innerText="Enviado com sucesso!";
+}
 </script>
-
 </body>
 </html>
+
 
 
