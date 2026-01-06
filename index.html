@@ -8,53 +8,48 @@
     <style>
         :root { --blue: #0f2a44; --green: #6b8f71; --white: #ffffff; }
         body { margin: 0; font-family: 'Inter', sans-serif; background: linear-gradient(135deg, var(--blue), var(--green)); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px; }
-        .app { width: 100%; max-width: 420px; background: rgba(255,255,255,0.96); backdrop-filter: blur(10px); border-radius: 24px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; }
-        .logo { width: 110px; margin-bottom: 10px; }
-        h1 { font-size: 1.3rem; color: var(--blue); margin-bottom: 20px; }
+        .app { width: 100%; max-width: 450px; background: rgba(255,255,255,0.98); border-radius: 24px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; }
+        .logo { width: 100px; margin-bottom: 10px; }
         
-        .status { background: #f0f4f8; padding: 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; color: var(--blue); margin-bottom: 15px; min-height: 45px; display: flex; align-items: center; justify-content: center; }
+        .status { background: #f0f4f8; padding: 15px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; color: var(--blue); margin-bottom: 15px; border-left: 5px solid var(--blue); }
         
-        .input-group { text-align: left; margin-bottom: 10px; }
-        label { font-size: 0.75rem; font-weight: 700; color: #555; margin-left: 5px; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-top: 4px; font-size: 1rem; box-sizing: border-box; }
-
-        .camera-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 18px; overflow: hidden; display: none; margin-top: 15px; }
+        .camera-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 18px; overflow: hidden; display: none; margin-top: 10px; }
         video { width: 100%; height: 100%; object-fit: cover; }
         
-        /* O Quadrado Corrigido */
-        .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #fff; z-index: 10; pointer-events: none; box-shadow: 0 0 0 1000px rgba(0,0,0,0.6); transition: all 0.3s; }
-        .rect { width: 80%; height: 60%; border-radius: 15px; }
+        .overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #fff; z-index: 10; pointer-events: none; box-shadow: 0 0 0 1000px rgba(0,0,0,0.6); }
+        .rect { width: 85%; height: 60%; border-radius: 15px; }
         .circle { width: 70%; height: 50%; border-radius: 50%; }
 
-        button { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        button { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; }
         .btn-primary { background: var(--blue); color: #fff; }
-        .btn-primary:disabled { background: #ccc; }
+        .btn-skip { background: #eee; color: #666; font-size: 0.8rem; }
         .hidden { display: none; }
+        
+        /* Alerta de Foto Embaçada */
+        #blur-warning { position: absolute; bottom: 20px; left: 0; right: 0; color: #ffeb3b; font-size: 0.8rem; font-weight: bold; z-index: 20; display: none; text-shadow: 1px 1px 2px #000; }
     </style>
 </head>
 <body>
 
 <div class="app">
     <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo">
-    <h1>RH Digital</h1>
+    <div id="status" class="status">Carregando formulário...</div>
 
-    <div id="status" class="status">Preencha os dados para iniciar</div>
-
-    <div id="formSection">
-        <div class="input-group"><label>NOME COMPLETO</label><input type="text" id="nome"></div>
-        <div class="input-group"><label>CPF</label><input type="text" id="cpf"></div>
-        <div class="input-group"><label>RG</label><input type="text" id="rg"></div>
-        <div class="input-group"><label>DATA NASCIMENTO</label><input type="text" id="nascimento"></div>
-        <button id="btnIniciar" class="btn-primary" onclick="iniciarFluxo()">Iniciar Captura</button>
+    <div id="setup-fields">
+        <input type="text" id="nome" placeholder="Nome Completo" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
+        <input type="text" id="cpf" placeholder="CPF" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
+        <button class="btn-primary" onclick="iniciarCaptura()">Iniciar Checklist</button>
     </div>
 
     <div id="cameraBox" class="camera-container">
         <video id="video" autoplay playsinline></video>
         <div id="overlay" class="overlay rect"></div>
+        <div id="blur-warning">⚠️ IMAGEM EMBAÇADA - APROXIME OU FOQUE</div>
     </div>
 
     <button id="btnAction" class="btn-primary hidden">Tirar Foto</button>
-    <button id="btnEnviar" class="btn-primary hidden" onclick="enviarParaAppsScript()">Enviar Documentação</button>
+    <button id="btnSkip" class="btn-skip hidden" onclick="pularDocumento()">Pular este documento (Não possuo)</button>
+    <button id="btnEnviar" class="btn-primary hidden" onclick="enviarParaRH()">Enviar Tudo para o RH</button>
 </div>
 
 <script>var exports = {};</script>
@@ -62,83 +57,117 @@
 
 <script>
     const etapas = [
-        { label: "Sua Selfie", key: "selfie", isFace: true },
-        { label: "Frente do RG", key: "rg_frente", isFace: false },
-        { label: "Comprovante de Residência", key: "endereco", isFace: false }
+        { label: "Foto Selfie (Para crachá)", key: "Selfie", isFace: true },
+        { label: "CTPS (Física ou Digital)", key: "CTPS", isFace: false },
+        { label: "Cópia do CPF", key: "CPF_Doc", isFace: false },
+        { label: "Cópia do RG", key: "RG_Doc", isFace: false },
+        { label: "PIS ou Cartão Cidadão", key: "PIS", isFace: false },
+        { label: "Cópia da CNH", key: "CNH", isFace: false },
+        { label: "Certificado de Reservista", key: "Reservista", isFace: false },
+        { label: "Comprovante de Endereço", key: "Endereco", isFace: false },
+        { label: "Cartão Vale Transporte", key: "Vale_Transporte", isFace: false },
+        { label: "Certidão Casamento/Nascimento", key: "Certidao_Civil", isFace: false },
+        { label: "CPF do Cônjuge", key: "CPF_Conjuge", isFace: false },
+        { label: "Certidão/RG dos Filhos", key: "Doc_Filhos", isFace: false },
+        { label: "Vacinação dos Filhos", key: "Vacina_Filhos", isFace: false },
+        { label: "CPF dos Filhos", key: "CPF_Filhos", isFace: false },
+        { label: "Vacina Hepatite B e Tétano", key: "Vacina_Saude", isFace: false },
+        { label: "Vacina Covid Atualizada", key: "Vacina_Covid", isFace: false },
+        { label: "Conta Bancária Itaú", key: "Conta_Itau", isFace: false },
+        { label: "Comprovante de Escolaridade", key: "Escolaridade", isFace: false }
     ];
 
     let currentIdx = 0, fotosCapturadas = {}, stream = null;
     const video = document.getElementById("video");
-    const overlay = document.getElementById("overlay");
     const status = document.getElementById("status");
     const btnAction = document.getElementById("btnAction");
+    const blurWarning = document.getElementById("blur-warning");
 
-    async function iniciarFluxo() {
-        document.getElementById("btnIniciar").disabled = true;
-        status.innerText = "Carregando Inteligência Facial...";
+    async function iniciarCaptura() {
+        if(!document.getElementById("nome").value) return alert("Digite seu nome");
+        document.getElementById("setup-fields").style.display = "none";
+        status.innerText = "Preparando Câmera...";
         await faceapi.nets.tinyFaceDetector.loadFromUri("https://justadudewhohacks.github.io/face-api.js/models");
         
-        document.getElementById("formSection").classList.add("hidden");
         document.getElementById("cameraBox").style.display = "block";
         btnAction.classList.remove("hidden");
-        proximaEtapa();
+        document.getElementById("btnSkip").classList.remove("hidden");
+        abrirEtapa();
     }
 
-    async function proximaEtapa() {
-        if (currentIdx >= etapas.length) {
-            finalizar(); return;
-        }
-        const config = etapas[currentIdx];
-        status.innerText = "Capture: " + config.label;
-        overlay.className = config.isFace ? "overlay circle" : "overlay rect";
+    async function abrirEtapa() {
+        if (currentIdx >= etapas.length) return finalizar();
+        const doc = etapas[currentIdx];
+        status.innerText = `(${currentIdx+1}/${etapas.length}) ${doc.label}`;
+        document.getElementById("overlay").className = doc.isFace ? "overlay circle" : "overlay rect";
         
         if(stream) stream.getTracks().forEach(t => t.stop());
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: config.isFace ? "user" : "environment" } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: doc.isFace ? "user" : "environment" } });
         video.srcObject = stream;
+        
+        requestAnimationFrame(verificarNitidez);
+    }
+
+    // DETECTOR DE NITIDEZ (FOTO EMBAÇADA)
+    function verificarNitidez() {
+        if (!stream || video.paused) return;
+        
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 100; canvas.height = 75; // Baixa resolução para performance
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let variancia = 0, avg = 0;
+        for (let i = 0; i < data.length; i += 4) avg += data[i];
+        avg /= (data.length / 4);
+        for (let i = 0; i < data.length; i += 4) variancia += Math.abs(data[i] - avg);
+        
+        // Se a variância de brilho for muito baixa, a imagem está lisa/embaçada
+        const score = variancia / (data.length / 4);
+        blurWarning.style.display = score < 15 ? "block" : "none";
+        
+        requestAnimationFrame(verificarNitidez);
     }
 
     btnAction.onclick = () => {
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth; canvas.height = video.videoHeight;
         canvas.getContext("2d").drawImage(video, 0, 0);
-        fotosCapturadas[etapas[currentIdx].key] = canvas.toDataURL("image/jpeg");
-        currentIdx++;
-        proximaEtapa();
+        fotosCapturadas[etapas[currentIdx].key] = canvas.toDataURL("image/jpeg", 0.8);
+        proximo();
     };
 
-    function finalizar() {
-        if(stream) stream.getTracks().forEach(t => t.stop());
-        document.getElementById("cameraBox").style.display = "none";
-        btnAction.classList.add("hidden");
-        document.getElementById("btnEnviar").classList.remove("hidden");
-        status.innerText = "Fotos capturadas com sucesso!";
+    function pularDocumento() { proximo(); }
+
+    function proximo() {
+        currentIdx++;
+        abrirEtapa();
     }
 
-    async function enviarParaAppsScript() {
-        status.innerText = "🚀 Enviando para o RH... Aguarde.";
+    function finalizar() {
+        stream.getTracks().forEach(t => t.stop());
+        document.getElementById("cameraBox").style.display = "none";
+        btnAction.classList.add("hidden");
+        document.getElementById("btnSkip").classList.add("hidden");
+        document.getElementById("btnEnviar").classList.remove("hidden");
+        status.innerText = "Checklist finalizado!";
+    }
+
+    async function enviarParaRH() {
+        status.innerText = "Enviando arquivos... Isso pode levar um minuto.";
         const payload = {
-            dados: {
-                nome: document.getElementById("nome").value,
-                cpf: document.getElementById("cpf").value,
-                rg: document.getElementById("rg").value,
-                nascimento: document.getElementById("nascimento").value
-            },
+            dados: { nome: document.getElementById("nome").value, cpf: document.getElementById("cpf").value },
             fotos: fotosCapturadas
         };
-
-        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxxwbiXFXGZaB_5yY4_Vceve_LMjrYtpUoUlR01t5Euy4t8wZkQV21_KvWzTAp1Q4aD/exec";
+        
+        // COLE SUA URL AQUI
+        const URL = "https://script.google.com/macros/s/AKfycbwIodwuI75p1eqmhOYEgCgFnRHlxzrTmxEX0oHzr90nUugd9warabRiiS2gHVz0rSZo/exec";
 
         try {
-            await fetch(URL_SCRIPT, {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify(payload)
-            });
-            status.innerText = "✅ Enviado! Verifique o e-mail do RH.";
-            alert("Documentos enviados!");
-        } catch (e) {
-            status.innerText = "❌ Erro ao enviar.";
-        }
+            await fetch(URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            status.innerText = "✅ TUDO ENVIADO! Obrigado.";
+        } catch (e) { status.innerText = "❌ Erro ao enviar."; }
     }
 </script>
 </body>
