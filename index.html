@@ -53,7 +53,7 @@
 
     <div id="setupSection">
         <div class="input-group"><input type="text" id="nome" placeholder="Nome Completo"></div>
-        <div class="input-group"><input type="text" id="cpf" placeholder="CPF"></div>
+        <div class="input-group"><input type="text" id="funcao" placeholder="Função"></div>
         <button class="btn-primary" onclick="iniciarChecklist()">Iniciar Admissão</button>
     </div>
 
@@ -105,7 +105,7 @@
     const blurWarning = document.getElementById("blur-warning");
 
     async function iniciarChecklist() {
-        if(!document.getElementById("nome").value || !document.getElementById("cpf").value) return alert("Preencha Nome e CPF");
+        if(!document.getElementById("nome").value || !document.getElementById("cpf").value) return alert("Preencha Nome e Função");
         document.getElementById("setupSection").classList.add("hidden");
         status.innerText = "Carregando Inteligência Artificial...";
         
@@ -177,12 +177,12 @@
     async function enviarTudo() {
         status.innerText = "🚀 Enviando arquivos ao RH... Aguarde.";
         const payload = {
-            dados: { nome: document.getElementById("nome").value, cpf: document.getElementById("cpf").value },
+            dados: { nome: document.getElementById("nome").value, funcao: document.getElementById("funcao").value },
             fotos: fotos
         };
         
         try {
-            await fetch("SUA_URL_DO_APPS_SCRIPT_AQUI", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+            await fetch("https://script.google.com/macros/s/AKfycbxVWJxuHTK3YUt4yY0G0exxyWCiZ5DqOxrNMC9H39NkW571rFEdJIBIv71Ee39p65yK/exec", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
             status.innerText = "✅ SUCESSO! Documentos enviados.";
             alert("Obrigado! Seus documentos foram enviados para a EFFICO.");
         } catch (e) {
