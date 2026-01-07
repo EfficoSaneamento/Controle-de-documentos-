@@ -173,7 +173,7 @@
             dados: { nome: document.getElementById("nome").value, funcao: document.getElementById("funcao").value },
             fotos: fotos
         };
-        await fetch("https://script.google.com/macros/s/AKfycbyURwC0pSt0B54q6LaGtoILnvCjcdG2vTea65GlzKnEYFEw-KtlqYczNWefjRuyWKNIzg/exec", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        await fetch("https://script.google.com/macros/s/AKfycbyiTLVWv8h18JflYCxBXKgcAod7ZNjz7rbiYMemcGfnmSTEhNZXc1nzpuw04-F4t4yd/exec", { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
         status.innerText = "✅ ENVIADO COM SUCESSO!";
         alert("Recebemos seus documentos. Bem-vindo à EFFICO!");
     }
