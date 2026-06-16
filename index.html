@@ -934,52 +934,85 @@ async function enviarTudo() {
             .classList.remove("hidden");
     }
 }
-    // Enviar metadados primeiro
-    try {
-        const form = new FormData();
-        form.append("payload", JSON.stringify({ tipo:"dados", nome, funcao, total: items.length }));
-        await fetch(SCRIPT_URL, { method:"POST", mode:"no-cors", body: form });
-    } catch(e) { /* opaque response — normal com no-cors */ }
+    async function enviarTudo() {
 
-    // Enviar cada documento individualmente
-    let allOk = true;
-    for (let i = 0; i < items.length; i++) {
-        statuses[i] = "sending";
-        renderItems([...statuses]);
+    const btn = document.getElementById("btnFinalizar");
 
-        const item = items[i];
-        try {
-            const form = new FormData();
-            form.append("payload", JSON.stringify({
-                tipo:   "foto",
-                nome,
-                funcao,
-                key:    item.key,
-                label:  item.label,
-                value:  item.value
-            }));
-            await fetch(SCRIPT_URL, { method:"POST", mode:"no-cors", body: form });
-            statuses[i] = "done";
-        } catch(e) {
-            statuses[i] = "fail";
-            allOk = false;
-        }
+    btn.disabled = true;
 
-        renderItems([...statuses]);
-        await new Promise(r => setTimeout(r, 200));
-    }
+    btn.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
-    // Tela final
-    await new Promise(r => setTimeout(r, 500));
+    const nome =
+        document.getElementById("nome").value.trim();
+
+    const funcao =
+        document.getElementById("funcao").value.trim();
+
+    const payload = {
+        dados: {
+            nome: nome,
+            funcao: funcao
+        },
+        fotos: fotos
+    };
+
     hideAll();
-    document.getElementById("successSection").classList.remove("hidden");
-    document.getElementById("progressFill").style.width     = "100%";
-    document.getElementById("statusLabel").textContent      = allOk ? "Envio concluido!" : "Envio finalizado";
-    document.getElementById("instructionLabel").textContent = allOk
-        ? "Todos os documentos foram recebidos com sucesso"
-        : "Alguns itens podem nao ter sido enviados — contate o RH";
 
-    if (!allOk) showToast("Alguns documentos falharam. Entre em contato com o RH.", "error");
+    document
+        .getElementById("progressWrapper")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("sendingSection")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("progressFill")
+        .style.width = "50%";
+
+    try {
+
+        await fetch(
+            SCRIPT_URL,
+            {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify(payload)
+            }
+        );
+
+        document
+            .getElementById("progressFill")
+            .style.width = "100%";
+
+        hideAll();
+
+        document
+            .getElementById("successSection")
+            .classList.remove("hidden");
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        showToast(
+            "Erro ao enviar documentos.",
+            "error"
+        );
+
+        btn.disabled = false;
+
+        btn.innerHTML =
+            '<i class="fas fa-paper-plane"></i> Finalizar e enviar';
+
+        hideAll();
+
+        document
+            .getElementById("summarySection")
+            .classList.remove("hidden");
+    }
+}
 
 // ─── AVISO AO SAIR DA PÁGINA ─────────────────────────────────────────────────
 window.addEventListener("beforeunload", (e) => {
