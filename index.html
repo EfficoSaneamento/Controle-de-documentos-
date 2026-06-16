@@ -3,821 +3,566 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admissão Digital • EFFICO</title>
+    <title>RH Digital • EFFICO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --navy:       #0B1F3A;
-            --navy-mid:   #162D4E;
-            --navy-soft:  #1E3A5F;
-            --accent:     #2563EB;
-            --accent-glow:#3B82F6;
-            --accent-bg:  #EFF6FF;
-            --green:      #059669;
-            --green-bg:   #ECFDF5;
-            --amber:      #D97706;
-            --amber-bg:   #FFFBEB;
-            --red:        #DC2626;
-            --red-bg:     #FEF2F2;
-            --surface:    #FFFFFF;
-            --bg:         #F1F5F9;
-            --border:     #E2E8F0;
-            --border-mid: #CBD5E1;
-            --txt-pri:    #0F172A;
-            --txt-sec:    #475569;
-            --txt-muted:  #94A3B8;
+            --blue: #0f2a44;
+            --blue-light: #1a3f66;
+            --green: #27ae60;
+            --green-light: #e8f8ef;
+            --amber: #f39c12;
+            --amber-light: #fef9ec;
+            --red: #e74c3c;
+            --red-light: #fdf2f1;
+            --bg: #f0f4f8;
+            --white: #ffffff;
+            --gray-100: #f8fafc;
+            --gray-200: #e2e8f0;
+            --gray-400: #94a3b8;
+            --gray-600: #64748b;
         }
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg);
-            color: var(--txt-pri);
+            color: var(--blue);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            padding: 0;
+            padding: 20px 15px 40px;
         }
-
-        /* ── SHELL ── */
-        .shell {
+        .app {
             width: 100%;
-            max-width: 420px;
-            min-height: 100vh;
-            background: var(--surface);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 0 60px rgba(11,31,58,0.08);
+            max-width: 440px;
+            background: var(--white);
+            border-radius: 28px;
+            padding: 28px 22px;
+            box-shadow: 0 20px 60px rgba(15,42,68,0.12);
         }
 
-        /* ── TOP BAR ── */
-        .topbar {
-            background: var(--navy);
-            padding: 18px 22px 16px;
+        /* HEADER */
+        .header {
             display: flex;
             align-items: center;
-            gap: 14px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
         }
-        .topbar-logo {
-            height: 28px;
-            filter: brightness(0) invert(1);
-            opacity: 0.95;
-        }
-        .topbar-divider {
-            width: 1px;
-            height: 22px;
-            background: rgba(255,255,255,0.2);
-        }
-        .topbar-title {
-            font-family: 'Sora', sans-serif;
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: rgba(255,255,255,0.9);
-            letter-spacing: 0.02em;
-        }
-        .topbar-sub {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.45);
-            margin-top: 1px;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
+        .logo { width: 70px; }
+        .header-text h1 { font-size: 1.15rem; font-weight: 800; margin: 0; }
+        .header-text p { font-size: 0.72rem; color: var(--gray-600); margin: 2px 0 0; }
 
-        /* ── PROGRESS STRIP ── */
-        .progress-strip {
-            background: var(--navy-mid);
-            padding: 12px 22px;
-        }
-        .progress-strip.hidden { display: none; }
+        /* PROGRESS */
+        .progress-wrapper { margin-bottom: 18px; }
         .progress-meta {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .progress-label {
-            font-size: 0.68rem;
-            font-weight: 600;
-            color: rgba(255,255,255,0.5);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
-        .progress-counter {
-            font-family: 'Sora', sans-serif;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: rgba(255,255,255,0.85);
-        }
-        .progress-track {
-            height: 3px;
-            background: rgba(255,255,255,0.12);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-glow), #60A5FA);
-            border-radius: 10px;
-            width: 0%;
-            transition: width 0.55s cubic-bezier(0.4,0,0.2,1);
-        }
-
-        /* ── BODY AREA ── */
-        .body {
-            flex: 1;
-            padding: 0;
-            overflow-y: auto;
-        }
-
-        /* ── STEP HEADER ── */
-        .step-header {
-            padding: 24px 22px 0;
-        }
-        .step-eyebrow {
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--accent);
-            margin-bottom: 5px;
-        }
-        .step-title {
-            font-family: 'Sora', sans-serif;
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--txt-pri);
-            line-height: 1.3;
-        }
-        .step-hint {
-            font-size: 0.78rem;
-            color: var(--txt-sec);
-            margin-top: 5px;
-            line-height: 1.55;
-        }
-
-        /* ── DIVIDER ── */
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 20px 22px;
-        }
-
-        /* ── INPUTS ── */
-        .fields { padding: 0 22px; }
-        .field { margin-bottom: 16px; }
-        .field label {
-            display: block;
+            align-items: baseline;
             font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--txt-sec);
-            margin-bottom: 7px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--gray-600);
         }
-        .field input, .field select {
+        .progress-meta .step-count { color: var(--blue); font-size: 0.75rem; }
+        .progress-track { width: 100%; height: 6px; background: var(--gray-200); border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--blue-light)); border-radius: 10px; width: 0%; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+        /* STATUS CARD */
+        .status-card {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+        }
+        #statusLabel { font-weight: 800; font-size: 0.95rem; display: block; }
+        #instructionLabel { font-size: 0.78rem; color: var(--gray-600); margin-top: 4px; display: block; }
+
+        /* INPUTS */
+        .input-group { margin-bottom: 10px; }
+        .input-group label { font-size: 0.72rem; font-weight: 700; color: var(--gray-600); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .input-group input, .input-group select {
             width: 100%;
             padding: 13px 15px;
-            border: 1.5px solid var(--border);
-            border-radius: 10px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 12px;
             font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-            color: var(--txt-pri);
-            background: var(--surface);
+            font-family: inherit;
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s;
+            background: var(--white);
+            color: var(--blue);
         }
-        .field input:focus, .field select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-        }
-        .field input.error { border-color: var(--red); }
+        .input-group input:focus, .input-group select:focus { border-color: var(--blue); }
+        .input-group input.error { border-color: var(--red); }
 
-        /* ── ACTIONS FOOTER ── */
-        .actions {
-            padding: 0 22px 28px;
-        }
-        .btn {
-            width: 100%;
-            padding: 15px 20px;
-            border: none;
-            border-radius: 11px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.18s;
-            letter-spacing: 0.01em;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-primary {
-            background: var(--navy);
-            color: #fff;
-        }
-        .btn-primary:hover:not(:disabled) { background: var(--navy-soft); }
-        .btn-ghost {
-            background: transparent;
-            color: var(--txt-muted);
-            font-size: 0.78rem;
-            font-weight: 500;
-            padding: 11px 20px;
-            margin-top: 6px;
-        }
-        .btn-ghost:hover { color: var(--txt-sec); }
-        .btn-success {
-            background: var(--green);
-            color: #fff;
-        }
-        .btn-outline {
-            background: transparent;
-            color: var(--txt-sec);
-            border: 1.5px solid var(--border-mid);
-        }
-        .btn-danger-ghost {
-            background: transparent;
-            color: var(--red);
-            font-size: 0.75rem;
-            font-weight: 500;
-            padding: 10px 20px;
-            margin-top: 4px;
-        }
-
-        /* ── LGPD ── */
-        .lgpd-card {
-            margin: 22px 22px 0;
-            background: var(--amber-bg);
-            border: 1px solid #FDE68A;
-            border-radius: 14px;
-            padding: 18px;
-        }
-        .lgpd-card-icon {
-            width: 36px;
-            height: 36px;
-            background: #FEF3C7;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--amber);
-            font-size: 0.9rem;
-            margin-bottom: 12px;
-        }
-        .lgpd-card h3 {
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: #92400E;
-            margin-bottom: 8px;
-        }
-        .lgpd-card p {
-            font-size: 0.76rem;
-            color: #78350F;
-            line-height: 1.65;
-        }
-        .lgpd-card a { color: var(--amber); font-weight: 600; text-decoration: none; }
-
-        /* ── CAMERA ── */
-        .cam-wrap {
+        /* CAMERA */
+        .camera-container {
             position: relative;
-            margin: 20px 22px 0;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #0A0A0A;
-            aspect-ratio: 3/4;
-        }
-        .cam-wrap video {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
+            aspect-ratio: 3/4;
+            background: #111;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 14px;
         }
-        .cam-guide {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%,-50%);
-            border: 1.5px solid rgba(255,255,255,0.8);
-            box-shadow: 0 0 0 9000px rgba(0,0,0,0.4);
+        video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .camera-overlay-mask {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 5;
             pointer-events: none;
+        }
+        .camera-guide {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(255,255,255,0.9);
             z-index: 10;
-            transition: all 0.3s;
-        }
-        .guide-rect { width: 82%; height: 56%; border-radius: 12px; }
-        .guide-circle { width: 68%; aspect-ratio: 1; border-radius: 50%; }
-        .cam-corners {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%,-50%);
             pointer-events: none;
-            z-index: 11;
+            box-shadow: 0 0 0 9000px rgba(0,0,0,0.45);
+            transition: all 0.3s ease;
         }
-        .cam-hint {
-            position: absolute;
-            bottom: 80px;
-            left: 0; right: 0;
+        .guide-rect { width: 82%; height: 58%; border-radius: 14px; }
+        .guide-circle { width: 70%; aspect-ratio: 1; border-radius: 50%; }
+
+        .camera-hint {
+            position: absolute; bottom: 60px; left: 0; right: 0;
             text-align: center;
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.7);
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.85);
             z-index: 15;
             pointer-events: none;
-            padding: 0 24px;
+            padding: 0 20px;
         }
-        .cam-bar {
+
+        .camera-actions {
             position: absolute;
-            bottom: 0; left: 0; right: 0;
-            padding: 16px 0 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+            bottom: 14px; left: 0; right: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
             z-index: 20;
         }
-        .cam-btn-gallery {
-            width: 46px; height: 46px;
+        .btn-cam-upload {
+            width: 44px; height: 44px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-            font-size: 0.95rem;
+            background: rgba(255,255,255,0.9);
+            color: var(--blue);
+            border: none;
+            font-size: 1rem;
             cursor: pointer;
             display: flex; align-items: center; justify-content: center;
         }
-        .cam-btn-shutter {
-            width: 68px; height: 68px;
+        .btn-cam-shutter {
+            width: 64px; height: 64px;
             border-radius: 50%;
-            background: transparent;
-            border: 3px solid rgba(255,255,255,0.6);
+            background: var(--white);
+            border: 4px solid rgba(255,255,255,0.5);
             cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            transition: transform 0.12s;
+            transition: transform 0.1s;
         }
-        .cam-btn-shutter:active { transform: scale(0.9); }
-        .cam-btn-shutter-inner {
-            width: 54px; height: 54px;
+        .btn-cam-shutter:active { transform: scale(0.92); }
+        .btn-cam-shutter-inner {
+            width: 48px; height: 48px;
             border-radius: 50%;
-            background: #fff;
+            background: var(--white);
         }
-        .cam-spacer { width: 46px; }
-        #fileInput { display: none; }
 
-        /* ── PREVIEW ── */
-        .preview-wrap {
-            margin: 20px 22px 0;
-            border-radius: 16px;
-            overflow: hidden;
+        /* PREVIEW */
+        .preview-container {
+            width: 100%;
             aspect-ratio: 3/4;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 14px;
             position: relative;
-            background: #0A0A0A;
+            background: #000;
         }
-        .preview-wrap img {
+        .preview-container img {
             width: 100%; height: 100%;
             object-fit: cover;
             display: block;
         }
-        .preview-tag {
-            position: absolute;
-            top: 14px; left: 14px;
-            background: rgba(5,150,105,0.9);
-            backdrop-filter: blur(8px);
+        .preview-badge {
+            position: absolute; top: 12px; left: 12px;
+            background: var(--green);
             color: #fff;
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             font-weight: 700;
-            letter-spacing: 0.05em;
-            padding: 5px 12px;
+            padding: 5px 10px;
             border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            z-index: 10;
         }
-        .preview-action-row {
+        .preview-actions {
             display: flex;
             gap: 10px;
-            margin: 14px 22px 0;
-        }
-        .preview-action-row .btn { margin: 0; }
-
-        /* ── SHIRT SIZE ── */
-        .size-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin: 20px 22px 0;
-        }
-        .size-chip {
-            padding: 16px 4px;
-            border: 1.5px solid var(--border);
-            border-radius: 10px;
-            background: var(--surface);
-            font-family: 'Sora', sans-serif;
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: var(--txt-sec);
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.15s;
-            user-select: none;
-        }
-        .size-chip:hover { border-color: var(--accent); color: var(--accent); }
-        .size-chip.sel {
-            background: var(--navy);
-            border-color: var(--navy);
-            color: #fff;
-        }
-
-        /* ── SUMMARY ── */
-        .summary-table {
-            margin: 16px 22px 0;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-        }
-        .summary-row {
-            display: grid;
-            grid-template-columns: 1fr auto auto;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 14px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.75rem;
-        }
-        .summary-row:last-child { border-bottom: none; }
-        .summary-row-name {
-            font-weight: 500;
-            color: var(--txt-pri);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .pill {
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            padding: 3px 9px;
-            border-radius: 20px;
-            white-space: nowrap;
-        }
-        .pill-ok  { background: var(--green-bg);  color: var(--green); }
-        .pill-skip{ background: var(--amber-bg);  color: var(--amber); }
-        .btn-edit-sm {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--txt-sec);
-            font-size: 0.62rem;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            padding: 4px 9px;
-            border-radius: 6px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background 0.15s;
-        }
-        .btn-edit-sm:hover { background: var(--border); }
-
-        /* ── SEND LIST ── */
-        .send-list {
-            margin: 20px 22px 0;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-        }
-        .send-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 11px 14px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.74rem;
-        }
-        .send-item:last-child { border-bottom: none; }
-        .send-item-icon { width: 18px; text-align: center; font-size: 0.8rem; }
-        .send-item-name { flex: 1; color: var(--txt-sec); }
-        .send-item-status { font-weight: 600; font-size: 0.7rem; white-space: nowrap; }
-        .s-pending { color: var(--txt-muted); }
-        .s-sending  { color: var(--amber); }
-        .s-done     { color: var(--green); }
-        .s-fail     { color: var(--red); }
-
-        /* ── SUCCESS ── */
-        .success-wrap {
-            padding: 48px 22px 32px;
-            text-align: center;
-        }
-        .success-icon-ring {
-            width: 72px; height: 72px;
-            background: var(--green-bg);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 1.8rem;
-            color: var(--green);
-        }
-        .success-title {
-            font-family: 'Sora', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--txt-pri);
             margin-bottom: 10px;
         }
-        .success-text {
-            font-size: 0.82rem;
-            color: var(--txt-sec);
-            line-height: 1.65;
+        .btn-preview-confirm {
+            flex: 1;
+            padding: 14px;
+            background: var(--green);
+            color: #fff;
+            border: none;
+            border-radius: 13px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            font-family: inherit;
         }
-        .success-divider { height: 1px; background: var(--border); margin: 24px 0; }
-        .success-meta {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 0.7rem;
-            color: var(--txt-muted);
+        .btn-preview-retry {
+            flex: 1;
+            padding: 14px;
+            background: var(--gray-100);
+            color: var(--blue);
+            border: 1.5px solid var(--gray-200);
+            border-radius: 13px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            font-family: inherit;
         }
 
-        /* ── TOAST ── */
+        /* SHIRT SIZE - special step */
+        .shirt-size-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .size-btn {
+            padding: 18px 8px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 12px;
+            background: var(--white);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--blue);
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .size-btn.selected {
+            background: var(--blue);
+            color: #fff;
+            border-color: var(--blue);
+        }
+
+        /* SUMMARY */
+        .summary-list {
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.75rem;
+            gap: 10px;
+        }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-item-name { flex: 1; font-weight: 600; color: var(--blue); }
+        .badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .badge-ok { background: var(--green-light); color: var(--green); }
+        .badge-skip { background: var(--amber-light); color: var(--amber); }
+        .btn-edit {
+            background: var(--gray-200);
+            color: var(--blue);
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-size: 0.65rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        /* MAIN BUTTONS */
+        .main-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .main-btn:active { transform: scale(0.98); }
+        .main-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-skip {
+            background: transparent;
+            color: var(--gray-400);
+            font-size: 0.75rem;
+            margin-top: 8px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            padding: 8px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+        .btn-danger-link {
+            background: transparent;
+            color: var(--red);
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-top: 6px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            padding: 8px;
+            font-family: inherit;
+        }
+
+        /* LGPD */
+        .lgpd-box {
+            background: var(--amber-light);
+            border: 1px solid #fce9b3;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 0.78rem;
+            color: #5a4209;
+            text-align: left;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        /* TOAST */
         .toast {
             position: fixed;
             bottom: 24px; left: 50%;
-            transform: translateX(-50%) translateY(90px);
-            background: var(--navy);
+            transform: translateX(-50%) translateY(80px);
+            background: var(--blue);
             color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 500;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
             padding: 11px 20px;
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(11,31,58,0.25);
+            border-radius: 30px;
+            box-shadow: 0 8px 24px rgba(15,42,68,0.3);
             z-index: 9999;
             transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            white-space: nowrap;
             pointer-events: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .toast.show { transform: translateX(-50%) translateY(0); }
-        .toast-success { background: var(--green); }
-        .toast-error   { background: var(--red); }
+        .toast.toast-success { background: var(--green); }
+        .toast.toast-error { background: var(--red); }
 
-        /* ── MODAL ── */
+        /* CONFIRM MODAL */
         .modal-backdrop {
             position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            backdrop-filter: blur(4px);
+            background: rgba(0,0,0,0.5);
             z-index: 1000;
-            display: flex; align-items: flex-end; justify-content: center;
-            padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
         }
         .modal {
-            background: var(--surface);
-            border-radius: 22px 22px 0 0;
-            padding: 28px 24px 32px;
-            width: 100%; max-width: 420px;
+            background: var(--white);
+            border-radius: 22px;
+            padding: 26px 22px;
+            width: 100%; max-width: 340px;
+            text-align: center;
         }
-        .modal-handle {
-            width: 36px; height: 4px;
-            background: var(--border-mid);
-            border-radius: 10px;
-            margin: 0 auto 20px;
-        }
-        .modal h3 {
-            font-family: 'Sora', sans-serif;
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--txt-pri);
-        }
-        .modal p {
-            font-size: 0.8rem;
-            color: var(--txt-sec);
-            line-height: 1.6;
-            margin-bottom: 22px;
-        }
-        .modal-btns { display: flex; gap: 10px; }
-        .modal-btns button {
-            flex: 1; padding: 13px;
-            border: none; border-radius: 11px;
-            font-size: 0.85rem; font-weight: 600;
-            cursor: pointer; font-family: 'Inter', sans-serif;
-        }
-        .btn-modal-cancel { background: var(--bg); color: var(--txt-sec); }
-        .btn-modal-ok     { background: var(--amber); color: #fff; }
+        .modal h3 { font-size: 1rem; font-weight: 800; margin: 0 0 8px; }
+        .modal p { font-size: 0.8rem; color: var(--gray-600); margin: 0 0 20px; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 10px; }
+        .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 11px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-modal-cancel { background: var(--gray-200); color: var(--blue); }
+        .btn-modal-confirm { background: var(--amber); color: #fff; }
 
-        /* ── UTILS ── */
+        /* SUCCESS */
+        .success-section { text-align: center; padding: 10px 0; }
+        .success-icon { font-size: 3rem; color: var(--green); margin-bottom: 12px; }
+        .success-section h2 { font-size: 1.2rem; font-weight: 800; margin: 0 0 8px; }
+        .success-section p { font-size: 0.82rem; color: var(--gray-600); line-height: 1.6; margin: 0; }
+
+        /* UPLOAD PROGRESS */
+        .upload-progress-list { text-align: left; margin-top: 14px; }
+        .upload-item {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.75rem;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        .upload-item:last-child { border: none; }
+        .upload-item-icon { width: 22px; text-align: center; }
+        .upload-item-name { flex: 1; color: var(--gray-600); }
+        .upload-item-status { font-weight: 700; }
+        .status-pending { color: var(--gray-400); }
+        .status-sending { color: var(--amber); }
+        .status-done { color: var(--green); }
+        .status-fail { color: var(--red); }
+
+        /* HELPERS */
         .hidden { display: none !important; }
         .mirror { transform: scaleX(-1); }
-        .mt16 { margin-top: 16px; }
-        .mt20 { margin-top: 20px; }
-        .mt8  { margin-top: 8px; }
-        .section-pad { padding: 0 22px 28px; }
+        .mt-10 { margin-top: 10px; }
+        .mt-14 { margin-top: 14px; }
+
+        /* FILE INPUT hidden */
+        #fileInput { display: none; }
     </style>
 </head>
 <body>
-<div class="shell">
 
-    <!-- TOP BAR -->
-    <div class="topbar">
-        <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="topbar-logo" alt="EFFICO">
-        <div class="topbar-divider"></div>
-        <div>
-            <div class="topbar-title">Admissão Digital</div>
-            <div class="topbar-sub">Envio seguro de documentos</div>
+<div class="app">
+    <!-- HEADER -->
+    <div class="header">
+        <img src="https://effico.com.br/wp-content/uploads/2022/06/Sem-Titulo-7123.png" class="logo" alt="EFFICO">
+        <div class="header-text">
+            <h1>Admissão Digital</h1>
+            <p>Envio seguro de documentos</p>
         </div>
     </div>
 
     <!-- PROGRESS -->
-    <div class="progress-strip hidden" id="progressStrip">
+    <div class="progress-wrapper hidden" id="progressWrapper">
         <div class="progress-meta">
-            <span class="progress-label">Progresso</span>
-            <span class="progress-counter" id="stepCount">1 de 19</span>
+            <span>Progresso</span>
+            <span class="step-count" id="stepCount">1 de 19</span>
         </div>
         <div class="progress-track">
             <div class="progress-fill" id="progressFill"></div>
         </div>
     </div>
 
-    <!-- BODY -->
-    <div class="body">
+    <!-- STATUS CARD -->
+    <div class="status-card" id="statusCard">
+        <span id="statusLabel">Privacidade</span>
+        <span id="instructionLabel">Leia os termos antes de continuar</span>
+    </div>
 
-        <!-- ── LGPD ── -->
-        <div id="lgpdSection">
-            <div class="step-header mt16">
-                <div class="step-eyebrow">Antes de começar</div>
-                <div class="step-title">Privacidade e consentimento</div>
-                <div class="step-hint">Suas informações são tratadas com total segurança, conforme a LGPD.</div>
-            </div>
-            <div class="divider"></div>
-            <div class="fields">
-                <div class="lgpd-card">
-                    <div class="lgpd-card-icon"><i class="fas fa-shield-halved"></i></div>
-                    <h3>Aviso de Privacidade (Lei 13.709/2018)</h3>
-                    <p>A <strong>EFFICO</strong> coleta as imagens dos seus documentos exclusivamente para fins de admissão trabalhista. Todas as informações são armazenadas com segurança e não serão compartilhadas com terceiros sem o seu consentimento expresso.</p>
-                </div>
-            </div>
-            <div class="divider"></div>
-            <div class="actions">
-                <button class="btn btn-primary" onclick="irParaCadastro()">
-                    <i class="fas fa-check"></i> Li e concordo — Iniciar
+    <!-- ============ LGPD ============ -->
+    <div id="lgpdSection">
+        <div class="lgpd-box">
+            <b>Aviso de Privacidade (LGPD)</b><br>
+            A <b>EFFICO</b> coleta imagens dos seus documentos exclusivamente para fins de admissão trabalhista. As informações são armazenadas de forma segura e não serão compartilhadas com terceiros sem o seu consentimento, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
+        </div>
+        <button class="main-btn btn-primary" onclick="irParaCadastro()">
+            <i class="fas fa-check"></i> Concordar e Iniciar
+        </button>
+    </div>
+
+    <!-- ============ CADASTRO ============ -->
+    <div id="setupSection" class="hidden">
+        <div class="input-group">
+            <label>Nome completo *</label>
+            <input type="text" id="nome" placeholder="Ex: Maria Silva Santos">
+        </div>
+        <div class="input-group">
+            <label>Função / Cargo *</label>
+            <input type="text" id="funcao" placeholder="Ex: Auxiliar de Produção">
+        </div>
+        <button class="main-btn btn-primary mt-14" onclick="iniciarCaptura()">
+            <i class="fas fa-play"></i> Começar Envio
+        </button>
+    </div>
+
+    <!-- ============ CÂMERA ============ -->
+    <div id="cameraSection" class="hidden">
+        <div class="camera-container" id="cameraContainer">
+            <video id="video" autoplay playsinline></video>
+            <div class="camera-guide guide-rect" id="cameraGuide"></div>
+            <span class="camera-hint" id="cameraHint">Centralize o documento dentro do guia</span>
+            <div class="camera-actions">
+                <button class="btn-cam-upload" onclick="document.getElementById('fileInput').click()" title="Enviar da galeria">
+                    <i class="fas fa-image"></i>
                 </button>
+                <button class="btn-cam-shutter" onclick="tirarFoto()" title="Capturar foto">
+                    <div class="btn-cam-shutter-inner"></div>
+                </button>
+                <div style="width:44px"></div>
             </div>
         </div>
+        <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="processarArquivo(event)">
+        <button class="btn-skip" onclick="confirmarPular()">
+            <i class="fas fa-forward"></i> Não possuo este documento
+        </button>
+    </div>
 
-        <!-- ── CADASTRO ── -->
-        <div id="setupSection" class="hidden">
-            <div class="step-header mt16">
-                <div class="step-eyebrow">Identificação</div>
-                <div class="step-title">Seus dados</div>
-                <div class="step-hint">Preencha as informações antes de enviar os documentos.</div>
-            </div>
-            <div class="divider"></div>
-            <div class="fields">
-                <div class="field">
-                    <label>Nome completo *</label>
-                    <input type="text" id="nome" placeholder="Ex: Maria Silva Santos" autocomplete="name">
-                </div>
-                <div class="field">
-                    <label>Função / Cargo *</label>
-                    <input type="text" id="funcao" placeholder="Ex: Auxiliar de Produção" autocomplete="organization-title">
-                </div>
-            </div>
-            <div class="actions mt20">
-                <button class="btn btn-primary" onclick="iniciarCaptura()">
-                    <i class="fas fa-arrow-right"></i> Começar envio
-                </button>
-            </div>
+    <!-- ============ PREVIEW ============ -->
+    <div id="previewSection" class="hidden">
+        <div class="preview-container">
+            <img id="previewImg" src="" alt="Prévia do documento">
+            <div class="preview-badge"><i class="fas fa-eye"></i> Prévia</div>
         </div>
-
-        <!-- ── CÂMERA ── -->
-        <div id="cameraSection" class="hidden">
-            <div class="step-header mt16">
-                <div class="step-eyebrow" id="camEyebrow">Documento 1</div>
-                <div class="step-title" id="camTitle">Foto para crachá</div>
-                <div class="step-hint" id="camHint">Centralize seu rosto dentro do círculo</div>
-            </div>
-            <div class="cam-wrap" id="camWrap">
-                <video id="video" autoplay playsinline></video>
-                <div class="cam-guide guide-rect" id="cameraGuide"></div>
-                <div class="cam-hint" id="cameraHint">Centralize o documento no guia</div>
-                <div class="cam-bar">
-                    <button class="cam-btn-gallery" onclick="document.getElementById('fileInput').click()" title="Galeria">
-                        <i class="fas fa-image"></i>
-                    </button>
-                    <button class="cam-btn-shutter" onclick="tirarFoto()">
-                        <div class="cam-btn-shutter-inner"></div>
-                    </button>
-                    <div class="cam-spacer"></div>
-                </div>
-            </div>
-            <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="processarArquivo(event)">
-            <div class="actions mt20">
-                <button class="btn btn-ghost" onclick="confirmarPular()">
-                    <i class="fas fa-forward"></i> Não possuo este documento
-                </button>
-            </div>
+        <div class="preview-actions">
+            <button class="btn-preview-retry" onclick="voltarCamera()">
+                <i class="fas fa-redo"></i> Refazer
+            </button>
+            <button class="btn-preview-confirm" onclick="confirmarFoto()">
+                <i class="fas fa-check"></i> Confirmar
+            </button>
         </div>
+    </div>
 
-        <!-- ── PREVIEW ── -->
-        <div id="previewSection" class="hidden">
-            <div class="step-header mt16">
-                <div class="step-eyebrow" id="previewEyebrow">Prévia</div>
-                <div class="step-title">Confira a imagem</div>
-                <div class="step-hint">Verifique se o documento está legível antes de confirmar.</div>
-            </div>
-            <div class="preview-wrap">
-                <img id="previewImg" src="" alt="Prévia do documento">
-                <div class="preview-tag"><i class="fas fa-eye"></i> Prévia</div>
-            </div>
-            <div class="preview-action-row mt16">
-                <button class="btn btn-outline" onclick="voltarCamera()" style="flex:1">
-                    <i class="fas fa-redo"></i> Refazer
-                </button>
-                <button class="btn btn-success" onclick="confirmarFoto()" style="flex:1">
-                    <i class="fas fa-check"></i> Confirmar
-                </button>
-            </div>
-            <div style="height:28px"></div>
+    <!-- ============ TAMANHO CAMISA (etapa especial) ============ -->
+    <div id="shirtSection" class="hidden">
+        <div class="shirt-size-grid" id="shirtGrid"></div>
+        <button class="main-btn btn-primary" id="btnConfirmShirt" onclick="confirmarTamanho()" disabled>
+            <i class="fas fa-check"></i> Confirmar Tamanho
+        </button>
+    </div>
+
+    <!-- ============ RESUMO ============ -->
+    <div id="summarySection" class="hidden">
+        <div class="summary-list" id="summaryList"></div>
+        <button class="main-btn btn-primary mt-14" id="btnFinalizar" onclick="enviarTudo()">
+            <i class="fas fa-paper-plane"></i> Finalizar e Enviar
+        </button>
+        <button class="btn-danger-link" onclick="confirmarReinicio()">
+            <i class="fas fa-undo"></i> Reiniciar processo
+        </button>
+    </div>
+
+    <!-- ============ ENVIANDO ============ -->
+    <div id="sendingSection" class="hidden">
+        <div class="upload-progress-list" id="uploadProgressList"></div>
+    </div>
+
+    <!-- ============ SUCESSO ============ -->
+    <div id="successSection" class="hidden">
+        <div class="success-section">
+            <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+            <h2>Documentos enviados!</h2>
+            <p>Seus documentos foram recebidos com sucesso pela EFFICO. O RH entrará em contato em breve.</p>
         </div>
-
-        <!-- ── TAMANHO DE CAMISA ── -->
-        <div id="shirtSection" class="hidden">
-            <div class="step-header mt16">
-                <div class="step-eyebrow">Uniforme</div>
-                <div class="step-title">Tamanho de camisa</div>
-                <div class="step-hint">Selecione o tamanho para confecção do uniforme.</div>
-            </div>
-            <div class="size-grid" id="shirtGrid"></div>
-            <div class="actions mt20">
-                <button class="btn btn-primary" id="btnConfirmShirt" onclick="confirmarTamanho()" disabled>
-                    <i class="fas fa-check"></i> Confirmar tamanho
-                </button>
-            </div>
-        </div>
-
-        <!-- ── RESUMO ── -->
-        <div id="summarySection" class="hidden">
-            <div class="step-header mt16">
-                <div class="step-eyebrow">Revisão</div>
-                <div class="step-title">Confira tudo</div>
-                <div class="step-hint">Verifique os documentos antes de enviar. Você pode alterar qualquer item.</div>
-            </div>
-            <div class="summary-table" id="summaryList"></div>
-            <div class="actions mt20">
-                <button class="btn btn-primary" id="btnFinalizar" onclick="enviarTudo()">
-                    <i class="fas fa-paper-plane"></i> Finalizar e enviar
-                </button>
-                <button class="btn btn-danger-ghost" onclick="confirmarReinicio()">
-                    <i class="fas fa-rotate-left"></i> Reiniciar processo
-                </button>
-            </div>
-        </div>
-
-        <!-- ── ENVIANDO ── -->
-        <div id="sendingSection" class="hidden">
-            <div class="step-header mt16">
-                <div class="step-eyebrow">Aguarde</div>
-                <div class="step-title">Enviando documentos</div>
-                <div class="step-hint">Não feche o aplicativo durante o envio.</div>
-            </div>
-            <div class="send-list" id="uploadProgressList"></div>
-            <div style="height:28px"></div>
-        </div>
-
-        <!-- ── SUCESSO ── -->
-        <div id="successSection" class="hidden">
-            <div class="success-wrap">
-                <div class="success-icon-ring">
-                    <i class="fas fa-check"></i>
-                </div>
-                <div class="success-title">Documentos enviados!</div>
-                <div class="success-text">Seus documentos foram recebidos com sucesso. O RH da EFFICO entrará em contato em breve para os próximos passos da admissão.</div>
-                <div class="success-divider"></div>
-                <div class="success-meta">
-                    <i class="fas fa-lock" style="font-size:0.7rem"></i>
-                    Transmissão segura • EFFICO RH Digital
-                </div>
-            </div>
-        </div>
-
-    </div><!-- /body -->
-</div><!-- /shell -->
+    </div>
+</div>
 
 <!-- MODAL -->
 <div class="modal-backdrop hidden" id="modalBackdrop">
     <div class="modal">
-        <div class="modal-handle"></div>
         <h3 id="modalTitle">Tem certeza?</h3>
         <p id="modalText"></p>
-        <div class="modal-btns">
+        <div class="modal-actions">
             <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
-            <button class="btn-modal-ok" id="modalConfirmBtn">Confirmar</button>
+            <button class="btn-modal-confirm" id="modalConfirmBtn">Confirmar</button>
         </div>
     </div>
 </div>
@@ -826,98 +571,111 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── CONFIG ────────────────────────────────────────────────────────────────
+// ─── CONFIG ─────────────────────────────────────────────────────────────────
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4CRuCVtqmQpN-IYbbF7NQ7pklb-LNLUMiy5M-76NHV3yJeeVpGzhLusBsVJ-gD4a0/exec";
 
-const ETAPAS = [
-    { label:"Foto para crachá",               hint:"Centralize seu rosto dentro do círculo",       key:"01_Selfie",         isFace:true,  isShirt:false },
-    { label:"CTPS",                            hint:"Página com foto e dados pessoais",              key:"02_CTPS",           isFace:false, isShirt:false },
-    { label:"CPF",                             hint:"Documento original ou cópia legível",           key:"03_CPF",            isFace:false, isShirt:false },
-    { label:"RG",                              hint:"Frente e verso do documento",                   key:"04_RG",             isFace:false, isShirt:false },
-    { label:"PIS",                             hint:"Cartão Cidadão ou extrato do FGTS",             key:"05_PIS",            isFace:false, isShirt:false },
-    { label:"CNH",                             hint:"Cópia da CNH, se possuir",                      key:"06_CNH",            isFace:false, isShirt:false },
-    { label:"Reservista",                      hint:"Certificado militar, se aplicável",              key:"07_Reservista",     isFace:false, isShirt:false },
-    { label:"Comprovante de residência",       hint:"Conta recente de luz, água ou internet",        key:"08_Endereco",       isFace:false, isShirt:false },
-    { label:"Vale Transporte",                 hint:"Cartão ou formulário preenchido",                key:"09_VT",             isFace:false, isShirt:false },
-    { label:"Certidão Civil",                  hint:"Nascimento ou certidão de casamento",            key:"10_Certidao_Civil", isFace:false, isShirt:false },
-    { label:"CPF do cônjuge",                  hint:"Se aplicável",                                   key:"11_CPF_Conjuge",    isFace:false, isShirt:false },
-    { label:"Documentos dos filhos",           hint:"RG ou certidão de nascimento, se aplicável",    key:"12_Doc_Filhos",     isFace:false, isShirt:false },
-    { label:"Carteira de vacinação dos filhos",hint:"Se aplicável",                                   key:"13_Vacina_Filhos",  isFace:false, isShirt:false },
-    { label:"CPF dos filhos",                  hint:"Se aplicável",                                   key:"14_CPF_Filhos",     isFace:false, isShirt:false },
-    { label:"Vacina – Saúde",                  hint:"Hepatite B e Tétano",                            key:"15_Vacina_Saude",   isFace:false, isShirt:false },
-    { label:"Vacina – Covid-19",               hint:"Comprovante de vacinação",                       key:"16_Vacina_Covid",   isFace:false, isShirt:false },
-    { label:"Conta Itaú",                      hint:"Cartão ou extrato bancário",                     key:"17_Conta_Itau",     isFace:false, isShirt:false },
-    { label:"Comprovante de escolaridade",     hint:"Diploma ou declaração de conclusão",             key:"18_Escolaridade",   isFace:false, isShirt:false },
-    { label:"Tamanho de camisa",               hint:"Selecione o tamanho para o uniforme",            key:"19_Tamanho",        isFace:false, isShirt:true  }
-];
-const SHIRT_SIZES = ["PP","P","M","G","GG","XG","XGG","ESPECIAL"];
+// Chunk de fotos enviadas separadamente para evitar payload gigante
+const MAX_CHUNK_KB = 900; // limite seguro para Apps Script por requisição
 
-// ─── STATE ─────────────────────────────────────────────────────────────────
+const ETAPAS = [
+    { label: "Foto para crachá",               hint: "Centralize seu rosto dentro do círculo",      key: "01_Selfie",          isFace: true,  isShirt: false },
+    { label: "CTPS",                            hint: "Página com foto e dados pessoais",             key: "02_CTPS",            isFace: false, isShirt: false },
+    { label: "CPF",                             hint: "Documento original ou cópia",                  key: "03_CPF",             isFace: false, isShirt: false },
+    { label: "RG",                              hint: "Frente e verso do documento",                  key: "04_RG",              isFace: false, isShirt: false },
+    { label: "PIS",                             hint: "Cartão Cidadão ou extrato do FGTS",            key: "05_PIS",             isFace: false, isShirt: false },
+    { label: "CNH",                             hint: "Cópia da CNH (se possuir)",                    key: "06_CNH",             isFace: false, isShirt: false },
+    { label: "Reservista",                      hint: "Certificado militar (se aplicável)",            key: "07_Reservista",      isFace: false, isShirt: false },
+    { label: "Comprovante de residência",       hint: "Conta recente de luz, água ou internet",       key: "08_Endereco",        isFace: false, isShirt: false },
+    { label: "Vale Transporte",                 hint: "Cartão ou formulário preenchido",               key: "09_VT",              isFace: false, isShirt: false },
+    { label: "Certidão Civil",                  hint: "Nascimento ou certidão de casamento",           key: "10_Certidao_Civil",  isFace: false, isShirt: false },
+    { label: "CPF do cônjuge",                  hint: "Se aplicável",                                  key: "11_CPF_Conjuge",     isFace: false, isShirt: false },
+    { label: "Documentos dos filhos",           hint: "RG ou certidão de nascimento (se aplicável)",  key: "12_Doc_Filhos",      isFace: false, isShirt: false },
+    { label: "Carteira de vacinação dos filhos",hint: "Se aplicável",                                  key: "13_Vacina_Filhos",   isFace: false, isShirt: false },
+    { label: "CPF dos filhos",                  hint: "Se aplicável",                                  key: "14_CPF_Filhos",      isFace: false, isShirt: false },
+    { label: "Vacina – Saúde",                  hint: "Hepatite B e Tétano",                           key: "15_Vacina_Saude",    isFace: false, isShirt: false },
+    { label: "Vacina – Covid-19",               hint: "Comprovante de vacinação",                      key: "16_Vacina_Covid",    isFace: false, isShirt: false },
+    { label: "Conta Itaú",                      hint: "Cartão ou extrato bancário",                    key: "17_Conta_Itau",      isFace: false, isShirt: false },
+    { label: "Comprovante de escolaridade",     hint: "Diploma ou declaração de conclusão",            key: "18_Escolaridade",    isFace: false, isShirt: false },
+    { label: "Tamanho de camisa",               hint: "Selecione o tamanho para o uniforme",           key: "19_Tamanho",         isFace: false, isShirt: true  }
+];
+
+const SHIRT_SIZES = ["PP", "P", "M", "G", "GG", "XG", "XGG", "ESPECIAL"];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
 let currentIdx   = 0;
 let fotos        = {};
-let pendingImage = null;
+let pendingImage = null;   // base64 aguardando confirmação
 let stream       = null;
 let selectedSize = null;
 
-// ─── TOAST ─────────────────────────────────────────────────────────────────
+// ─── TOAST ───────────────────────────────────────────────────────────────────
 let toastTimer;
-function showToast(msg, type="") {
+function showToast(msg, type = "") {
     const el = document.getElementById("toast");
-    el.className = "toast" + (type ? " toast-"+type : "");
-    el.innerHTML = (type==="error" ? '<i class="fas fa-circle-exclamation"></i> ' : type==="success" ? '<i class="fas fa-check"></i> ' : '') + msg;
+    el.textContent = msg;
+    el.className = "toast" + (type ? " toast-" + type : "");
     el.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=>el.classList.remove("show"), 2800);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
 }
 
-// ─── MODAL ─────────────────────────────────────────────────────────────────
-let modalCb = null;
-function abrirModal(titulo, texto, labelOk, cb) {
-    document.getElementById("modalTitle").textContent   = titulo;
-    document.getElementById("modalText").textContent    = texto;
-    document.getElementById("modalConfirmBtn").textContent = labelOk;
-    modalCb = cb;
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+let modalCallback = null;
+function abrirModal(titulo, texto, labelConfirm, cb) {
+    document.getElementById("modalTitle").textContent = titulo;
+    document.getElementById("modalText").textContent  = texto;
+    document.getElementById("modalConfirmBtn").textContent = labelConfirm;
+    modalCallback = cb;
     document.getElementById("modalBackdrop").classList.remove("hidden");
 }
 function fecharModal() { document.getElementById("modalBackdrop").classList.add("hidden"); }
-document.getElementById("modalConfirmBtn").onclick = ()=>{ fecharModal(); if(modalCb) modalCb(); };
+document.getElementById("modalConfirmBtn").onclick = () => { fecharModal(); if (modalCallback) modalCallback(); };
 
-// ─── SECTIONS ──────────────────────────────────────────────────────────────
+// ─── NAVEGAÇÃO DE SEÇÕES ─────────────────────────────────────────────────────
 function hideAll() {
     ["lgpdSection","setupSection","cameraSection","previewSection",
      "shirtSection","summarySection","sendingSection","successSection"
-    ].forEach(id=>document.getElementById(id).classList.add("hidden"));
+    ].forEach(id => document.getElementById(id).classList.add("hidden"));
 }
 
-// ─── LGPD → CADASTRO ───────────────────────────────────────────────────────
+// ─── LGPD → CADASTRO ─────────────────────────────────────────────────────────
 function irParaCadastro() {
     hideAll();
     document.getElementById("setupSection").classList.remove("hidden");
+    document.getElementById("statusLabel").textContent      = "Seus dados";
+    document.getElementById("instructionLabel").textContent = "Preencha as informações abaixo";
 }
 
-// ─── CADASTRO → CAPTURE ────────────────────────────────────────────────────
+// ─── CADASTRO → CAPTURA ──────────────────────────────────────────────────────
 function iniciarCaptura() {
     const nome   = document.getElementById("nome").value.trim();
     const funcao = document.getElementById("funcao").value.trim();
-    if (!nome)   { showToast("Informe seu nome completo.", "error"); document.getElementById("nome").classList.add("error"); return; }
-    if (!funcao) { showToast("Informe a função ou cargo.", "error"); document.getElementById("funcao").classList.add("error"); return; }
+    if (!nome)   { showToast("Por favor, informe seu nome completo.", "error"); document.getElementById("nome").classList.add("error"); return; }
+    if (!funcao) { showToast("Por favor, informe a função/cargo.", "error"); document.getElementById("funcao").classList.add("error"); return; }
+
     hideAll();
-    document.getElementById("progressStrip").classList.remove("hidden");
+    document.getElementById("progressWrapper").classList.remove("hidden");
     document.getElementById("cameraSection").classList.remove("hidden");
     currentIdx = 0;
     carregarEtapa();
 }
 
-// ─── LOAD STEP ─────────────────────────────────────────────────────────────
+// ─── CARREGAR ETAPA ──────────────────────────────────────────────────────────
 async function carregarEtapa() {
     if (currentIdx >= ETAPAS.length) { mostrarResumo(); return; }
+
     const etapa = ETAPAS[currentIdx];
     const pct   = Math.round((currentIdx / ETAPAS.length) * 100);
-    document.getElementById("progressFill").style.width = pct + "%";
-    document.getElementById("stepCount").textContent = (currentIdx+1) + " de " + ETAPAS.length;
-    hideAll();
-    document.getElementById("progressStrip").classList.remove("hidden");
 
+    document.getElementById("statusLabel").textContent      = etapa.label;
+    document.getElementById("instructionLabel").textContent = etapa.hint;
+    document.getElementById("progressFill").style.width     = pct + "%";
+    document.getElementById("stepCount").textContent        = (currentIdx + 1) + " de " + ETAPAS.length;
+
+    hideAll();
+    document.getElementById("progressWrapper").classList.remove("hidden");
+
+    // Etapa especial: tamanho de camisa
     if (etapa.isShirt) {
         selectedSize = null;
         renderShirtGrid();
@@ -926,256 +684,277 @@ async function carregarEtapa() {
         return;
     }
 
+    // Etapa de câmera
     document.getElementById("cameraSection").classList.remove("hidden");
-    document.getElementById("camEyebrow").textContent  = "Documento " + (currentIdx+1) + " de " + ETAPAS.length;
-    document.getElementById("camTitle").textContent    = etapa.label;
-    document.getElementById("camHint").textContent     = etapa.hint;
-    document.getElementById("cameraHint").textContent  = etapa.hint;
+    document.getElementById("cameraHint").textContent = etapa.hint;
 
     const guide = document.getElementById("cameraGuide");
-    guide.className = "cam-guide " + (etapa.isFace ? "guide-circle" : "guide-rect");
+    guide.className = "camera-guide " + (etapa.isFace ? "guide-circle" : "guide-rect");
+
     document.getElementById("video").classList.toggle("mirror", etapa.isFace);
 
-    if (stream) stream.getTracks().forEach(t=>t.stop());
+    if (stream) stream.getTracks().forEach(t => t.stop());
     try {
         stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: etapa.isFace ? "user" : "environment", width:{ideal:1280}, height:{ideal:960} }
+            video: { facingMode: etapa.isFace ? "user" : "environment", width: { ideal: 1280 }, height: { ideal: 960 } }
         });
         document.getElementById("video").srcObject = stream;
-    } catch(e) {
-        showToast("Câmera não disponível. Use a galeria.", "error");
+    } catch (e) {
+        showToast("Câmera não disponível. Use o botão de galeria.", "error");
     }
 }
 
-// ─── CAPTURE ───────────────────────────────────────────────────────────────
+// ─── CAPTURA DE FOTO ─────────────────────────────────────────────────────────
 function tirarFoto() {
     const video = document.getElementById("video");
     if (!video.videoWidth) { showToast("Aguarde a câmera carregar.", "error"); return; }
-    const MAX=1024, ratio=MAX/Math.max(video.videoWidth, video.videoHeight);
-    const w=Math.round(video.videoWidth*ratio), h=Math.round(video.videoHeight*ratio);
-    const c=document.createElement("canvas"); c.width=w; c.height=h;
-    const ctx=c.getContext("2d");
-    if (ETAPAS[currentIdx].isFace) { ctx.translate(w,0); ctx.scale(-1,1); }
-    ctx.drawImage(video,0,0,w,h);
-    pendingImage = c.toDataURL("image/jpeg", 0.72);
+
+    const MAX = 1024;
+    const ratio = MAX / Math.max(video.videoWidth, video.videoHeight);
+    const w = Math.round(video.videoWidth  * ratio);
+    const h = Math.round(video.videoHeight * ratio);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d");
+
+    if (ETAPAS[currentIdx].isFace) { ctx.translate(w, 0); ctx.scale(-1, 1); }
+    ctx.drawImage(video, 0, 0, w, h);
+
+    pendingImage = canvas.toDataURL("image/jpeg", 0.7);
     mostrarPreview(pendingImage);
 }
 
 function processarArquivo(e) {
-    const file=e.target.files[0]; e.target.value="";
+    const file = e.target.files[0];
+    e.target.value = "";
     if (!file) return;
-    const allowed=["image/jpeg","image/png","image/webp","image/heic","application/pdf"];
-    if (!allowed.includes(file.type)) { showToast("Formato inválido. Envie uma imagem ou PDF.", "error"); return; }
-    const reader=new FileReader();
-    reader.onload=ev=>{
-        if (file.type==="application/pdf") { pendingImage=ev.target.result; confirmarFoto(); return; }
-        const img=new Image();
-        img.onload=()=>{
-            const MAX=1024, ratio=MAX/Math.max(img.width,img.height);
-            const w=Math.round(img.width*ratio), h=Math.round(img.height*ratio);
-            const c=document.createElement("canvas"); c.width=w; c.height=h;
-            c.getContext("2d").drawImage(img,0,0,w,h);
-            pendingImage=c.toDataURL("image/jpeg",0.72);
-            mostrarPreview(pendingImage);
-        };
-        img.src=ev.target.result;
+
+    // Validação de tipo
+    const allowed = ["image/jpeg","image/png","image/webp","image/heic","application/pdf"];
+    if (!allowed.includes(file.type)) {
+        showToast("Formato inválido. Envie uma imagem ou PDF.", "error");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+        if (file.type === "application/pdf") {
+            // PDF: armazena diretamente, sem preview visual
+            pendingImage = ev.target.result;
+            confirmarFoto();
+        } else {
+            // Redimensiona imagem
+            const img = new Image();
+            img.onload = () => {
+                const MAX = 1024;
+                const ratio = MAX / Math.max(img.width, img.height);
+                const w = Math.round(img.width  * ratio);
+                const h = Math.round(img.height * ratio);
+                const c = document.createElement("canvas");
+                c.width = w; c.height = h;
+                c.getContext("2d").drawImage(img, 0, 0, w, h);
+                pendingImage = c.toDataURL("image/jpeg", 0.7);
+                mostrarPreview(pendingImage);
+            };
+            img.src = ev.target.result;
+        }
     };
     reader.readAsDataURL(file);
 }
 
-// ─── PREVIEW ───────────────────────────────────────────────────────────────
+// ─── PREVIEW ─────────────────────────────────────────────────────────────────
 function mostrarPreview(src) {
-    if (stream) stream.getTracks().forEach(t=>t.stop());
+    if (stream) stream.getTracks().forEach(t => t.stop());
     hideAll();
-    document.getElementById("progressStrip").classList.remove("hidden");
-    document.getElementById("previewEyebrow").textContent = ETAPAS[currentIdx].label;
+    document.getElementById("progressWrapper").classList.remove("hidden");
     document.getElementById("previewImg").src = src;
     document.getElementById("previewSection").classList.remove("hidden");
 }
 
-function voltarCamera() { pendingImage=null; carregarEtapa(); }
+function voltarCamera() {
+    pendingImage = null;
+    carregarEtapa();
+}
 
 function confirmarFoto() {
     fotos[ETAPAS[currentIdx].key] = pendingImage;
-    pendingImage=null; currentIdx++; carregarEtapa();
+    pendingImage = null;
+    currentIdx++;
+    carregarEtapa();
 }
 
-// ─── SKIP ──────────────────────────────────────────────────────────────────
+// ─── PULAR DOCUMENTO ─────────────────────────────────────────────────────────
 function confirmarPular() {
     abrirModal(
         "Pular este documento?",
-        `"${ETAPAS[currentIdx].label}" será marcado como não informado.`,
+        "\"" + ETAPAS[currentIdx].label + "\" será marcado como não informado.",
         "Pular",
-        ()=>{ fotos[ETAPAS[currentIdx].key]="NÃO POSSUI"; currentIdx++; carregarEtapa(); }
+        () => { fotos[ETAPAS[currentIdx].key] = "NÃO POSSUI"; currentIdx++; carregarEtapa(); }
     );
 }
 
-// ─── SHIRT ─────────────────────────────────────────────────────────────────
+// ─── TAMANHO DE CAMISA ───────────────────────────────────────────────────────
 function renderShirtGrid() {
-    document.getElementById("shirtGrid").innerHTML = SHIRT_SIZES.map(s=>
-        `<button class="size-chip${selectedSize===s?" sel":""}" onclick="selecionarTamanho('${s}')">${s}</button>`
+    const grid = document.getElementById("shirtGrid");
+    grid.innerHTML = SHIRT_SIZES.map(s =>
+        `<button class="size-btn${selectedSize === s ? " selected" : ""}" onclick="selecionarTamanho('${s}')">${s}</button>`
     ).join("");
 }
-function selecionarTamanho(s) { selectedSize=s; renderShirtGrid(); document.getElementById("btnConfirmShirt").disabled=false; }
-function confirmarTamanho() {
-    if (!selectedSize) { showToast("Selecione um tamanho.", "error"); return; }
-    fotos[ETAPAS[currentIdx].key]="TAMANHO: "+selectedSize; currentIdx++; carregarEtapa();
+
+function selecionarTamanho(size) {
+    selectedSize = size;
+    renderShirtGrid();
+    document.getElementById("btnConfirmShirt").disabled = false;
 }
 
-// ─── SUMMARY ───────────────────────────────────────────────────────────────
+function confirmarTamanho() {
+    if (!selectedSize) { showToast("Selecione um tamanho.", "error"); return; }
+    fotos[ETAPAS[currentIdx].key] = "TAMANHO: " + selectedSize;
+    currentIdx++;
+    carregarEtapa();
+}
+
+// ─── RESUMO ──────────────────────────────────────────────────────────────────
 function mostrarResumo() {
-    if (stream) stream.getTracks().forEach(t=>t.stop());
+    if (stream) stream.getTracks().forEach(t => t.stop());
     hideAll();
-    document.getElementById("progressStrip").classList.remove("hidden");
-    document.getElementById("progressFill").style.width="100%";
-    document.getElementById("stepCount").textContent="Concluído";
+    document.getElementById("progressWrapper").classList.remove("hidden");
     document.getElementById("summarySection").classList.remove("hidden");
-    document.getElementById("summaryList").innerHTML = ETAPAS.map((e,i)=>{
-        const ok = fotos[e.key] && fotos[e.key]!=="NÃO POSSUI";
-        return `<div class="summary-row">
-            <span class="summary-row-name">${e.label}</span>
-            <span class="pill ${ok?"pill-ok":"pill-skip"}">${ok?"OK":"Pulado"}</span>
-            <button class="btn-edit-sm" onclick="editarEtapa(${i})">Alterar</button>
+    document.getElementById("progressFill").style.width = "100%";
+    document.getElementById("stepCount").textContent     = "Concluído";
+    document.getElementById("statusLabel").textContent      = "Revisão final";
+    document.getElementById("instructionLabel").textContent = "Confira tudo antes de enviar";
+
+    const list = document.getElementById("summaryList");
+    list.innerHTML = ETAPAS.map((e, i) => {
+        const val    = fotos[e.key];
+        const ok     = val && val !== "NÃO POSSUI";
+        const badge  = ok ? '<span class="badge badge-ok">OK</span>' : '<span class="badge badge-skip">Pulado</span>';
+        return `<div class="summary-item">
+            <span class="summary-item-name">${e.label}</span>
+            ${badge}
+            <button class="btn-edit" onclick="editarEtapa(${i})">Alterar</button>
         </div>`;
     }).join("");
 }
 
-function editarEtapa(idx) { currentIdx=idx; carregarEtapa(); }
-
-function confirmarReinicio() {
-    abrirModal("Reiniciar?","Todos os documentos capturados serão perdidos e você voltará ao início.","Reiniciar",()=>location.reload());
+function editarEtapa(idx) {
+    currentIdx = idx;
+    carregarEtapa();
 }
 
-// ─── SEND ──────────────────────────────────────────────────────────────────
+// ─── REINICIAR ───────────────────────────────────────────────────────────────
+function confirmarReinicio() {
+    abrirModal(
+        "Reiniciar processo?",
+        "Todos os documentos capturados serão perdidos e você voltará ao início.",
+        "Sim, reiniciar",
+        () => location.reload()
+    );
+}
+
+// ─── ENVIO ───────────────────────────────────────────────────────────────────
 async function enviarTudo() {
-
     const btn = document.getElementById("btnFinalizar");
-
     btn.disabled = true;
-    btn.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparando envio...';
 
-    const nome =
-        document.getElementById("nome").value.trim();
+    const nome   = document.getElementById("nome").value.trim();
+    const funcao = document.getElementById("funcao").value.trim();
 
-    const funcao =
-        document.getElementById("funcao").value.trim();
+    const items = ETAPAS.map(e => ({
+        key:   e.key,
+        label: e.label,
+        value: fotos[e.key] || "NÃO ENVIADO"
+    }));
 
-    const payload = {
-        dados: {
-            nome: nome,
-            funcao: funcao
-        },
-        fotos: fotos
+    // Mostrar tela de progresso
+    hideAll();
+    document.getElementById("progressWrapper").classList.remove("hidden");
+    document.getElementById("sendingSection").classList.remove("hidden");
+    document.getElementById("statusLabel").textContent      = "Enviando documentos";
+    document.getElementById("instructionLabel").textContent = "Aguarde, não feche o aplicativo";
+
+    const listEl = document.getElementById("uploadProgressList");
+
+    const renderItems = (statuses) => {
+        listEl.innerHTML = items.map((item, i) => {
+            const s = statuses[i] || "pending";
+            const icons  = { pending:"fas fa-clock", sending:"fas fa-spinner fa-spin", done:"fas fa-check-circle", fail:"fas fa-times-circle" };
+            const labels = { pending:"Aguardando",   sending:"Enviando...",            done:"Enviado",             fail:"Falhou" };
+            return '<div class="upload-item">'
+                + '<span class="upload-item-icon"><i class="' + icons[s] + ' status-' + s + '"></i></span>'
+                + '<span class="upload-item-name">' + item.label + '</span>'
+                + '<span class="upload-item-status status-' + s + '">' + labels[s] + '</span>'
+                + '</div>';
+        }).join("");
     };
 
-    hideAll();
+    const statuses = items.map(() => "pending");
+    renderItems(statuses);
 
-    document
-        .getElementById("progressStrip")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("sendingSection")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("progressFill")
-        .style.width = "50%";
-
-    document.getElementById(
-        "uploadProgressList"
-    ).innerHTML = `
-        <div class="send-item">
-            <span class="send-item-icon">
-                <i class="fas fa-spinner fa-spin s-sending"></i>
-            </span>
-            <span class="send-item-name">
-                Enviando documentos...
-            </span>
-            <span class="send-item-status s-sending">
-                Aguarde
-            </span>
-        </div>
-    `;
-
+    // Enviar metadados primeiro
     try {
+        const form = new FormData();
+        form.append("payload", JSON.stringify({ tipo:"dados", nome, funcao, total: items.length }));
+        await fetch(SCRIPT_URL, { method:"POST", mode:"no-cors", body: form });
+    } catch(e) { /* opaque response — normal com no-cors */ }
 
-            await fetch(
-                    SCRIPT_URL,
-                    {
-                     method: "POST",
-                    mode: "no-cors",
-                    body: "JSON.stringify(payload)"
-                        }
-                    );
+    // Enviar cada documento individualmente
+    let allOk = true;
+    for (let i = 0; i < items.length; i++) {
+        statuses[i] = "sending";
+        renderItems([...statuses]);
 
-            hideAll();
-
-            document
-                    .getElementById("successSection")
-                    .classList.remove("hidden");
-
-            let resultado;
-
-            try {
-                resultado = JSON.parse(texto);
-            } catch {
-                resultado = {
-                    status: "error",
-                    message: texto
-                };
-            }
-
-            if (
-                resultado.status === "success"
-            )  {
-
-            document
-                .getElementById("progressFill")
-                .style.width = "100%";
-
-            hideAll();
-
-            document
-                .getElementById("successSection")
-                .classList.remove("hidden");
-
-        } else {
-
-            throw new Error(
-                resultado.message ||
-                "Falha no envio"
-            );
+        const item = items[i];
+        try {
+            const form = new FormData();
+            form.append("payload", JSON.stringify({
+                tipo:   "foto",
+                nome,
+                funcao,
+                key:    item.key,
+                label:  item.label,
+                value:  item.value
+            }));
+            await fetch(SCRIPT_URL, { method:"POST", mode:"no-cors", body: form });
+            statuses[i] = "done";
+        } catch(e) {
+            statuses[i] = "fail";
+            allOk = false;
         }
 
-    } catch (erro) {
-
-        console.error(erro);
-
-        showToast(
-            "Erro ao enviar documentos.",
-            "error"
-        );
-
-        btn.disabled = false;
-
-        btn.innerHTML =
-            '<i class="fas fa-paper-plane"></i> Finalizar e enviar';
-
-        hideAll();
-
-        document
-            .getElementById("summarySection")
-            .classList.remove("hidden");
+        renderItems([...statuses]);
+        await new Promise(r => setTimeout(r, 200));
     }
+
+    // Tela final
+    await new Promise(r => setTimeout(r, 500));
+    hideAll();
+    document.getElementById("successSection").classList.remove("hidden");
+    document.getElementById("progressFill").style.width     = "100%";
+    document.getElementById("statusLabel").textContent      = allOk ? "Envio concluido!" : "Envio finalizado";
+    document.getElementById("instructionLabel").textContent = allOk
+        ? "Todos os documentos foram recebidos com sucesso"
+        : "Alguns itens podem nao ter sido enviados — contate o RH";
+
+    if (!allOk) showToast("Alguns documentos falharam. Entre em contato com o RH.", "error");
 }
-// ─── MISC ──────────────────────────────────────────────────────────────────
-window.addEventListener("beforeunload",(e)=>{
-    if (currentIdx>0 && currentIdx<ETAPAS.length) { e.preventDefault(); e.returnValue=""; }
+
+// ─── AVISO AO SAIR DA PÁGINA ─────────────────────────────────────────────────
+window.addEventListener("beforeunload", (e) => {
+    if (currentIdx > 0 && currentIdx < ETAPAS.length && !document.getElementById("successSection").classList.contains("hidden") === false) {
+        e.preventDefault();
+        e.returnValue = "Tem certeza que deseja sair? O progresso será perdido.";
+    }
 });
-["nome","funcao"].forEach(id=>{
-    document.getElementById(id)?.addEventListener("input",()=>document.getElementById(id).classList.remove("error"));
+
+// ─── LIMPAR CLASSE DE ERRO AO DIGITAR ────────────────────────────────────────
+["nome","funcao"].forEach(id => {
+    document.getElementById(id)?.addEventListener("input", () => {
+        document.getElementById(id).classList.remove("error");
+    });
 });
 </script>
 </body>
