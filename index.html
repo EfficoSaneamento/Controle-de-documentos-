@@ -572,7 +572,7 @@
 
 <script>
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4CRuCVtqmQpN-IYbbF7NQ7pklb-LNLUMiy5M-76NHV3yJeeVpGzhLusBsVJ-gD4a0/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUKbWMqxOGSAMWmskm1wsGItGEY0VFvywrs171J2FvxBqYknk-XBnWvRdDDTfs3CtF/exec";
 
 // Chunk de fotos enviadas separadamente para evitar payload gigante
 const MAX_CHUNK_KB = 900; // limite seguro para Apps Script por requisição
@@ -856,44 +856,84 @@ function confirmarReinicio() {
 
 // ─── ENVIO ───────────────────────────────────────────────────────────────────
 async function enviarTudo() {
+
     const btn = document.getElementById("btnFinalizar");
+
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparando envio...';
 
-    const nome   = document.getElementById("nome").value.trim();
-    const funcao = document.getElementById("funcao").value.trim();
+    btn.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
-    const items = ETAPAS.map(e => ({
-        key:   e.key,
-        label: e.label,
-        value: fotos[e.key] || "NÃO ENVIADO"
-    }));
+    const nome =
+        document.getElementById("nome").value.trim();
 
-    // Mostrar tela de progresso
-    hideAll();
-    document.getElementById("progressWrapper").classList.remove("hidden");
-    document.getElementById("sendingSection").classList.remove("hidden");
-    document.getElementById("statusLabel").textContent      = "Enviando documentos";
-    document.getElementById("instructionLabel").textContent = "Aguarde, não feche o aplicativo";
+    const funcao =
+        document.getElementById("funcao").value.trim();
 
-    const listEl = document.getElementById("uploadProgressList");
-
-    const renderItems = (statuses) => {
-        listEl.innerHTML = items.map((item, i) => {
-            const s = statuses[i] || "pending";
-            const icons  = { pending:"fas fa-clock", sending:"fas fa-spinner fa-spin", done:"fas fa-check-circle", fail:"fas fa-times-circle" };
-            const labels = { pending:"Aguardando",   sending:"Enviando...",            done:"Enviado",             fail:"Falhou" };
-            return '<div class="upload-item">'
-                + '<span class="upload-item-icon"><i class="' + icons[s] + ' status-' + s + '"></i></span>'
-                + '<span class="upload-item-name">' + item.label + '</span>'
-                + '<span class="upload-item-status status-' + s + '">' + labels[s] + '</span>'
-                + '</div>';
-        }).join("");
+    const payload = {
+        dados: {
+            nome: nome,
+            funcao: funcao
+        },
+        fotos: fotos
     };
 
-    const statuses = items.map(() => "pending");
-    renderItems(statuses);
+    hideAll();
 
+    document
+        .getElementById("progressWrapper")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("sendingSection")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("progressFill")
+        .style.width = "50%";
+
+    try {
+
+        await fetch(
+            SCRIPT_URL,
+            {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify(payload)
+            }
+        );
+
+        document
+            .getElementById("progressFill")
+            .style.width = "100%";
+
+        hideAll();
+
+        document
+            .getElementById("successSection")
+            .classList.remove("hidden");
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        showToast(
+            "Erro ao enviar documentos.",
+            "error"
+        );
+
+        btn.disabled = false;
+
+        btn.innerHTML =
+            '<i class="fas fa-paper-plane"></i> Finalizar e enviar';
+
+        hideAll();
+
+        document
+            .getElementById("summarySection")
+            .classList.remove("hidden");
+    }
+}
     // Enviar metadados primeiro
     try {
         const form = new FormData();
@@ -940,7 +980,6 @@ async function enviarTudo() {
         : "Alguns itens podem nao ter sido enviados — contate o RH";
 
     if (!allOk) showToast("Alguns documentos falharam. Entre em contato com o RH.", "error");
-}
 
 // ─── AVISO AO SAIR DA PÁGINA ─────────────────────────────────────────────────
 window.addEventListener("beforeunload", (e) => {
