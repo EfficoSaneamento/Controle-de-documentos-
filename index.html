@@ -1105,18 +1105,15 @@ async function enviarTudo() {
                     SCRIPT_URL,
                     {
                      method: "POST",
-                     headers: {
-                     "Content-Type":
-                    "application/json"
-                        },
-                    body: JSON.stringify(payload)
+                    mode: "no-cors",
+                    body: "JSON.stringify(payload)"
                         }
                     );
 
             hideAll();
 
             document
-                    .getElementById("sucessSection")
+                    .getElementById("successSection")
                     .classList.remove("hidden");
 
             let resultado;
