@@ -827,7 +827,7 @@
 
 <script>
 // ─── CONFIG ────────────────────────────────────────────────────────────────
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxnOIzMLa2Lan4_iC389O9Ggx8wVGpgmRqhI3QyO5NkrqQuaaUQrwDGB8YaZyNmyyJc/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4CRuCVtqmQpN-IYbbF7NQ7pklb-LNLUMiy5M-76NHV3yJeeVpGzhLusBsVJ-gD4a0/exec";
 
 const ETAPAS = [
     { label:"Foto para crachá",               hint:"Centralize seu rosto dentro do círculo",       key:"01_Selfie",         isFace:true,  isShirt:false },
@@ -1048,52 +1048,127 @@ function confirmarReinicio() {
 
 // ─── SEND ──────────────────────────────────────────────────────────────────
 async function enviarTudo() {
-    const btn=document.getElementById("btnFinalizar");
-    btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Preparando envio…';
-    const nome=document.getElementById("nome").value.trim();
-    const funcao=document.getElementById("funcao").value.trim();
-    const items=ETAPAS.map(e=>({ key:e.key, label:e.label, value:fotos[e.key]||"NÃO ENVIADO" }));
 
-    hideAll();
-    document.getElementById("progressStrip").classList.remove("hidden");
-    document.getElementById("sendingSection").classList.remove("hidden");
-    document.getElementById("progressFill").style.width="80%";
+    const btn = document.getElementById("btnFinalizar");
 
-    const listEl=document.getElementById("uploadProgressList");
-    const render=(statuses)=>{
-        listEl.innerHTML=items.map((item,i)=>{
-            const s=statuses[i]||"pending";
-            const icons={pending:"fas fa-clock s-pending",sending:"fas fa-spinner fa-spin s-sending",done:"fas fa-check-circle s-done",fail:"fas fa-times-circle s-fail"};
-            const labels={pending:"Aguardando",sending:"Enviando…",done:"Enviado",fail:"Falhou"};
-            return `<div class="send-item">
-                <span class="send-item-icon"><i class="${icons[s]}"></i></span>
-                <span class="send-item-name">${item.label}</span>
-                <span class="send-item-status s-${s}">${labels[s]}</span>
-            </div>`;
-        }).join("");
+    btn.disabled = true;
+    btn.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+    const nome =
+        document.getElementById("nome").value.trim();
+
+    const funcao =
+        document.getElementById("funcao").value.trim();
+
+    const payload = {
+        dados: {
+            nome: nome,
+            funcao: funcao
+        },
+        fotos: fotos
     };
 
-    const statuses=items.map(()=>"pending"); render(statuses);
-    try { await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({tipo:"dados",nome,funcao,total:items.length})}); } catch(e) {}
-
-    let allOk=true;
-    for (let i=0;i<items.length;i++) {
-        statuses[i]="sending"; render([...statuses]);
-        try {
-            await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({tipo:"foto",nome,funcao,...items[i]})});
-            statuses[i]="done";
-        } catch(e) { statuses[i]="fail"; allOk=false; }
-        render([...statuses]);
-        await new Promise(r=>setTimeout(r,150));
-    }
-
-    await new Promise(r=>setTimeout(r,500));
-    document.getElementById("progressFill").style.width="100%";
     hideAll();
-    document.getElementById("successSection").classList.remove("hidden");
-    if (!allOk) showToast("Alguns documentos podem não ter sido enviados.", "error");
-}
 
+    document
+        .getElementById("progressStrip")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("sendingSection")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("progressFill")
+        .style.width = "50%";
+
+    document.getElementById(
+        "uploadProgressList"
+    ).innerHTML = `
+        <div class="send-item">
+            <span class="send-item-icon">
+                <i class="fas fa-spinner fa-spin s-sending"></i>
+            </span>
+            <span class="send-item-name">
+                Enviando documentos...
+            </span>
+            <span class="send-item-status s-sending">
+                Aguarde
+            </span>
+        </div>
+    `;
+
+    try {
+
+                    const response = await fetch(
+                        SCRIPT_URL,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+                const texto = await response.text();
+
+            let resultado;
+
+            try {
+                resultado = JSON.parse(texto);
+            } catch {
+                resultado = {
+                    status: "error",
+                    message: texto
+                };
+            }
+
+            if (
+                resultado.status === "success"
+            )  {
+
+            document
+                .getElementById("progressFill")
+                .style.width = "100%";
+
+            hideAll();
+
+            document
+                .getElementById("successSection")
+                .classList.remove("hidden");
+
+        } else {
+
+            throw new Error(
+                resultado.message ||
+                "Falha no envio"
+            );
+        }
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        showToast(
+            "Erro ao enviar documentos.",
+            "error"
+        );
+
+        btn.disabled = false;
+
+        btn.innerHTML =
+            '<i class="fas fa-paper-plane"></i> Finalizar e enviar';
+
+        hideAll();
+
+        document
+            .getElementById("summarySection")
+            .classList.remove("hidden");
+    }
+}
 // ─── MISC ──────────────────────────────────────────────────────────────────
 window.addEventListener("beforeunload",(e)=>{
     if (currentIdx>0 && currentIdx<ETAPAS.length) { e.preventDefault(); e.returnValue=""; }
