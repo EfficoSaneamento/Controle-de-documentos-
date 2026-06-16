@@ -1101,19 +1101,23 @@ async function enviarTudo() {
 
     try {
 
-                    const response = await fetch(
-                        SCRIPT_URL,
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-                            body: JSON.stringify(payload)
+            await fetch(
+                    SCRIPT_URL,
+                    {
+                     method: "POST",
+                     headers: {
+                     "Content-Type":
+                    "application/json"
+                        },
+                    body: JSON.stringify(payload)
                         }
                     );
 
-                const texto = await response.text();
+            hideAll();
+
+            document
+                    .getElementById("sucessSection")
+                    .classList.remove("hidden");
 
             let resultado;
 
