@@ -561,7 +561,7 @@
         <h3 id="modalTitle">Tem certeza?</h3>
         <p id="modalText"></p>
         <div class="modal-actions">
-            <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
+            <button class="btn-modal-cancel" id="modalCancelBtn">Cancelar</button>
             <button class="btn-modal-confirm" id="modalConfirmBtn">Confirmar</button>
         </div>
     </div>
@@ -573,9 +573,7 @@
 <script>
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUKbWMqxOGSAMWmskm1wsGItGEY0VFvywrs171J2FvxBqYknk-XBnWvRdDDTfs3CtF/exec";
-
-// Chunk de fotos enviadas separadamente para evitar payload gigante
-const MAX_CHUNK_KB = 900; // limite seguro para Apps Script por requisição
+const STORAGE_KEY = "effico_admissao_progresso";
 
 const ETAPAS = [
     { label: "Foto para crachá",               hint: "Centralize seu rosto dentro do círculo",      key: "01_Selfie",          isFace: true,  isShirt: false },
@@ -608,6 +606,53 @@ let pendingImage = null;   // base64 aguardando confirmação
 let stream       = null;
 let selectedSize = null;
 
+// ─── SALVAR / RETOMAR PROGRESSO ─────────────────────────────────────────────
+function salvarProgresso() {
+    const nome   = document.getElementById("nome").value.trim();
+    const funcao = document.getElementById("funcao").value.trim();
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ nome, funcao, fotos, currentIdx }));
+    } catch (e) {
+        // localStorage cheio (fotos grandes) — segue sem salvar, não trava o fluxo
+        console.warn("Não foi possível salvar o progresso:", e);
+    }
+}
+
+function limparProgresso() {
+    localStorage.removeItem(STORAGE_KEY);
+}
+
+function retomarProgresso(saved) {
+    document.getElementById("nome").value   = saved.nome   || "";
+    document.getElementById("funcao").value = saved.funcao || "";
+    fotos      = saved.fotos      || {};
+    currentIdx = saved.currentIdx || 0;
+    hideAll();
+    document.getElementById("progressWrapper").classList.remove("hidden");
+    document.getElementById("cameraSection").classList.remove("hidden");
+    carregarEtapa();
+}
+
+function verificarProgressoSalvo() {
+    let saved;
+    try {
+        saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    } catch (e) {
+        saved = null;
+    }
+    if (!saved || !saved.currentIdx) return;
+
+    const faltam = ETAPAS.length - saved.currentIdx;
+    abrirModal(
+        "Continuar de onde parou?",
+        "Encontramos um envio em andamento para " + (saved.nome || "você") + " (" + saved.currentIdx + " de " + ETAPAS.length + " etapas concluídas). Deseja continuar apenas com o que falta (" + faltam + " etapas) ou começar do zero?",
+        "Continuar",
+        () => retomarProgresso(saved),
+        () => limparProgresso(),
+        "Começar do zero"
+    );
+}
+
 // ─── TOAST ───────────────────────────────────────────────────────────────────
 let toastTimer;
 function showToast(msg, type = "") {
@@ -620,16 +665,20 @@ function showToast(msg, type = "") {
 }
 
 // ─── MODAL ───────────────────────────────────────────────────────────────────
-let modalCallback = null;
-function abrirModal(titulo, texto, labelConfirm, cb) {
+let modalCallback       = null;
+let modalCancelCallback = null;
+function abrirModal(titulo, texto, labelConfirm, cb, onCancel, labelCancel) {
     document.getElementById("modalTitle").textContent = titulo;
     document.getElementById("modalText").textContent  = texto;
     document.getElementById("modalConfirmBtn").textContent = labelConfirm;
-    modalCallback = cb;
+    document.getElementById("modalCancelBtn").textContent  = labelCancel || "Cancelar";
+    modalCallback       = cb;
+    modalCancelCallback = onCancel || null;
     document.getElementById("modalBackdrop").classList.remove("hidden");
 }
 function fecharModal() { document.getElementById("modalBackdrop").classList.add("hidden"); }
 document.getElementById("modalConfirmBtn").onclick = () => { fecharModal(); if (modalCallback) modalCallback(); };
+document.getElementById("modalCancelBtn").onclick  = () => { fecharModal(); if (modalCancelCallback) modalCancelCallback(); };
 
 // ─── NAVEGAÇÃO DE SEÇÕES ─────────────────────────────────────────────────────
 function hideAll() {
@@ -781,6 +830,7 @@ function confirmarFoto() {
     fotos[ETAPAS[currentIdx].key] = pendingImage;
     pendingImage = null;
     currentIdx++;
+    salvarProgresso();
     carregarEtapa();
 }
 
@@ -790,7 +840,7 @@ function confirmarPular() {
         "Pular este documento?",
         "\"" + ETAPAS[currentIdx].label + "\" será marcado como não informado.",
         "Pular",
-        () => { fotos[ETAPAS[currentIdx].key] = "NÃO POSSUI"; currentIdx++; carregarEtapa(); }
+        () => { fotos[ETAPAS[currentIdx].key] = "NÃO POSSUI"; currentIdx++; salvarProgresso(); carregarEtapa(); }
     );
 }
 
@@ -812,6 +862,7 @@ function confirmarTamanho() {
     if (!selectedSize) { showToast("Selecione um tamanho.", "error"); return; }
     fotos[ETAPAS[currentIdx].key] = "TAMANHO: " + selectedSize;
     currentIdx++;
+    salvarProgresso();
     carregarEtapa();
 }
 
@@ -850,7 +901,7 @@ function confirmarReinicio() {
         "Reiniciar processo?",
         "Todos os documentos capturados serão perdidos e você voltará ao início.",
         "Sim, reiniciar",
-        () => location.reload()
+        () => { limparProgresso(); location.reload(); }
     );
 }
 
@@ -907,84 +958,7 @@ async function enviarTudo() {
             .getElementById("progressFill")
             .style.width = "100%";
 
-        hideAll();
-
-        document
-            .getElementById("successSection")
-            .classList.remove("hidden");
-
-    } catch (erro) {
-
-        console.error(erro);
-
-        showToast(
-            "Erro ao enviar documentos.",
-            "error"
-        );
-
-        btn.disabled = false;
-
-        btn.innerHTML =
-            '<i class="fas fa-paper-plane"></i> Finalizar e enviar';
-
-        hideAll();
-
-        document
-            .getElementById("summarySection")
-            .classList.remove("hidden");
-    }
-}
-    async function enviarTudo() {
-
-    const btn = document.getElementById("btnFinalizar");
-
-    btn.disabled = true;
-
-    btn.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-
-    const nome =
-        document.getElementById("nome").value.trim();
-
-    const funcao =
-        document.getElementById("funcao").value.trim();
-
-    const payload = {
-        dados: {
-            nome: nome,
-            funcao: funcao
-        },
-        fotos: fotos
-    };
-
-    hideAll();
-
-    document
-        .getElementById("progressWrapper")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("sendingSection")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("progressFill")
-        .style.width = "50%";
-
-    try {
-
-        await fetch(
-            SCRIPT_URL,
-            {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify(payload)
-            }
-        );
-
-        document
-            .getElementById("progressFill")
-            .style.width = "100%";
+        limparProgresso();
 
         hideAll();
 
@@ -1016,7 +990,9 @@ async function enviarTudo() {
 
 // ─── AVISO AO SAIR DA PÁGINA ─────────────────────────────────────────────────
 window.addEventListener("beforeunload", (e) => {
-    if (currentIdx > 0 && currentIdx < ETAPAS.length && !document.getElementById("successSection").classList.contains("hidden") === false) {
+    const emAndamento = currentIdx > 0 && currentIdx < ETAPAS.length
+        && document.getElementById("successSection").classList.contains("hidden");
+    if (emAndamento) {
         e.preventDefault();
         e.returnValue = "Tem certeza que deseja sair? O progresso será perdido.";
     }
@@ -1028,6 +1004,9 @@ window.addEventListener("beforeunload", (e) => {
         document.getElementById(id).classList.remove("error");
     });
 });
+
+// ─── AO CARREGAR A PÁGINA: verifica se há progresso salvo para retomar ──────
+verificarProgressoSalvo();
 </script>
 </body>
 </html>
