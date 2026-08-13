@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>RH Digital • EFFICO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --blue: #0f2a44;
@@ -111,12 +111,19 @@
             margin-bottom: 14px;
         }
         video { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .camera-overlay-mask {
+        .camera-error {
             position: absolute; inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 5;
-            pointer-events: none;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 10px;
+            background: #111;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.8rem;
+            text-align: center;
+            line-height: 1.5;
+            padding: 0 32px;
+            z-index: 12;
         }
+        .camera-error i { font-size: 1.8rem; color: rgba(255,255,255,0.6); }
         .camera-guide {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -141,7 +148,7 @@
 
         .camera-actions {
             position: absolute;
-            bottom: 14px; left: 0; right: 0;
+            bottom: calc(14px + env(safe-area-inset-bottom)); left: 0; right: 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -234,12 +241,12 @@
         /* SHIRT SIZE - special step */
         .shirt-size-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin-bottom: 14px;
         }
         .size-btn {
-            padding: 18px 8px;
+            padding: 16px 6px;
             border: 1.5px solid var(--gray-200);
             border-radius: 12px;
             background: var(--white);
@@ -354,7 +361,7 @@
         /* TOAST */
         .toast {
             position: fixed;
-            bottom: 24px; left: 50%;
+            bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%;
             transform: translateX(-50%) translateY(80px);
             background: var(--blue);
             color: #fff;
@@ -394,6 +401,8 @@
         .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 11px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: inherit; }
         .btn-modal-cancel { background: var(--gray-200); color: var(--blue); }
         .btn-modal-confirm { background: var(--amber); color: #fff; }
+        .btn-modal-confirm.variant-danger { background: var(--red); }
+        .btn-modal-confirm.variant-primary { background: var(--blue); }
 
         /* SUCCESS */
         .success-section { text-align: center; padding: 10px 0; }
@@ -489,6 +498,10 @@
             <video id="video" autoplay playsinline></video>
             <div class="camera-guide guide-rect" id="cameraGuide"></div>
             <span class="camera-hint" id="cameraHint">Centralize o documento dentro do guia</span>
+            <div class="camera-error hidden" id="cameraError">
+                <i class="fas fa-video-slash"></i>
+                Câmera indisponível.<br>Use o botão de galeria abaixo.
+            </div>
             <div class="camera-actions">
                 <button class="btn-cam-upload" onclick="document.getElementById('fileInput').click()" title="Enviar da galeria">
                     <i class="fas fa-image"></i>
@@ -649,7 +662,8 @@ function verificarProgressoSalvo() {
         "Continuar",
         () => retomarProgresso(saved),
         () => limparProgresso(),
-        "Começar do zero"
+        "Começar do zero",
+        "primary"
     );
 }
 
@@ -667,10 +681,13 @@ function showToast(msg, type = "") {
 // ─── MODAL ───────────────────────────────────────────────────────────────────
 let modalCallback       = null;
 let modalCancelCallback = null;
-function abrirModal(titulo, texto, labelConfirm, cb, onCancel, labelCancel) {
+function abrirModal(titulo, texto, labelConfirm, cb, onCancel, labelCancel, variant) {
+    const confirmBtn = document.getElementById("modalConfirmBtn");
     document.getElementById("modalTitle").textContent = titulo;
     document.getElementById("modalText").textContent  = texto;
-    document.getElementById("modalConfirmBtn").textContent = labelConfirm;
+    confirmBtn.textContent = labelConfirm;
+    confirmBtn.classList.remove("variant-danger", "variant-primary");
+    if (variant) confirmBtn.classList.add("variant-" + variant);
     document.getElementById("modalCancelBtn").textContent  = labelCancel || "Cancelar";
     modalCallback       = cb;
     modalCancelCallback = onCancel || null;
@@ -741,6 +758,7 @@ async function carregarEtapa() {
     guide.className = "camera-guide " + (etapa.isFace ? "guide-circle" : "guide-rect");
 
     document.getElementById("video").classList.toggle("mirror", etapa.isFace);
+    mostrarErroCamera(false);
 
     if (stream) stream.getTracks().forEach(t => t.stop());
     try {
@@ -750,7 +768,14 @@ async function carregarEtapa() {
         document.getElementById("video").srcObject = stream;
     } catch (e) {
         showToast("Câmera não disponível. Use o botão de galeria.", "error");
+        mostrarErroCamera(true);
     }
+}
+
+function mostrarErroCamera(mostrar) {
+    document.getElementById("cameraError").classList.toggle("hidden", !mostrar);
+    document.getElementById("cameraGuide").classList.toggle("hidden", mostrar);
+    document.getElementById("cameraHint").classList.toggle("hidden", mostrar);
 }
 
 // ─── CAPTURA DE FOTO ─────────────────────────────────────────────────────────
@@ -901,7 +926,10 @@ function confirmarReinicio() {
         "Reiniciar processo?",
         "Todos os documentos capturados serão perdidos e você voltará ao início.",
         "Sim, reiniciar",
-        () => { limparProgresso(); location.reload(); }
+        () => { limparProgresso(); location.reload(); },
+        null,
+        null,
+        "danger"
     );
 }
 
