@@ -1,5 +1,5 @@
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdG49x6XLF08kGk7RTKdqppANnTKU8s7612iTDU3xI10sFTGhHQ1u8j-iIifrWbFmW/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyefV-5F18PHA3hS4Co61pLFA-qMmYVdp9_nGRg2NSYhJzh3FXZ5MVHFamz4HJDD4e_/exec";
 const STORAGE_KEY = "effico_admissao_progresso";
 
 const PJ_CAMPOS = [
@@ -47,6 +47,7 @@ let fotos        = {};
 let pendingImage = null;   // base64 aguardando confirmação
 let stream       = null;
 let selectedSize = null;
+let modoEdicao   = false;  // true quando o usuário reabre uma etapa a partir do resumo
 
 // ─── SALVAR / RETOMAR PROGRESSO ─────────────────────────────────────────────
 function salvarProgresso() {
@@ -358,6 +359,18 @@ function voltarCamera() {
 function confirmarFoto() {
     fotos[ETAPAS[currentIdx].key] = pendingImage;
     pendingImage = null;
+    avancarEtapa();
+}
+
+// ─── AVANÇA PARA A PRÓXIMA ETAPA, OU VOLTA AO RESUMO SE ESTIVER EDITANDO ────
+function avancarEtapa() {
+    if (modoEdicao) {
+        modoEdicao = false;
+        currentIdx = ETAPAS.length;
+        salvarProgresso();
+        mostrarResumo();
+        return;
+    }
     currentIdx++;
     salvarProgresso();
     carregarEtapa();
@@ -369,7 +382,7 @@ function confirmarPular() {
         "Pular este documento?",
         "\"" + ETAPAS[currentIdx].label + "\" será marcado como não informado.",
         "Pular",
-        () => { fotos[ETAPAS[currentIdx].key] = "NÃO POSSUI"; currentIdx++; salvarProgresso(); carregarEtapa(); }
+        () => { fotos[ETAPAS[currentIdx].key] = "NÃO POSSUI"; avancarEtapa(); }
     );
 }
 
@@ -390,9 +403,7 @@ function selecionarTamanho(size) {
 function confirmarTamanho() {
     if (!selectedSize) { showToast("Selecione um tamanho.", "error"); return; }
     fotos[ETAPAS[currentIdx].key] = "TAMANHO: " + selectedSize;
-    currentIdx++;
-    salvarProgresso();
-    carregarEtapa();
+    avancarEtapa();
 }
 
 // ─── RESUMO ──────────────────────────────────────────────────────────────────
@@ -420,6 +431,7 @@ function mostrarResumo() {
 }
 
 function editarEtapa(idx) {
+    modoEdicao = true;
     currentIdx = idx;
     carregarEtapa();
 }
