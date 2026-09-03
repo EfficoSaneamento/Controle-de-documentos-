@@ -136,7 +136,7 @@ function validarDados(data) {
       throw new Error("Campo obrigatório ausente.");
     }
   });
-  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(dados.email.trim())) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dados.email.trim())) {
     throw new Error("E-mail inválido.");
   }
   if (data.tipo === "CLT" && (!dados.funcao || !String(dados.funcao).trim())) {
@@ -174,7 +174,7 @@ function escaparHtml(valor) {
 }
 
 function mascararCpf(cpf) {
-  const digitos = String(cpf || "").replace(/\\D/g, "");
+  const digitos = String(cpf || "").replace(/\D/g, "");
   return digitos.length >= 4 ? "***.***." + digitos.slice(-3, -1) + "-" + digitos.slice(-1) : "Não informado";
 }
 
