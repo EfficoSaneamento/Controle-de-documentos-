@@ -1,5 +1,5 @@
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyefV-5F18PHA3hS4Co61pLFA-qMmYVdp9_nGRg2NSYhJzh3FXZ5MVHFamz4HJDD4e_/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwS84cDzoVKuTNfoabs7QKWszTTQiRoN7LkuH3S_g1-Rj2W-H0AkS9wuL0WVBIjwDQ5/exec";
 const STORAGE_KEY = "effico_admissao_progresso";
 
 const PJ_CAMPOS = [
@@ -15,6 +15,17 @@ const PJ_CAMPOS = [
     { section: "Formação e contato",     label: "Formação acadêmica",    key: "formacaoAcademica", type: "text"  },
     { section: "Formação e contato",     label: "E-mail",                key: "email",             type: "email" },
     { section: "Formação e contato",     label: "Telefone + DDD",        key: "telefone",          type: "tel"   }
+];
+
+const PJ_DOCUMENTOS = [
+    { label: "Cartão CNPJ - emissão atual - cópia", key: "PJ_Cartao_CNPJ", optional: false },
+    { label: "CREA ativo - cópia", key: "PJ_CREA", optional: true },
+    { label: "CNH - cópia", key: "PJ_CNH", optional: false },
+    { label: "Certificado escolar (Histórico/Diploma)", key: "PJ_Certificado_Escolar", optional: false },
+    { label: "Comprovante de residência - cópia", key: "PJ_Comprovante_Residencia", optional: false },
+    { label: "Banco, agência e conta pessoa jurídica", key: "PJ_Dados_Bancarios", optional: false },
+    { label: "CND - Certidão Negativa de Débitos", key: "PJ_CND", optional: false },
+    { label: "Foto 3x4 (física ou digital)", key: "PJ_Foto_3x4", optional: false }
 ];
 
 const ETAPAS = [
@@ -52,22 +63,26 @@ let modoEdicao   = false;  // true quando o usuário reabre uma etapa a partir d
 // ─── SALVAR / RETOMAR PROGRESSO ─────────────────────────────────────────────
 function salvarProgresso() {
     const nome   = document.getElementById("nome").value.trim();
+    const cpf    = document.getElementById("cpf").value.trim();
+    const email  = document.getElementById("email").value.trim();
     const funcao = document.getElementById("funcao").value.trim();
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ nome, funcao, fotos, currentIdx }));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ nome, cpf, email, funcao, fotos, currentIdx }));
     } catch (e) {
-        // localStorage cheio (fotos grandes) — segue sem salvar, não trava o fluxo
+        // Armazenamento da sessão cheio — segue sem salvar, não trava o fluxo
         console.warn("Não foi possível salvar o progresso:", e);
         showToast("Aviso: progresso pode não ser salvo automaticamente.", "error");
     }
 }
 
 function limparProgresso() {
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
 }
 
 function retomarProgresso(saved) {
     document.getElementById("nome").value   = saved.nome   || "";
+    document.getElementById("cpf").value    = saved.cpf    || "";
+    document.getElementById("email").value  = saved.email  || "";
     document.getElementById("funcao").value = saved.funcao || "";
     fotos      = saved.fotos      || {};
     currentIdx = saved.currentIdx || 0;
@@ -80,7 +95,7 @@ function retomarProgresso(saved) {
 function verificarProgressoSalvo() {
     let saved;
     try {
-        saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY));
     } catch (e) {
         saved = null;
     }
@@ -155,21 +170,47 @@ function selecionarTipo(tipo) {
 function irParaFormularioPJ() {
     hideAll();
     const container = document.getElementById("pjFormFields");
-    let ultimaSecao = null;
-    container.innerHTML = PJ_CAMPOS.map(c => {
-        const cabecalho = c.section !== ultimaSecao
-            ? `<div class="form-section-title">${c.section}</div>`
-            : "";
-        ultimaSecao = c.section;
-        return cabecalho + `
-            <div class="input-group">
-                <label for="pj_${c.key}">${c.label} *</label>
-                <input type="${c.type}" id="pj_${c.key}" placeholder="Digite aqui">
+    const secoes = [...new Set(PJ_CAMPOS.map(c => c.section))];
+    const renderCampo = c => `
+        <div class="input-group">
+            <label for="pj_${c.key}">${c.label} *</label>
+            <input type="${c.type}" id="pj_${c.key}" placeholder="Digite aqui">
+        </div>
+    `;
+    const renderSecao = (section, index) => `
+        <details class="pj-fieldset"${index === 0 ? " open" : ""}>
+            <summary>${section}<span class="pj-chevron"><i class="fas fa-chevron-down"></i></span></summary>
+            <div class="pj-fields-grid">${PJ_CAMPOS.filter(c => c.section === section).map(renderCampo).join("")}</div>
+        </details>
+    `;
+    container.innerHTML = secoes.map(renderSecao).join("") + `
+        <details class="pj-fieldset pj-documents" open>
+            <summary>Documentos do contrato<span class="pj-doc-count">7 obrigatórios</span><span class="pj-chevron"><i class="fas fa-chevron-down"></i></span></summary>
+            <div class="pj-fields-grid">
+                ${PJ_DOCUMENTOS.map(doc => `
+                    <div class="pj-upload-item">
+                        <div class="pj-upload-icon"><i class="fas fa-file-arrow-up"></i></div>
+                        <div class="pj-upload-copy">
+                            <label for="pj_doc_${doc.key}">${doc.label}${doc.optional ? " <span class=\"pj-optional\">Opcional</span>" : " *"}</label>
+                            <span class="pj-file-name" id="pj_file_name_${doc.key}">Nenhum arquivo selecionado</span>
+                        </div>
+                        <label class="pj-upload-button" for="pj_doc_${doc.key}"><i class="fas fa-plus"></i><span>Adicionar</span></label>
+                        <input class="pj-file-input" type="file" id="pj_doc_${doc.key}" accept="image/*,application/pdf">
+                    </div>
+                `).join("")}
             </div>
-        `;
-    }).join("");
+        </details>
+    `;
     container.querySelectorAll("input").forEach(inp => {
         inp.addEventListener("input", () => inp.classList.remove("error"));
+    });
+    container.querySelectorAll(".pj-file-input").forEach(input => {
+        input.addEventListener("change", () => {
+            const nome = document.getElementById("pj_file_name_" + input.id.replace("pj_doc_", ""));
+            nome.textContent = input.files[0]?.name || "Nenhum arquivo selecionado";
+            input.closest(".pj-upload-item").classList.toggle("selected", Boolean(input.files[0]));
+            input.classList.remove("error");
+        });
     });
 
     document.getElementById("pjSection").classList.remove("hidden");
@@ -177,7 +218,16 @@ function irParaFormularioPJ() {
     document.getElementById("instructionLabel").textContent = "Preencha seus dados abaixo";
 }
 
-function enviarPJ() {
+function lerArquivoComoBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = event => resolve(event.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+async function enviarPJ() {
     const dados = {};
     for (const c of PJ_CAMPOS) {
         const input = document.getElementById("pj_" + c.key);
@@ -187,14 +237,39 @@ function enviarPJ() {
             input.classList.add("error");
             return;
         }
+        if (c.type === "email" && !input.checkValidity()) {
+            showToast("Informe um e-mail válido.", "error");
+            input.classList.add("error");
+            return;
+        }
         dados[c.key] = val;
+    }
+
+    const documentos = {};
+    for (const doc of PJ_DOCUMENTOS) {
+        const input = document.getElementById("pj_doc_" + doc.key);
+        const file = input.files[0];
+        if (!file && !doc.optional) {
+            showToast("Anexe \"" + doc.label + "\".", "error");
+            input.classList.add("error");
+            return;
+        }
+        if (file) {
+            const permitidos = ["application/pdf", "image/jpeg", "image/png", "image/webp", "image/heic"];
+            if (!permitidos.includes(file.type)) {
+                showToast("Formato inválido em \"" + doc.label + "\".", "error");
+                input.classList.add("error");
+                return;
+            }
+            documentos[doc.key] = await lerArquivoComoBase64(file);
+        }
     }
 
     const btn = document.getElementById("btnEnviarPJ");
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
-    fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ tipo: "PJ", dados }) })
+    fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ tipo: "PJ", dados, fotos: documentos }) })
         .then(() => {
             document.getElementById("successTitle").textContent = "Cadastro enviado!";
             document.getElementById("successText").textContent  = "Seus dados foram recebidos com sucesso pela EFFICO. O RH entrará em contato em breve.";
@@ -220,8 +295,13 @@ function irParaCadastro() {
 // ─── CADASTRO → CAPTURA ──────────────────────────────────────────────────────
 function iniciarCaptura() {
     const nome   = document.getElementById("nome").value.trim();
+    const cpf    = document.getElementById("cpf").value.trim();
+    const email  = document.getElementById("email").value.trim();
     const funcao = document.getElementById("funcao").value.trim();
     if (!nome)   { showToast("Por favor, informe seu nome completo.", "error"); document.getElementById("nome").classList.add("error"); return; }
+    if (!cpf)    { showToast("Por favor, informe seu CPF.", "error"); document.getElementById("cpf").classList.add("error"); return; }
+    if (!email)  { showToast("Por favor, informe seu e-mail.", "error"); document.getElementById("email").classList.add("error"); return; }
+    if (!document.getElementById("email").checkValidity()) { showToast("Informe um e-mail válido.", "error"); document.getElementById("email").classList.add("error"); return; }
     if (!funcao) { showToast("Por favor, informe a função/cargo.", "error"); document.getElementById("funcao").classList.add("error"); return; }
 
     hideAll();
@@ -473,7 +553,9 @@ async function enviarTudo() {
 
     const nome   = document.getElementById("nome").value.trim();
     const funcao = document.getElementById("funcao").value.trim();
-    const payload = { dados: { nome, funcao }, fotos };
+    const cpf    = document.getElementById("cpf").value.trim();
+    const email  = document.getElementById("email").value.trim();
+    const payload = { tipo: "CLT", dados: { nome, cpf, email, funcao }, fotos };
 
     const status = {};
     ETAPAS.forEach(e => status[e.key] = "sending");
@@ -520,7 +602,7 @@ window.addEventListener("beforeunload", (e) => {
 });
 
 // ─── LIMPAR CLASSE DE ERRO AO DIGITAR ────────────────────────────────────────
-["nome","funcao"].forEach(id => {
+["nome","cpf","email","funcao"].forEach(id => {
     document.getElementById(id)?.addEventListener("input", () => {
         document.getElementById(id).classList.remove("error");
     });
