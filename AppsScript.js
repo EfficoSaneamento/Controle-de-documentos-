@@ -159,10 +159,10 @@ function validarFotos(fotos) {
   Object.keys(fotos).forEach(function (key) {
     const valor = fotos[key];
     if (valor === "NÃO POSSUI" || valor === "NAO POSSUI" || String(valor).startsWith("TAMANHO:")) return;
-    if (typeof valor !== "string" || valor.length > 8 * 1024 * 1024 || !valor.startsWith("data:")) {
+    if (typeof valor !== "string" || valor.length > 8 * 1024 * 1024 || !/^data:[^;,]+;base64,/.test(valor)) {
       throw new Error("Arquivo inválido.");
     }
-    const tipo = valor.substring(5, valor.indexOf(";"));
+    const tipo = valor.match(/^data:([^;,]+);base64,/)[1];
     if (!ALLOWED_FILE_TYPES.includes(tipo)) throw new Error("Tipo de arquivo não permitido.");
   });
 }
@@ -197,6 +197,21 @@ function limparLogsAntigos(aba) {
   for (let indice = datas.length - 1; indice >= 0; indice--) {
     if (datas[indice][0] instanceof Date && datas[indice][0] < limite) aba.deleteRow(indice + 2);
   }
+}
+
+function criarArquivoNoDrive(chave, conteudo) {
+  const partes = conteudo.match(/^data:([^;,]+);base64,(.+)$/);
+  if (!partes) throw new Error("Data URL inválido para " + chave + ".");
+
+  const contentType = partes[1].toLowerCase();
+  if (!ALLOWED_FILE_TYPES.includes(contentType)) {
+    throw new Error("Tipo de arquivo não permitido para " + chave + ".");
+  }
+
+  const extensao = contentType === "application/pdf" ? "pdf" : contentType.split("/")[1];
+  const nomeSeguro = String(chave).replace(/[^a-zA-Z0-9_-]/g, "_");
+  const blob = Utilities.newBlob(Utilities.base64Decode(partes[2]), contentType, nomeSeguro + "." + extensao);
+  return obterPastaDocumentos().createFile(blob);
 }
 
 // ─── LOG / HISTÓRICO DE ENVIOS ───────────────────────────────────────────────
@@ -307,24 +322,7 @@ function enviarEmailCLT(dados, fotos) {
           throw new Error("Formato Base64 inválido");
         }
 
-        const base64Parts = conteudo.split(",");
-
-        const contentType = base64Parts[0]
-          .split(":")[1]
-          .split(";")[0];
-
-        const base64Data = base64Parts[1];
-
-        const extensao =
-          contentType.split("/")[1] || "jpg";
-
-        const blob = Utilities.newBlob(
-          Utilities.base64Decode(base64Data),
-          contentType,
-          `${key}.${extensao}`
-        );
-
-        const arquivo = obterPastaDocumentos().createFile(blob);
+        const arquivo = criarArquivoNoDrive(key, conteudo);
         linksDocumentos.push(arquivo.getUrl());
 
         checklistHtml += `
@@ -334,16 +332,8 @@ function enviarEmailCLT(dados, fotos) {
         `;
 
       } catch (erroArquivo) {
-
-        Logger.log(
-          `Erro ao processar ${key}: ${erroArquivo}`
-        );
-
-        checklistHtml += `
-          <li>
-            ⚠️ <b>${escaparHtml(key.replace(/_/g, " "))}</b>: Erro ao processar arquivo
-          </li>
-        `;
+        Logger.log(`Erro ao processar ${key}: ${erroArquivo.stack || erroArquivo}`);
+        throw new Error("Falha ao armazenar o documento " + key + ".");
       }
     }
   }
@@ -427,20 +417,12 @@ function enviarEmailPJ(dados, fotos) {
       if (typeof conteudo !== "string" || !conteudo.includes(",")) {
         throw new Error("Formato Base64 inválido");
       }
-      const partes = conteudo.split(",");
-      const contentType = partes[0].split(":")[1].split(";")[0];
-      const extensao = contentType.split("/")[1] || "bin";
-      const blob = Utilities.newBlob(
-        Utilities.base64Decode(partes[1]),
-        contentType,
-        `${key}.${extensao}`
-      );
-      const arquivo = obterPastaDocumentos().createFile(blob);
+      const arquivo = criarArquivoNoDrive(key, conteudo);
       linksDocumentos.push(arquivo.getUrl());
       checklistHtml += `<li>✅ <b>${escaparHtml(key.replace(/_/g, " "))}</b>: Armazenado no Drive</li>`;
     } catch (erroArquivo) {
-      Logger.log(`Erro ao processar anexo PJ ${key}: ${erroArquivo}`);
-      checklistHtml += `<li>⚠️ <b>${escaparHtml(key.replace(/_/g, " "))}</b>: Erro ao processar arquivo</li>`;
+      Logger.log(`Erro ao processar anexo PJ ${key}: ${erroArquivo.stack || erroArquivo}`);
+      throw new Error("Falha ao armazenar o documento " + key + ".");
     }
   }
 
