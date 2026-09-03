@@ -200,6 +200,11 @@ function limparLogsAntigos(aba) {
 }
 
 function criarArquivoNoDrive(chave, conteudo) {
+  const blob = criarBlobAnexo(chave, conteudo);
+  return obterPastaDocumentos().createFile(blob);
+}
+
+function criarBlobAnexo(chave, conteudo) {
   const partes = conteudo.match(/^data:([^;,]+);base64,(.+)$/);
   if (!partes) throw new Error("Data URL inválido para " + chave + ".");
 
@@ -210,8 +215,7 @@ function criarArquivoNoDrive(chave, conteudo) {
 
   const extensao = contentType === "application/pdf" ? "pdf" : contentType.split("/")[1];
   const nomeSeguro = String(chave).replace(/[^a-zA-Z0-9_-]/g, "_");
-  const blob = Utilities.newBlob(Utilities.base64Decode(partes[2]), contentType, nomeSeguro + "." + extensao);
-  return obterPastaDocumentos().createFile(blob);
+  return Utilities.newBlob(Utilities.base64Decode(partes[2]), contentType, nomeSeguro + "." + extensao);
 }
 
 // ─── LOG / HISTÓRICO DE ENVIOS ───────────────────────────────────────────────
@@ -276,7 +280,7 @@ function enviarEmailCLT(dados, fotos) {
   const email = escaparHtml(dados.email || "Não informado");
   const funcao = escaparHtml(dados.funcao || "Não informado");
 
-  const linksDocumentos = [];
+  const anexos = [];
   let checklistHtml = "";
 
   if (fotos) {
@@ -322,12 +326,11 @@ function enviarEmailCLT(dados, fotos) {
           throw new Error("Formato Base64 inválido");
         }
 
-        const arquivo = criarArquivoNoDrive(key, conteudo);
-        linksDocumentos.push(arquivo.getUrl());
+        anexos.push(criarBlobAnexo(key, conteudo));
 
         checklistHtml += `
           <li>
-            ✅ <b>${escaparHtml(key.replace(/_/g, " "))}</b>: Armazenado no Drive
+            ✅ <b>${escaparHtml(key.replace(/_/g, " "))}</b>: Anexado ao e-mail
           </li>
         `;
 
@@ -387,8 +390,7 @@ function enviarEmailCLT(dados, fotos) {
         ${checklistHtml}
       </ul>
 
-      <p><b>Acesso aos documentos:</b> Os arquivos foram armazenados no Drive corporativo.</p>
-      ${linksDocumentos.map(url => `<p><a href="${escaparHtml(url)}">Abrir documento</a></p>`).join("")}
+      <p><b>Documentos:</b> Os arquivos seguem anexados a este e-mail.</p>
 
       <hr>
 
@@ -402,13 +404,14 @@ function enviarEmailCLT(dados, fotos) {
     </div>
     `,
 
+    attachments: anexos
   });
 }
 
 function enviarEmailPJ(dados, fotos) {
 
   const nome = escaparHtml(dados.nome || "Não informado");
-  const linksDocumentos = [];
+  const anexos = [];
   let checklistHtml = "";
 
   for (const key in (fotos || {})) {
@@ -417,9 +420,8 @@ function enviarEmailPJ(dados, fotos) {
       if (typeof conteudo !== "string" || !conteudo.includes(",")) {
         throw new Error("Formato Base64 inválido");
       }
-      const arquivo = criarArquivoNoDrive(key, conteudo);
-      linksDocumentos.push(arquivo.getUrl());
-      checklistHtml += `<li>✅ <b>${escaparHtml(key.replace(/_/g, " "))}</b>: Armazenado no Drive</li>`;
+      anexos.push(criarBlobAnexo(key, conteudo));
+      checklistHtml += `<li>✅ <b>${escaparHtml(key.replace(/_/g, " "))}</b>: Anexado ao e-mail</li>`;
     } catch (erroArquivo) {
       Logger.log(`Erro ao processar anexo PJ ${key}: ${erroArquivo.stack || erroArquivo}`);
       throw new Error("Falha ao armazenar o documento " + key + ".");
@@ -468,8 +470,7 @@ function enviarEmailPJ(dados, fotos) {
         ${checklistHtml || "<li>Nenhum documento anexado</li>"}
       </ul>
 
-      <p><b>Acesso aos documentos:</b> Os arquivos foram armazenados no Drive corporativo.</p>
-      ${linksDocumentos.map(url => `<p><a href="${escaparHtml(url)}">Abrir documento</a></p>`).join("")}
+      <p><b>Documentos:</b> Os arquivos seguem anexados a este e-mail.</p>
 
       <hr>
 
@@ -482,5 +483,6 @@ function enviarEmailPJ(dados, fotos) {
 
     </div>
     `,
+    attachments: anexos
   });
 }
