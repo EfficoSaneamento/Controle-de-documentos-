@@ -1,0 +1,26 @@
+{
+  "tipo": "PJ",
+  "dados": {
+    "nome": "TESTE TI - PJ - 01",
+    "endereco": "Rua A 123",
+    "dataNascimento": "01/01/1990",
+    "rg": "1234567",
+    "cpf": "12345678900",
+    "estadoCivil": "Solteiro",
+    "nacionalidade": "Brasileira",
+    "cnpj": "12345678000199",
+    "razaoSocial": "Empresa Teste",
+    "formacaoAcademica": "Ensino Superior",
+    "email": "efficoti@gmail.com",
+    "telefone": "11999999999"
+  },
+  "fotos": {
+    "PJ_Cartao_CNPJ": "NÃO POSSUI",
+    "PJ_CNH": "NÃO POSSUI",
+    "PJ_Certificado_Escolar": "NÃO POSSUI",
+    "PJ_Comprovante_Residencia": "NÃO POSSUI",
+    "PJ_Dados_Bancarios": "NÃO POSSUI",
+    "PJ_CND": "NÃO POSSUI",
+    "PJ_Foto_3x4": "NÃO POSSUI"
+  }
+}

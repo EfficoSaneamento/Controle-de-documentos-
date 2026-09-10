@@ -1,5 +1,5 @@
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUF4gGtrPHisFL46HEDSjcPRHpr8EdtAPfDU2dWh0OX9tSqaQu1oNLFGv2SQoNh-zm/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyIhvlJ8F-2-OQ2uSVFpFCZwRZ-3gcQEzBngtK4_ZNfqLfB3Vu686hdjxUW35AW_4Nl/exec";
 const STORAGE_KEY = "effico_admissao_progresso";
 
 const PJ_CAMPOS = [

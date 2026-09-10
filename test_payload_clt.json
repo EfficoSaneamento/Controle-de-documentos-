@@ -1,0 +1,24 @@
+{
+  "tipo": "CLT",
+  "dados": {
+    "nome": "TESTE TI - CLT - 01",
+    "cpf": "12345678900",
+    "email": "efficoti@gmail.com",
+    "telefone": "11999999999",
+    "funcao": "TI",
+    "endereco": "Rua A 123",
+    "dataNascimento": "01/01/1990",
+    "rg": "1234567",
+    "estadoCivil": "Solteiro",
+    "nacionalidade": "Brasileira",
+    "formacaoAcademica": "Ensino Superior"
+  },
+  "fotos": {
+    "CLT_Foto_3x4": "NÃO POSSUI",
+    "CLT_RG": "NÃO POSSUI",
+    "CLT_CPF": "NÃO POSSUI",
+    "CLT_CNH": "NÃO POSSUI",
+    "CLT_Comprovante_Residencia": "NÃO POSSUI",
+    "CLT_Certificado_Escolar": "NÃO POSSUI"
+  }
+}
