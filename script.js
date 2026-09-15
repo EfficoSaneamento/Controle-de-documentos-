@@ -287,24 +287,14 @@ async function enviarPJ() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
     try {
-        const response = await fetch(SCRIPT_URL, {
+        await fetch(SCRIPT_URL, {
             method: "POST",
-            mode: "cors",
+            mode: "no-cors",
             headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Content-Type": "text/plain;charset=UTF-8"
             },
             body: JSON.stringify({ tipo: "PJ", dados, fotos: documentos })
         });
-
-        if (!response.ok) {
-            throw new Error("HTTP " + response.status);
-        }
-
-        const payload = await response.json();
-        if (payload && payload.status === "error") {
-            throw new Error(payload.message || "Falha ao enviar cadastro.");
-        }
 
         document.getElementById("successTitle").textContent = "Cadastro enviado!";
         document.getElementById("successText").textContent  = "Seus dados foram recebidos com sucesso pela EFFICO. O RH entrará em contato em breve.";
@@ -601,24 +591,14 @@ async function enviarTudo() {
     renderUploadProgressList(status);
 
     try {
-        const response = await fetch(SCRIPT_URL, {
+        await fetch(SCRIPT_URL, {
             method: "POST",
-            mode: "cors",
+            mode: "no-cors",
             headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
+                "Content-Type": "text/plain;charset=UTF-8"
             },
             body: JSON.stringify(payload)
         });
-
-        if (!response.ok) {
-            throw new Error("HTTP " + response.status);
-        }
-
-        const resposta = await response.json();
-        if (resposta && resposta.status === "error") {
-            throw new Error(resposta.message || "Erro ao enviar documentos.");
-        }
 
         ETAPAS.forEach(e => status[e.key] = "done");
         renderUploadProgressList(status);
