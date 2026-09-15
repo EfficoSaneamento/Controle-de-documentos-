@@ -48,9 +48,9 @@ function doPost(e) {
       throw new Error("Muitos envios em pouco tempo. Tente novamente em instantes.");
     }
 
-    const conteudo = e && e.postData && e.postData.contents
-      ? e.postData.contents
-      : e && e.parameter && e.parameter.payload;
+    const conteudo = e && e.parameter && e.parameter.payload
+      ? e.parameter.payload
+      : e && e.postData && e.postData.contents;
 
     if (!conteudo) {
       throw new Error("Nenhum dado recebido.");
