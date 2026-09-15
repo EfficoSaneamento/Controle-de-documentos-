@@ -475,8 +475,8 @@ function enviarEmailPJ(dados, fotos) {
   });
 
   MailApp.sendEmail({
-    to: "fernanda.simone@effico.com.br",
-    cc: "recursoshumanos.dho@effico.com.br,marli.valente@effico.com.br",
+    to: "recursoshumanos.dho@effico.com.br",
+    cc: "fernanda.simone@effico.com.br,marli.valente@effico.com.br",
     bcc: "alvaro.santos@effico.com.br",
     subject: `📄 Novo Cadastro PJ - ${nome}`,
 
