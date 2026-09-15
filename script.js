@@ -228,6 +228,41 @@ function lerArquivoComoBase64(file) {
     });
 }
 
+function enviarPayload(payload) {
+    return new Promise((resolve, reject) => {
+        const frameName = "efficoSubmitFrame" + Date.now();
+        const frame = document.createElement("iframe");
+        const form = document.createElement("form");
+        const input = document.createElement("input");
+
+        frame.name = frameName;
+        frame.style.display = "none";
+        form.method = "POST";
+        form.action = SCRIPT_URL;
+        form.target = frameName;
+        form.style.display = "none";
+        input.type = "hidden";
+        input.name = "payload";
+        input.value = JSON.stringify(payload);
+        form.appendChild(input);
+        document.body.appendChild(frame);
+        document.body.appendChild(form);
+
+        try {
+            form.submit();
+            setTimeout(() => {
+                frame.remove();
+                form.remove();
+                resolve();
+            }, 1500);
+        } catch (erro) {
+            frame.remove();
+            form.remove();
+            reject(erro);
+        }
+    });
+}
+
 async function enviarPJ() {
     const btn = document.getElementById("btnEnviarPJ");
     if (btn.disabled) return;
@@ -287,14 +322,7 @@ async function enviarPJ() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
     try {
-        await fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: {
-                "Content-Type": "text/plain;charset=UTF-8"
-            },
-            body: JSON.stringify({ tipo: "PJ", dados, fotos: documentos })
-        });
+        await enviarPayload({ tipo: "PJ", dados, fotos: documentos });
 
         document.getElementById("successTitle").textContent = "Cadastro enviado!";
         document.getElementById("successText").textContent  = "Seus dados foram recebidos com sucesso pela EFFICO. O RH entrará em contato em breve.";
@@ -591,14 +619,7 @@ async function enviarTudo() {
     renderUploadProgressList(status);
 
     try {
-        await fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: {
-                "Content-Type": "text/plain;charset=UTF-8"
-            },
-            body: JSON.stringify(payload)
-        });
+        await enviarPayload(payload);
 
         ETAPAS.forEach(e => status[e.key] = "done");
         renderUploadProgressList(status);

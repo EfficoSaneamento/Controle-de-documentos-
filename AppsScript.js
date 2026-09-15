@@ -48,19 +48,23 @@ function doPost(e) {
       throw new Error("Muitos envios em pouco tempo. Tente novamente em instantes.");
     }
 
-    if (!e || !e.postData || !e.postData.contents) {
+    const conteudo = e && e.postData && e.postData.contents
+      ? e.postData.contents
+      : e && e.parameter && e.parameter.payload;
+
+    if (!conteudo) {
       throw new Error("Nenhum dado recebido.");
     }
 
     // Não logamos e.postData.contents nem o JSON completo: podem conter
     // fotos em base64 e dados pessoais, e ficariam expostos no log de execução.
-    if (e.postData.contents.length > MAX_PAYLOAD_BYTES) {
+    if (conteudo.length > MAX_PAYLOAD_BYTES) {
       throw new Error("Envio excede o tamanho permitido.");
     }
 
-    Logger.log("Payload recebido: " + e.postData.contents.length + " caracteres");
+    Logger.log("Payload recebido: " + conteudo.length + " caracteres");
 
-    const data = JSON.parse(e.postData.contents);
+    const data = JSON.parse(conteudo);
 
     if (!data.dados) {
       throw new Error("Dados do candidato não encontrados.");
