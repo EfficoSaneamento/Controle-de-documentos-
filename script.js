@@ -1,6 +1,7 @@
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyIhvlJ8F-2-OQ2uSVFpFCZwRZ-3gcQEzBngtK4_ZNfqLfB3Vu686hdjxUW35AW_4Nl/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyx5EDXz8lnSla-Q4kot3zM5uJh6XrwzEQea0F7u3vIm9K0HBsQHAw_P3nj46XHxEef/exec";
 const STORAGE_KEY = "effico_admissao_progresso";
+const MAX_PJ_ANEXOS_BYTES = 16 * 1024 * 1024;
 
 const PJ_CAMPOS = [
     { section: "Dados pessoais",         label: "Nome completo",         key: "nome",              type: "text"  },
@@ -228,6 +229,10 @@ function lerArquivoComoBase64(file) {
 }
 
 async function enviarPJ() {
+    const btn = document.getElementById("btnEnviarPJ");
+    if (btn.disabled) return;
+    btn.disabled = true;
+
     const dados = {};
     for (const c of PJ_CAMPOS) {
         const input = document.getElementById("pj_" + c.key);
@@ -235,11 +240,13 @@ async function enviarPJ() {
         if (!val) {
             showToast("Preencha \"" + c.label + "\".", "error");
             input.classList.add("error");
+            btn.disabled = false;
             return;
         }
         if (c.type === "email" && !input.checkValidity()) {
             showToast("Informe um e-mail válido.", "error");
             input.classList.add("error");
+            btn.disabled = false;
             return;
         }
         dados[c.key] = val;
@@ -252,6 +259,7 @@ async function enviarPJ() {
         if (!file && !doc.optional) {
             showToast("Anexe \"" + doc.label + "\".", "error");
             input.classList.add("error");
+            btn.disabled = false;
             return;
         }
         if (file) {
@@ -259,29 +267,55 @@ async function enviarPJ() {
             if (!permitidos.includes(file.type)) {
                 showToast("Formato inválido em \"" + doc.label + "\".", "error");
                 input.classList.add("error");
+                btn.disabled = false;
                 return;
             }
             documentos[doc.key] = await lerArquivoComoBase64(file);
         }
     }
 
-    const btn = document.getElementById("btnEnviarPJ");
-    btn.disabled = true;
+    const totalBytes = Object.values(documentos).reduce((total, valor) => {
+        const base64 = valor.split(",")[1] || "";
+        return total + Math.floor(base64.length * 3 / 4);
+    }, 0);
+    if (totalBytes > MAX_PJ_ANEXOS_BYTES) {
+        showToast("O tamanho total dos anexos deve ser menor que 16 MB.", "error");
+        btn.disabled = false;
+        return;
+    }
+
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
-    fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ tipo: "PJ", dados, fotos: documentos }) })
-        .then(() => {
-            document.getElementById("successTitle").textContent = "Cadastro enviado!";
-            document.getElementById("successText").textContent  = "Seus dados foram recebidos com sucesso pela EFFICO. O RH entrará em contato em breve.";
-            hideAll();
-            document.getElementById("successSection").classList.remove("hidden");
-        })
-        .catch(erro => {
-            console.error(erro);
-            showToast("Erro ao enviar cadastro.", "error");
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Cadastro';
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({ tipo: "PJ", dados, fotos: documentos })
         });
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const payload = await response.json();
+        if (payload && payload.status === "error") {
+            throw new Error(payload.message || "Falha ao enviar cadastro.");
+        }
+
+        document.getElementById("successTitle").textContent = "Cadastro enviado!";
+        document.getElementById("successText").textContent  = "Seus dados foram recebidos com sucesso pela EFFICO. O RH entrará em contato em breve.";
+        hideAll();
+        document.getElementById("successSection").classList.remove("hidden");
+    } catch (erro) {
+        console.error(erro);
+        showToast(erro.message || "Erro ao enviar cadastro.", "error");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Cadastro';
+    }
 }
 
 // ─── TIPO → CADASTRO ─────────────────────────────────────────────────────────
@@ -567,7 +601,24 @@ async function enviarTudo() {
     renderUploadProgressList(status);
 
     try {
-        await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
+        const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const resposta = await response.json();
+        if (resposta && resposta.status === "error") {
+            throw new Error(resposta.message || "Erro ao enviar documentos.");
+        }
 
         ETAPAS.forEach(e => status[e.key] = "done");
         renderUploadProgressList(status);
@@ -581,7 +632,7 @@ async function enviarTudo() {
 
         ETAPAS.forEach(e => status[e.key] = "fail");
         renderUploadProgressList(status);
-        showToast("Erro ao enviar documentos.", "error");
+        showToast(erro.message || "Erro ao enviar documentos.", "error");
 
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-paper-plane"></i> Finalizar e enviar';
