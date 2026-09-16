@@ -1,7 +1,14 @@
 :root {
+<<<<<<< Updated upstream
     --blue: #687b58;
     --blue-light: #536747;
     --ink: #263329;
+=======
+    --dark: #14181a;
+    --dark-2: #262b26;
+    --teal: #00eab9;
+    --teal-dark: #00b18c;
+>>>>>>> Stashed changes
     --green: #27ae60;
     --green-light: #e8f8ef;
     --amber: #687b58;
@@ -19,9 +26,14 @@
 body {
     margin: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
+<<<<<<< Updated upstream
     background-color: var(--bg);
     background-image: linear-gradient(120deg, rgba(104,123,88,0.06), transparent 42%), linear-gradient(300deg, rgba(242,154,24,0.05), transparent 38%);
     color: var(--blue);
+=======
+    background: var(--bg);
+    color: var(--dark);
+>>>>>>> Stashed changes
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -34,7 +46,11 @@ body {
     background: var(--white);
     border-radius: 24px;
     padding: 0 0 28px;
+<<<<<<< Updated upstream
     box-shadow: 0 24px 70px rgba(54,76,51,0.14);
+=======
+    box-shadow: 0 20px 60px rgba(20,24,26,0.14);
+>>>>>>> Stashed changes
     overflow: hidden;
 }
 
@@ -43,12 +59,20 @@ body {
     display: flex;
     align-items: center;
     gap: 14px;
+<<<<<<< Updated upstream
     padding: 24px;
     background: var(--blue);
     margin-bottom: 22px;
     border-bottom: 0;
 }
 .logo { width: 54px; filter: brightness(0) invert(1); }
+=======
+    padding: 22px;
+    background: var(--dark);
+    margin-bottom: 24px;
+}
+.logo { width: 56px; }
+>>>>>>> Stashed changes
 .header-text h1 { font-size: 1.05rem; font-weight: 800; margin: 0; color: #fff; letter-spacing: 0.01em; }
 .header-text p { font-size: 0.72rem; color: rgba(255,255,255,0.72); margin: 2px 0 0; }
 .app > *:not(.header) { margin-left: 22px; margin-right: 22px; }
@@ -64,9 +88,9 @@ body {
     margin-bottom: 6px;
     color: var(--gray-600);
 }
-.progress-meta .step-count { color: var(--blue); font-size: 0.75rem; }
+.progress-meta .step-count { color: var(--dark); font-size: 0.75rem; }
 .progress-track { width: 100%; height: 6px; background: var(--gray-200); border-radius: 10px; overflow: hidden; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--blue-light)); border-radius: 10px; width: 0%; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal-dark), var(--teal)); border-radius: 10px; width: 0%; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
 
 /* STATUS CARD */
 .status-card {
@@ -82,7 +106,7 @@ body {
 
 /* INPUTS */
 .input-group { margin-bottom: 12px; }
-.input-group label { font-size: 0.76rem; font-weight: 700; color: var(--blue); display: block; margin-bottom: 5px; }
+.input-group label { font-size: 0.76rem; font-weight: 700; color: var(--dark); display: block; margin-bottom: 5px; }
 .input-group input, .input-group select {
     width: 100%;
     padding: 13px 15px;
@@ -92,21 +116,26 @@ body {
     font-family: inherit;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
+<<<<<<< Updated upstream
     background: var(--white);
     color: var(--blue);
+=======
+    background: var(--gray-100);
+    color: var(--dark);
+>>>>>>> Stashed changes
 }
-.input-group input:focus, .input-group select:focus { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(15,42,68,0.08); }
+.input-group input:focus, .input-group select:focus { border-color: var(--teal); background: var(--white); box-shadow: 0 0 0 3px rgba(0,234,185,0.15); }
 .input-group input.error { border-color: var(--red); }
 
 /* FORM SECTIONS (grupos de campos, ex: formulário PJ) */
 .form-section-title {
     font-size: 0.68rem;
     font-weight: 800;
-    color: var(--blue);
+    color: var(--dark);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding-left: 10px;
-    border-left: 3px solid var(--amber);
+    border-left: 3px solid var(--teal-dark);
     margin: 20px 0 12px;
 }
 .form-section-title:first-child { margin-top: 0; }
@@ -222,17 +251,17 @@ body {
 }
 .type-card:active { transform: scale(0.98); }
 .type-card + .type-card { margin-top: 10px; }
-.type-card:hover { border-color: var(--blue-light); background: var(--gray-100); }
+.type-card:hover { border-color: var(--teal); background: var(--gray-100); }
 .type-card-icon {
     width: 44px; height: 44px;
     min-width: 44px;
     border-radius: 12px;
-    background: var(--blue);
-    color: #fff;
+    background: var(--dark);
+    color: var(--teal);
     display: flex; align-items: center; justify-content: center;
     font-size: 1.1rem;
 }
-.type-card-text strong { display: block; font-size: 0.92rem; font-weight: 800; color: var(--blue); }
+.type-card-text strong { display: block; font-size: 0.92rem; font-weight: 800; color: var(--dark); }
 .type-card-text span { display: block; font-size: 0.75rem; color: var(--gray-600); margin-top: 2px; }
 
 /* CAMERA */
@@ -294,7 +323,7 @@ video { width: 100%; height: 100%; object-fit: cover; display: block; }
     width: 44px; height: 44px;
     border-radius: 50%;
     background: rgba(255,255,255,0.9);
-    color: var(--blue);
+    color: var(--dark);
     border: none;
     font-size: 1rem;
     cursor: pointer;
@@ -363,7 +392,7 @@ video { width: 100%; height: 100%; object-fit: cover; display: block; }
     flex: 1;
     padding: 14px;
     background: var(--gray-100);
-    color: var(--blue);
+    color: var(--dark);
     border: 1.5px solid var(--gray-200);
     border-radius: 13px;
     font-size: 0.9rem;
@@ -388,15 +417,15 @@ video { width: 100%; height: 100%; object-fit: cover; display: block; }
     font-family: inherit;
     font-size: 0.9rem;
     font-weight: 700;
-    color: var(--blue);
+    color: var(--dark);
     cursor: pointer;
     transition: all 0.15s;
     text-align: center;
 }
 .size-btn.selected {
-    background: var(--blue);
-    color: #fff;
-    border-color: var(--blue);
+    background: var(--teal);
+    color: var(--dark);
+    border-color: var(--teal);
 }
 
 /* SUMMARY */
@@ -416,7 +445,7 @@ video { width: 100%; height: 100%; object-fit: cover; display: block; }
     gap: 10px;
 }
 .summary-item:last-child { border-bottom: none; }
-.summary-item-name { flex: 1; font-weight: 600; color: var(--blue); }
+.summary-item-name { flex: 1; font-weight: 600; color: var(--dark); }
 .badge {
     font-size: 0.65rem;
     font-weight: 700;
@@ -428,7 +457,7 @@ video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .badge-skip { background: var(--amber-light); color: var(--amber); }
 .btn-edit {
     background: var(--gray-200);
-    color: var(--blue);
+    color: var(--dark);
     padding: 5px 9px;
     border-radius: 7px;
     font-size: 0.65rem;
@@ -455,7 +484,7 @@ video { width: 100%; height: 100%; object-fit: cover; display: block; }
 }
 .main-btn:active { transform: scale(0.98); }
 .main-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary { background: var(--teal); color: var(--dark); }
 .btn-skip {
     background: transparent;
     color: var(--gray-400);
@@ -499,14 +528,14 @@ video { width: 100%; height: 100%; object-fit: cover; display: block; }
     position: fixed;
     bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%;
     transform: translateX(-50%) translateY(80px);
-    background: var(--blue);
+    background: var(--dark);
     color: #fff;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.82rem;
     font-weight: 600;
     padding: 11px 20px;
     border-radius: 30px;
-    box-shadow: 0 8px 24px rgba(15,42,68,0.3);
+    box-shadow: 0 8px 24px rgba(20,24,26,0.3);
     z-index: 9999;
     transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
     white-space: nowrap;
@@ -535,10 +564,10 @@ video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .modal p { font-size: 0.8rem; color: var(--gray-600); margin: 0 0 20px; line-height: 1.5; }
 .modal-actions { display: flex; gap: 10px; }
 .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 11px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: inherit; }
-.btn-modal-cancel { background: var(--gray-200); color: var(--blue); }
+.btn-modal-cancel { background: var(--gray-200); color: var(--dark); }
 .btn-modal-confirm { background: var(--amber); color: #fff; }
 .btn-modal-confirm.variant-danger { background: var(--red); }
-.btn-modal-confirm.variant-primary { background: var(--blue); }
+.btn-modal-confirm.variant-primary { background: var(--teal); color: var(--dark); }
 
 /* SUCCESS */
 .success-section { text-align: center; padding: 10px 0; }
