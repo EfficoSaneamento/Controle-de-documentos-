@@ -31,6 +31,61 @@ const PJ_REQUIRED_DOCUMENTS = [
 ];
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp", "image/heic"];
 
+function extrairConteudoDoPost(e) {
+  const parametros = e && e.parameter ? e.parameter : {};
+  const rawPost = e && e.postData && e.postData.contents ? String(e.postData.contents) : "";
+
+  const candidatos = [];
+
+  if (parametros.payload !== undefined && parametros.payload !== null) {
+    candidatos.push(String(parametros.payload));
+  }
+
+  if (rawPost) {
+    candidatos.push(rawPost);
+  }
+
+  for (const valor of candidatos) {
+    if (!valor) continue;
+
+    const texto = String(valor).trim();
+
+    if (texto.indexOf("payload=") === 0) {
+      const parte = texto.slice("payload=".length);
+      const semQuery = parte.split("&")[0];
+      try {
+        return decodeURIComponent(semQuery.replace(/\+/g, " "));
+      } catch (erro) {
+        return semQuery.replace(/\+/g, " ");
+      }
+    }
+
+    const match = texto.match(/(?:^|[?&])payload=([^&]+)/i);
+    if (match && match[1]) {
+      try {
+        return decodeURIComponent(match[1].replace(/\+/g, " "));
+      } catch (erro) {
+        return match[1].replace(/\+/g, " ");
+      }
+    }
+
+    if (/^\s*\{/.test(texto) || /^\s*\[/.test(texto)) {
+      return texto;
+    }
+
+    try {
+      const decodificado = decodeURIComponent(texto);
+      if (/^\s*\{/.test(decodificado) || /^\s*\[/.test(decodificado)) {
+        return decodificado;
+      }
+    } catch (erro) {
+      // ignora; próximo candidato será testado
+    }
+  }
+
+  return "";
+}
+
 function doPost(e) {
 
   let tipo = "desconhecido";
@@ -48,16 +103,10 @@ function doPost(e) {
       throw new Error("Muitos envios em pouco tempo. Tente novamente em instantes.");
     }
 
-    let conteudo = e && e.parameter && e.parameter.payload
-      ? e.parameter.payload
-      : e && e.postData && e.postData.contents;
+    const conteudo = extrairConteudoDoPost(e);
 
     if (!conteudo) {
       throw new Error("Nenhum dado recebido.");
-    }
-
-    if (conteudo.indexOf("payload=") === 0) {
-      conteudo = decodeURIComponent(conteudo.slice(8).split("&")[0].replace(/\+/g, " "));
     }
 
     // Não logamos e.postData.contents nem o JSON completo: podem conter
@@ -68,7 +117,14 @@ function doPost(e) {
 
     Logger.log("Payload recebido: " + conteudo.length + " caracteres");
 
-    const data = JSON.parse(conteudo);
+    let payloadJson = conteudo;
+    try {
+      payloadJson = decodeURIComponent(conteudo);
+    } catch (erro) {
+      payloadJson = conteudo;
+    }
+
+    const data = JSON.parse(payloadJson);
 
     if (!data.dados) {
       throw new Error("Dados do candidato não encontrados.");
